@@ -397,6 +397,32 @@ body.standalone .dl-only{display:none!important}
 .gan .gsub b{color:var(--ink)}
 .gwarn{display:block;width:100%;text-align:left;margin-top:10px;padding:9px 11px;border-radius:11px;background:var(--warnSoft);color:var(--warn);font-weight:700;font-size:12.5px;line-height:1.4}
 body.cajero .gan{display:none}
+
+.planchip{font-size:11.5px;font-weight:800;padding:6px 10px;border-radius:99px;white-space:nowrap;border:1px solid var(--line2);background:var(--card);color:var(--muted);margin-left:auto}
+.planchip+.rolechip{margin-left:6px}
+.planchip.p-pro{color:#7cc7ff;border-color:rgba(124,199,255,.4)}
+.planchip.p-premium{color:#d0a8ff;border-color:rgba(168,85,247,.45)}
+.planchip.p-empresarial{color:#f6dc85;border-color:rgba(201,162,39,.6)}
+html[data-theme="light"] .planchip{background:#fff}
+html[data-theme="light"] .planchip.p-pro{color:#0369a1}
+html[data-theme="light"] .planchip.p-premium{color:#6d28d9}
+html[data-theme="light"] .planchip.p-empresarial{color:#8a6a0c}
+.plan.cur{border:1px solid var(--ok)}
+.plan h4 small{font-size:11px;color:var(--muted);font-weight:700}
+.plan h4 em{font-style:normal;font-size:10.5px;padding:2px 7px;border-radius:99px;margin-left:4px;vertical-align:2px}
+.pcur{background:var(--okSoft);color:var(--ok)}.prec{background:var(--vioSoft);color:#d0a8ff}
+html[data-theme="light"] .prec{color:#6d28d9}
+.pbuy{display:block;text-align:center;text-decoration:none;margin-top:10px}
+.ubar{padding:4px 0}
+.ubar .ut{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted)}
+.ubar .ut b{color:var(--ink)}
+.ub{height:7px;border-radius:9px;background:rgba(139,155,189,.18);margin-top:5px;overflow:hidden}
+.ub i{display:block;height:100%;border-radius:9px;background:var(--grad)}
+.ub i.warn{background:var(--warn)}.ub i.full{background:var(--bad)}
+.glock{display:block;width:100%;text-align:left;padding:2px 0;color:var(--ink)}
+.glock span{display:block;font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.glock b{display:block;font-size:17px;margin:4px 0 2px}
+.glock small{color:var(--acc);font-weight:800;font-size:12.5px}
 </style>
 </head>
 <body>
@@ -411,6 +437,7 @@ body.cajero .gan{display:none}
 </header>
 <div class="ctxbar" id="ctxbar">
   <button class="ctxchip" id="sedeBtn" type="button" aria-label="Sede actual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="sedeName">Sede principal</span></button>
+  <button class="planchip" id="planChip" type="button" hidden>🆓 Gratis</button>
   <span class="rolechip" id="roleChip">👑 Dueño</span>
 </div>
 
@@ -473,6 +500,8 @@ body.cajero .gan{display:none}
   <!-- ADMINISTRACIÓN (solo dueño) -->
   <section class="view" id="v-admin">
     <div id="admWarn" style="margin-top:14px"></div>
+    <div class="sec"><h2>Tu plan</h2><button class="btn sm dark" id="admPlanes">Ver planes</button></div>
+    <div class="card" id="admPlan"></div>
     <div class="sec"><h2>Empresa</h2><button class="btn sm" id="admEmpEdit">Editar</button></div>
     <div class="card" id="admEmp"></div>
     <div class="sec"><h2>Sedes</h2><button class="btn sm dark" id="admSedeNew">+ Sede</button></div>
@@ -495,7 +524,7 @@ body.cajero .gan{display:none}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.5 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.6 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -628,8 +657,9 @@ const store={
   async venta(items,metodo){
     if(sb){
       const q={cid:uuid4(),sede:st.sede,items:items.map(i=>({pid:i.pid,nombre:i.nombre,cant:i.cant,precio:i.precio})),metodo,fecha:today(),ts:Date.now(),por:st.usuario||"",cajero_id:(st.perfil&&st.perfil.cajero_id)||null};
-      if(navigator.onLine===false){enqueue(q);return "offline";}
-      try{const r=await sendVenta(q);chk(r);}catch(e){if(isNetErr(e)){enqueue(q);return "offline";}throw e;}
+      const off=puede("offline");
+      if(navigator.onLine===false){if(off){enqueue(q);return "offline";}throw new Error("PLAN_OFFLINE");}
+      try{const r=await sendVenta(q);chk(r);}catch(e){if(isNetErr(e)){if(off){enqueue(q);return "offline";}throw new Error("PLAN_OFFLINE");}throw e;}
       await refresh();return "ok";
     }
     const m=local.movs(),total=items.reduce((s,i)=>s+i.cant*i.precio,0);
@@ -710,6 +740,7 @@ async function refresh(){
     if(!vc.error)st.vcost=new Map(vc.data.map(r=>[r.movimiento_id,r]));
   }else{st.costos=new Map();st.vcost=new Map();}
   st.serverProds=new Map([...st.prods].map(([k,v])=>[k,v.stock]));
+  await loadPlan();
   overlayQueue();saveCache();
   setStatus("● En línea");render();renderStatus();
   if(st.queue.length&&!st.flushing)setTimeout(flushQueue,300);
@@ -867,6 +898,9 @@ async function loadContext(){
     const ids=new Set((cs.data||[]).map(x=>x.sede_id));sedes=sedes.filter(s=>ids.has(s.id)&&s.activa);
     st.usuario=LS.get("cp_usr_"+uid,"Cajero");
   }else st.usuario="Dueño";
+  await loadPlan();
+  const ls=LIM().sedes;
+  if(ls!==null&&ls!==undefined){const act=sedes.filter(s=>s.activa);const ok=new Set(act.slice(0,ls).map(s=>s.id));sedes=sedes.filter(s=>ok.has(s.id)||(!s.activa&&pf.data.rol==="dueno"));}
   st.sedes=sedes;
   const saved=LS.get("cp_sede_"+uid,null);
   if(sedes.some(s=>s.id===saved))st.sede=saved;
@@ -896,8 +930,13 @@ async function boot(force){
   }
   finally{st.booting=false;}
 }
+function avisoVence(){
+  if(!isDueno()||!st.plan||planActual()==="gratis"||!st.plan.vence)return;
+  const d=Math.round((new Date(st.plan.vence+"T12:00")-new Date(today()+"T12:00"))/864e5);
+  const k="cp_avisov_"+today();if(d<=5&&d>=0&&!LS.get(k,false)){LS.set(k,true);setTimeout(()=>toast(`⏳ Tu plan ${PLANES[planActual()].n} vence en ${d} ${d===1?"día":"días"}. Renuévalo en Admin → Tu plan.`),1500);}
+}
 function enterApp(){
-  loadQueue();
+  loadQueue();setTimeout(avisoVence,500);
   showLogin(false);loginPanel("loginForm");loginMsg("");applyRole();
   if(isCajero()&&st.day!==today())st.day=today();
   st.loaded=false;startData();render();
@@ -1081,6 +1120,7 @@ function renderHeader(){
   $("#bizBtn").disabled=!!isCajero();
   const s=sedeActual();$("#sedeName").textContent=s?s.nombre:"Sede principal";
   $("#roleChip").textContent=isCajero()?"👤 "+st.usuario:"👑 Dueño";
+  const pc=$("#planChip"),pk=planActual();pc.hidden=st.mode!=="db"||!st.perfil;pc.textContent=(PLANES[pk]||PLANES.gratis).ico+" "+(pk==="empresarial"?"Empresarial":(PLANES[pk]||PLANES.gratis).n);pc.className="planchip p-"+pk;
   $("#ctxbar").hidden=st.mode==="db"&&!st.perfil;
   document.title=(n?n+" · ":"")+"DL CUADRA PRO";
 }
@@ -1137,7 +1177,8 @@ function renderDia(){
   $("#dTot").textContent=fmt(r.tot);$("#dEf").textContent=fmt(r.ef);$("#dQr").textContent=fmt(r.qr);$("#dGa").textContent=fmt(r.ga);
   $("#dCaja").textContent=fmt(r.ef-r.ga);
   const gw=$("#dGanW");
-  if(isDueno()){
+  if(isDueno()&&!puede("costos")){gw.innerHTML=`<button class="glock" type="button" id="gLock"><span>💰 Ganancia del día</span><b>🔒 Mira cuánto ganas cada día</b><small>Disponible desde el plan Pro · Ver planes →</small></button>`;$("#gLock").onclick=()=>upsell("costos");}
+  else if(isDueno()){
     const pct=r.tot?Math.round(r.gan*100/r.tot):0;
     gw.innerHTML=`<div class="gtop"><div><span>💰 Ganancia del día</span><b class="num ${r.gan<0?"neg":""}">${fmt(r.gan)}</b></div>${r.tot?`<em>${pct}%</em>`:""}</div>
       <div class="gsub"><span>Costo de lo vendido <b class="num">${fmt(r.costo)}</b></span><span>Después de gastos <b class="num ${r.neta<0?"neg":""}">${fmt(r.neta)}</b></span></div>
@@ -1177,6 +1218,8 @@ function confirmSheet(title,msg,okLabel,fn){
   });
 }
 function fail(e){console.error(e);const m=String(e&&e.message||"");
+  const lp=m.match(/LIMITE_PLAN:(\w+)(?::(\d+))?/);if(lp){loadPlan().then(render);upsell(lp[1],lp[2]?+lp[2]:undefined);return;}
+  if(m==="PLAN_OFFLINE"){upsell("offline");return;}
   if(isNetErr(e)){toast("Sin internet. Esta acción necesita conexión; intenta de nuevo cuando vuelva la señal.");return;}
   if(e&&e.code==="23505"||/duplicate key|productos_codigo/i.test(m)){toast("Ese código ya está asignado a otro producto");return;}
   if(/codigo/i.test(m)&&/column|schema cache/i.test(m)){toast("Falta actualizar la base de datos (paso SQL)");return;}toast(/fetch|network/i.test(m)?"Sin internet. Intenta de nuevo.":/row-level|permission|JWT/i.test(m)?"Tu sesión expiró. Vuelve a entrar.":"No se pudo guardar: "+(m||"intenta de nuevo"));}
@@ -1237,7 +1280,7 @@ document.querySelectorAll("[data-kf]").forEach(b=>b.onclick=()=>{
 });
 $("#invFilter").addEventListener("click",e=>{if(e.target.closest("[data-kfx]")){st.invF="";renderInv();}});
 $("#invList").addEventListener("click",e=>{const r=e.target.closest("[data-inv]");if(r)invMenu(st.prods.get(r.dataset.inv));});
-$("#btnNewProd").onclick=addProductMenu;
+$("#btnNewProd").onclick=()=>{if(topeAlcanzado("productos"))return;addProductMenu();};
 $("#btnCats").onclick=catManager;
 function invMenu(p){
   if(!p)return;
@@ -1278,7 +1321,7 @@ function editProd(p,opts){
   openSheet(`<h3>${isNew?"Nuevo producto":"Editar producto"}</h3><p class="hint">${opts.priceFocus?"Este producto aún no tiene precio. Ponlo para poder venderlo.":isNew?"Si es un vaso, escribe la medida. Ej: Vasos 12 oz.":"&nbsp;"}</p>
     <label class="fld"><span>Nombre</span><input id="n" value="${esc(p.nombre)}" placeholder="Ej: Águila Original 330 ml"></label>
     <div class="two"><label class="fld"><span>Precio de venta</span><input id="pr" inputmode="numeric" class="num" value="${p.precio||""}" placeholder="0"></label>
-    <label class="fld"><span>Precio de compra</span><input id="co" inputmode="numeric" class="num" value="${(isNew?"":(st.costos.get(p.id)||p.costo||""))}" placeholder="Lo que te cuesta"></label></div>
+    <label class="fld"><span>Precio de compra${puede("costos")?"":" 🔒"}</span><input id="co" inputmode="numeric" class="num" value="${(isNew?"":(st.costos.get(p.id)||p.costo||""))}" placeholder="${puede("costos")?"Lo que te cuesta":"Desde plan Pro"}" ${puede("costos")?"":"readonly"}></label></div>
     <p class="hint" id="mgn" style="margin:-4px 0 12px"></p>
     <div class="two" style="grid-template-columns:1fr"><label class="fld"><span>Categoría</span><select id="ca">${cl.map(c=>`<option ${c===p.cat?"selected":""}>${esc(c)}</option>`).join("")}<option value="__new">➕ Nueva categoría…</option></select></label></div>
     <label class="fld" id="caNewW" hidden><span>Nombre de la nueva categoría</span><input id="caNew" maxlength="24" placeholder="Ej: Snacks"></label>
@@ -1293,12 +1336,13 @@ function editProd(p,opts){
     const mg=()=>{const pv=parseInt(s.querySelector("#pr").value.replace(/\D/g,""),10)||0,cv=parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0;
       s.querySelector("#mgn").innerHTML=pv&&cv?`Ganas <b style="color:${pv-cv<0?"var(--bad)":"var(--ok)"}">${fmt(pv-cv)}</b> por unidad (${Math.round((pv-cv)*100/pv)}%)`:"El precio de compra solo lo ves tú, para calcular tu ganancia.";};
     s.querySelector("#pr").oninput=mg;s.querySelector("#co").oninput=mg;mg();
-    s.querySelector("#cbScan").onclick=()=>openScanner({title:"Código del producto",onCode:code=>{s.querySelector("#cb").value=code;const o=findByCode(code);if(o&&o.id!==p.id)toast("Ojo: ese código ya es de "+o.nombre);}});
+    if(!puede("costos")){s.querySelector("#co").onclick=()=>upsell("costos");s.querySelector("#mgn").innerHTML='🔒 Precio de compra y ganancia: <a style="color:var(--acc);cursor:pointer" data-up>disponible desde el plan Pro</a>';s.querySelector("[data-up]").onclick=()=>upsell("costos");}
+    s.querySelector("#cbScan").onclick=()=>!puede("escaner")?upsell("escaner"):openScanner({title:"Código del producto",onCode:code=>{s.querySelector("#cb").value=code;const o=findByCode(code);if(o&&o.id!==p.id)toast("Ojo: ese código ya es de "+o.nombre);}});
     const del=s.querySelector("[data-del]");if(del)del.onclick=()=>confirmSheet("Eliminar "+p.nombre,"Dejará de aparecer en ventas e inventario. Las ventas pasadas se conservan.","Eliminar",()=>store.updProd(p.id,p.codigo?{activo:false,codigo:null}:{activo:false}));
     s.querySelector("[data-ok]").onclick=async()=>{
       const nombre=s.querySelector("#n").value.trim().replace(/\s+/g," "),precio=parseInt(s.querySelector("#pr").value.replace(/\D/g,""),10)||0;
       let cat=ca.value;const codigo=s.querySelector("#cb").value.trim();
-      const costo=parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0;
+      const costo=puede("costos")?(parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0):(st.costos.get(p.id)||p.costo||0);
       if(!nombre){toast("Escribe el nombre");return;}
       if(cat==="__new"){cat=s.querySelector("#caNew").value.trim().replace(/\s+/g," ");if(!cat){toast("Escribe el nombre de la categoría");return;}
         const ex=catList().find(c=>c.toLowerCase()===cat.toLowerCase());if(ex)cat=ex;}
@@ -1309,9 +1353,9 @@ function editProd(p,opts){
           const sk=parseInt(s.querySelector("#sk").value,10)||0;
           const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;
           await store.newProd(id,data,sk);
-          if(costo)await store.setCosto(id,costo);
+          if(costo&&puede("costos"))await store.setCosto(id,costo);
         }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;await store.updProd(p.id,data);
-          if(costo!==(st.costos.get(p.id)||p.costo||0))await store.setCosto(p.id,costo);}
+          if(puede("costos")&&costo!==(st.costos.get(p.id)||p.costo||0))await store.setCosto(p.id,costo);}
         closeSheet();toast("Guardado");
       }catch(e){fail(e);}
     };
@@ -1326,7 +1370,7 @@ function addProductMenu(){
     <button class="btn ghost wide" data-x>Cancelar</button>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     s.querySelector('[data-o="man"]').onclick=()=>editProd(null);
-    s.querySelector('[data-o="scan"]').onclick=()=>{closeSheet();openScanner({title:"Escanear producto",onCode:code=>{const p=findByCode(code);if(p){toast("Ya registrado: "+p.nombre);invMenu(p);}else unknownCode(code);}});};
+    s.querySelector('[data-o="scan"]').onclick=()=>{if(!puede("escaner"))return upsell("escaner");closeSheet();openScanner({title:"Escanear producto",onCode:code=>{const p=findByCode(code);if(p){toast("Ya registrado: "+p.nombre);invMenu(p);}else unknownCode(code);}});};
   });
 }
 function unknownCode(code,ctx){
@@ -1438,7 +1482,7 @@ $("#scDone").onclick=()=>{closeScanner();scanOpts=null;render();};
 const useManual=()=>{const v=$("#scManual").value.trim();if(!v)return;$("#scManual").value="";lastCode="";handleCode(v);};
 $("#scUse").onclick=useManual;$("#scManual").onkeydown=e=>{if(e.key==="Enter")useManual();};
 
-$("#scanSell").onclick=()=>openScanner({title:"Escanear para vender",continuous:true,onCode:code=>{
+$("#scanSell").onclick=()=>!puede("escaner")?upsell("escaner"):openScanner({title:"Escanear para vender",continuous:true,onCode:code=>{
   const p=findByCode(code);
   if(!p){beep(false);closeScanner().then(()=>{scanOpts=null;render();unknownCode(code,"sell");});return;}
   if(!(p.precio>0)){beep(false);scanLog(`<span>${esc(p.nombre)}</span><span>sin precio</span>`,true);return;}
@@ -1447,10 +1491,11 @@ $("#scanSell").onclick=()=>openScanner({title:"Escanear para vender",continuous:
   scanLog(`<span>+1 ${esc(p.nombre)} <small style="opacity:.75">(${n})</small></span><span class="num">${fmt(t)}</span>`);
   $("#scMsg").textContent=`Carrito: ${fmt(t)} · toca "Listo" para cobrar`;
 }});
-$("#scanInv").onclick=()=>openScanner({title:"Buscar por código",onCode:code=>{const p=findByCode(code);if(p)invMenu(p);else unknownCode(code);}});
+$("#scanInv").onclick=()=>!puede("escaner")?upsell("escaner"):openScanner({title:"Buscar por código",onCode:code=>{const p=findByCode(code);if(p)invMenu(p);else unknownCode(code);}});
 
 /* ---------- día ---------- */
-function setDay(d){if(d>today())d=today();st.day=d;subscribeMovs();renderDia();}
+function setDay(d){if(d>today())d=today();
+  const hl=LIM().historial;if(st.mode==="db"&&hl){const min=addDays(today(),-(hl-1));if(d<min){d=min;if(isDueno())upsell("historial",hl);}}st.day=d;subscribeMovs();renderDia();}
 $("#dDate").onchange=e=>e.target.value&&setDay(e.target.value);
 $("#dPrev").onclick=()=>setDay(addDays(st.day,-1));
 $("#dNext").onclick=()=>setDay(addDays(st.day,1));
@@ -1521,7 +1566,20 @@ async function loadAdmin(){
   st.adm.cajeros=c.data||[];st.adm.cs=cs.data||[];renderAdmin();
 }
 const nitOk=n=>String(n||"").replace(/\D/g,"").length>=6;
+function renderPlanCard(){
+  const el=$("#admPlan");if(!el)return;const k=planActual(),P=PLANES[k],pl=st.plan||{},L=LIM(),U=pl.uso||{};
+  const bar=(lbl,key)=>{const l=L[key],u=U[key]||0;const pct=l?Math.min(100,Math.round(u*100/l)):0;
+    return `<div class="ubar"><div class="ut"><span>${lbl}</span><b class="num">${u}${l===null||l===undefined?" · ilimitado":" de "+l}</b></div>${l?`<div class="ub"><i style="width:${pct}%" class="${pct>=100?"full":pct>=80?"warn":""}"></i></div>`:""}</div>`;};
+  let venc="";if(pl.vence&&k!=="gratis"){const d=Math.round((new Date(pl.vence+"T12:00")-new Date(today()+"T12:00"))/864e5);venc=`<div class="sub" style="margin-top:2px">${d<0?"Venció":"Vence"} el ${new Date(pl.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"})}${d>=0&&d<=5?` · <b style="color:var(--warn)">quedan ${d} días</b>`:""}</div>`;}
+  else if(k!=="gratis")venc=`<div class="sub" style="margin-top:2px">Sin vencimiento</div>`;
+  if(pl.contratado&&pl.contratado!=="gratis"&&k==="gratis")venc=`<div class="sub" style="margin-top:2px;color:var(--bad)">Tu plan ${PLANES[pl.contratado].n} venció. Renuévalo para recuperar todo.</div>`;
+  el.innerHTML=`<div class="row"><div class="grow"><div class="t">${P.ico} ${P.n}</div>${venc}</div><span class="num" style="font-weight:800">${P.p?"$"+P.p.toLocaleString("es-CO")+"/mes":"$0"}</span></div>
+    <div class="row" style="display:block">${bar("Productos","productos")}${bar("Cajeros","cajeros")}${bar("Sedes","sedes")}</div>`;
+}
+$("#admPlanes").onclick=()=>showPlanes();
+$("#planChip").onclick=()=>showPlanes();
 function renderAdmin(){
+  renderPlanCard();
   if(st.mode!=="db"||!isDueno()||!st.empresa)return;
   const e=st.empresa;
   $("#admWarn").innerHTML=nitOk(e.nit)?"":`<div class="banner">⚠️ Pon el NIT real de la empresa. Sin él, tus cajeros no pueden ingresar.</div>`;
@@ -1551,7 +1609,7 @@ $("#admEmpEdit").onclick=()=>{
     };
   });
 };
-$("#admSedeNew").onclick=()=>sedeSheet(null);
+$("#admSedeNew").onclick=()=>{if(topeAlcanzado("sedes"))return;sedeSheet(null);};
 $("#admSedes").onclick=ev=>{const r=ev.target.closest("[data-sedeed]");if(r)sedeSheet(st.sedes.find(s=>s.id===r.dataset.sedeed));};
 function sedeSheet(sd){
   const isNew=!sd;sd=sd||{nombre:"",activa:true};
@@ -1577,6 +1635,7 @@ function sedeChecks(sel){
 }
 const checked=s=>[...s.querySelectorAll(".csd:checked")].map(x=>x.value);
 $("#admCajNew").onclick=()=>{
+  if(topeAlcanzado("cajeros"))return;
   if(!nitOk(st.empresa.nit)){toast("Primero pon el NIT de la empresa");$("#admEmpEdit").click();return;}
   openSheet(`<h3>Nuevo cajero</h3><p class="hint">La app le genera un PIN de 4 números solo para él.</p>
     <label class="fld"><span>Usuario del cajero</span><input id="cu" maxlength="30" placeholder="Ej: DL COMPANY o Juan"></label>
@@ -1633,14 +1692,41 @@ function cajeroSheet(c){
   });
 }
 
+
 /* ---------- planes ---------- */
-const WA_PLANES="https://wa.me/573218641539?text=Hola%20DL%20Company,%20quiero%20informaci%C3%B3n%20de%20los%20planes%20de%20DL%20CUADRA%20PRO";
-const showPlanes=()=>openSheet(`<h3>Planes DL CUADRA PRO</h3><p class="hint">Te asesoramos y activamos tu cuenta por WhatsApp.</p>
-  <div class="plan hl"><h4><span>DL CUADRA PRO</span><span>Precio por WhatsApp</span></h4><ul><li>Punto de venta: efectivo y QR, con cálculo de vueltas.</li><li>Inventario con alertas de stock bajo y agotado.</li><li>Cierre del día: inicial, entradas, vendido, final y gastos.</li><li>Datos en la nube y sincronización entre celulares.</li><li>Soporte por WhatsApp.</li></ul></div>
-  <a class="btn pri wide" style="display:block;text-align:center;text-decoration:none" href="${WA_PLANES}" target="_blank" rel="noopener">Pedir mi plan por WhatsApp</a>
-  <p class="hint" style="margin-top:10px;text-align:center">Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
-  <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;});
-$("#lnkPlanes").onclick=showPlanes;$("#lPlans").onclick=showPlanes;
+const PLANES={
+  gratis:{n:"Gratis",p:0,ico:"🆓",f:["1 sede, solo el dueño","Hasta 15 productos","Historial de 3 días","Sin escáner, ganancia ni ventas sin internet"]},
+  pro:{n:"Pro",p:19900,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Historial de 90 días"]},
+  premium:{n:"Premium",p:39900,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
+  empresarial:{n:"Premium Empresarial",p:79900,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Panel del dueño para todas las sedes (próximamente)"]}
+};
+const ORDEN=["gratis","pro","premium","empresarial"];
+const planActual=()=>(st.mode!=="db"?"empresarial":(st.plan&&st.plan.plan)||"gratis");
+const LIM=()=>(st.plan&&st.plan.limites)||{productos:null,cajeros:null,sedes:null,historial:null,costos:true,escaner:true,offline:true};
+const puede=k=>st.mode!=="db"||!!LIM()[k];
+async function loadPlan(){if(!sb)return;const r=await sb.rpc("mi_plan");if(!r.error&&r.data)st.plan=r.data;}
+const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:()=>"Tu plan incluye una sola sede.",
+  costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",historial:l=>`Tu plan muestra los últimos ${l} días.`};
+function showPlanes(motivo){
+  const cur=planActual(),e=st.empresa||{};
+  const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ($${PLANES[k].p.toLocaleString("es-CO")}/mes).${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
+  const venc=st.plan&&st.plan.vence&&cur!=="gratis"?` · vence ${new Date(st.plan.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"})}`:"";
+  openSheet(`<h3>${motivo?"🔒 Mejora tu plan":"Planes DL CUADRA PRO"}</h3>
+    <p class="hint">${motivo?esc(motivo)+" ":""}${st.perfil?`Tu plan actual: <b>${PLANES[cur].n}</b>${venc}.`:"Empieza gratis y mejora cuando lo necesites."}</p>
+    ${ORDEN.map(k=>{const P=PLANES[k],isCur=k===cur&&!!st.perfil,up=ORDEN.indexOf(k)>ORDEN.indexOf(cur);
+      return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}</span><span class="num">${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}</span></h4>
+        <ul>${P.f.map(x=>`<li>${x}</li>`).join("")}</ul>
+        ${P.p&&(up||!st.perfil)?`<a class="btn ${k==="premium"?"pri":"dark"} wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Quiero ${P.n} por WhatsApp</a>`:isCur&&P.p?`<a class="btn wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Renovar ${P.n}</a>`:""}</div>`;}).join("")}
+    <p class="hint" style="text-align:center">Pagos y activación por WhatsApp. Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos.<br>Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
+    <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;});
+}
+function upsell(k,l){if(isCajero()){toast(MOTIVO[k]?MOTIVO[k](l)+" Habla con el dueño.":"Función no incluida en el plan.");return;}showPlanes(MOTIVO[k]?MOTIVO[k](l):"");}
+// límite alcanzado (antes de intentar)
+function topeAlcanzado(k){
+  if(st.mode!=="db")return false;const l=LIM()[k];if(l===null||l===undefined)return false;
+  const uso=(st.plan&&st.plan.uso&&st.plan.uso[k])||0;if(uso>=l){upsell(k,l);return true;}return false;
+}
+$("#lnkPlanes").onclick=()=>showPlanes();$("#lPlans").onclick=()=>showPlanes();
 
 /* ---------- tabs ---------- */
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
