@@ -298,8 +298,8 @@ html[data-theme="light"] .dev-footer::before{background:var(--goldGrad)}
 .lslogan{margin:8px 0 14px;color:var(--muted);font-weight:600;font-size:14px;line-height:1.5}
 .lslogan b{color:var(--ink)}
 .lbadge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.5px;padding:7px 14px;border-radius:99px;border:1px solid var(--line2);color:var(--acc);background:var(--accSoft)}
-.ltabs{display:grid;grid-template-columns:1fr 1fr;margin:20px 0 16px;border-bottom:1px solid var(--line)}
-.ltabs button{padding:12px 0;font-weight:800;font-size:15px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+.ltabs{display:grid;grid-template-columns:1fr 1.25fr 1.1fr;margin:20px 0 16px;border-bottom:1px solid var(--line)}
+.ltabs button{padding:10px 2px;font-weight:800;font-size:13.5px;line-height:1.25;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
 .ltabs button.on{color:var(--acc);border-color:var(--acc)}
 .lcard form{text-align:left}
 .pwd{position:relative}.pwd input{padding-right:48px}
@@ -318,7 +318,7 @@ html[data-theme="light"] .dev-footer::before{background:var(--goldGrad)}
 .lcredit{display:flex;align-items:center;justify-content:center;gap:12px;margin:26px auto 0;max-width:420px;text-align:left;font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700}
 .lcredit img{width:54px;height:54px;border-radius:14px;border:1px solid var(--line)}
 .lcredit b{display:block;color:var(--ink);letter-spacing:1.2px;font-size:13.5px}
-.wafab{position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.45);z-index:31}
+.wafab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));width:50px;height:50px;opacity:.92;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 8px 24px rgba(37,211,102,.45);z-index:31}
 .wafab svg{width:32px;height:32px}
 .ltheme{position:fixed;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:31}
 html[data-theme="light"] .login{background:radial-gradient(80% 50% at 50% 0%,rgba(8,145,178,.12),transparent 70%),radial-gradient(60% 40% at 100% 100%,rgba(201,162,39,.16),transparent 70%),#f6f7fb}
@@ -524,7 +524,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.6 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.7 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -552,7 +552,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
     <p class="lslogan">Cuadra tu caja, todos los días.<br><b>Inventario + ventas = resultados.</b></p>
     <span class="lbadge">BY DL COMPANY -TECHNOLOGY-</span>
     <div class="lmsg" id="lMsg" hidden></div>
-    <div class="ltabs" id="lTabs"><button type="button" class="on" data-lt="in">👑 Dueño</button><button type="button" data-lt="emp">🏢 Acceso empresa</button></div>
+    <div class="ltabs" id="lTabs"><button type="button" class="on" data-lt="in">👑 Dueño</button><button type="button" data-lt="emp">🏢 Acceso empresa</button><button type="button" data-lt="new">✨ Crear cuenta</button></div>
 
     <form id="loginForm" autocomplete="on">
       <label class="fld"><span>Correo electrónico</span><input id="lEmail" type="email" autocomplete="username" placeholder="tucorreo@ejemplo.com" required></label>
@@ -584,6 +584,19 @@ html[data-theme="light"] .prec{color:#6d28d9}
       <p class="lalt"><a id="spSalir">Salir</a></p>
     </div>
 
+    <form id="newForm" hidden autocomplete="on">
+      <p class="hint" style="margin:0 0 12px;color:var(--muted);font-weight:600;font-size:13.5px">Empieza <b style="color:var(--ink)">gratis</b>, sin tarjeta. Mejora tu plan cuando lo necesites.</p>
+      <div class="seg" id="nTipo" style="margin:0 0 14px"><button type="button" class="on" data-nt="negocio">🏪 Negocio</button><button type="button" data-nt="empresa">🏢 Empresa</button></div>
+      <label class="fld"><span id="nNomL">Nombre del negocio</span><input id="nNom" maxlength="60" autocomplete="organization" placeholder="Ej: Licorera La 13" required></label>
+      <label class="fld"><span id="nNitL">NIT o cédula (opcional)</span><input id="nNit" class="mono" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="900123456-7"></label>
+      <label class="fld"><span>Correo electrónico</span><input id="nMail" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required></label>
+      <label class="fld"><span>Contraseña (mínimo 6 caracteres)</span><div class="pwd"><input id="nPass" type="password" autocomplete="new-password" minlength="6" placeholder="••••••••" required><button type="button" id="nEye" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+      <label class="lrow" style="justify-content:flex-start;margin:0 0 12px"><input type="checkbox" id="nAcepto"> <span style="color:var(--muted);font-weight:600">Acepto los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a></span></label>
+      <div class="lerr" id="newErr"></div>
+      <button class="lgo" id="newBtn" type="submit">Crear cuenta gratis ›</button>
+      <p class="lalt">¿Necesitas ayuda? <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20para%20crear%20mi%20cuenta%20de%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></p>
+    </form>
+
     <form id="reqForm" hidden>
       <p class="hint" style="margin:0 0 14px;color:var(--muted);font-weight:600;font-size:13.5px">Déjanos tus datos y te creamos la cuenta de tu negocio. Te contactamos por WhatsApp.</p>
       <label class="fld"><span>Tu nombre</span><input id="rNom" autocomplete="name" placeholder="Nombre y apellido" required></label>
@@ -595,7 +608,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
       <button class="lgo" type="submit">Solicitar por WhatsApp ›</button>
     </form>
 
-    <p class="lalt">¿Tu negocio aún no tiene cuenta? <a id="lReq">Solicítala aquí</a></p>
+    <p class="lalt" id="lAltNew">¿Tu negocio aún no tiene cuenta? <a id="lReq">Créala gratis aquí</a></p>
     <a class="lplan" id="lPlans">Ver planes y precios →</a>
     <p class="llegal">Al ingresar aceptas los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</p>
   </div>
@@ -760,9 +773,10 @@ const sedeActual=()=>st.sedes.find(s=>s.id===st.sede)||null;
 const appUrl=()=>location.origin+location.pathname;
 function showLogin(on){$("#login").classList.toggle("on",on);document.body.classList.toggle("locked",on);}
 function loginPanel(name){
-  ["loginForm","empForm","pinForm","sedePick","reqForm"].forEach(id=>{$("#"+id).hidden=id!==name;});
+  ["loginForm","empForm","pinForm","sedePick","reqForm","newForm"].forEach(id=>{$("#"+id).hidden=id!==name;});
   $("#lTabs").hidden=name==="sedePick";
-  document.querySelectorAll("[data-lt]").forEach(x=>x.classList.toggle("on",(x.dataset.lt==="in"&&name==="loginForm")||(x.dataset.lt==="emp"&&["empForm","pinForm"].includes(name))));
+  document.querySelectorAll("[data-lt]").forEach(x=>x.classList.toggle("on",(x.dataset.lt==="in"&&name==="loginForm")||(x.dataset.lt==="emp"&&["empForm","pinForm"].includes(name))||(x.dataset.lt==="new"&&name==="newForm")));
+  const alt=document.getElementById("lAltNew");if(alt)alt.hidden=name==="newForm"||name==="sedePick";
 }
 function loginMsg(m){$("#lMsg").textContent=m||"";$("#lMsg").hidden=!m;}
 try{const em=localStorage.getItem("cp_email");if(em){$("#lEmail").value=em;}else if(localStorage.getItem("cp_remember")==="0")$("#lRemember").checked=false;}catch(e){}
@@ -771,9 +785,41 @@ document.querySelectorAll("[data-lt]").forEach(b=>b.onclick=()=>{
   loginMsg("");
   if(b.dataset.lt==="in")loginPanel("loginForm");
   else if(b.dataset.lt==="emp")loginPanel(st.empOk?"pinForm":"empForm");
-  else loginPanel("reqForm");
+  else loginPanel("newForm");
 });
-$("#lReq").onclick=()=>{loginMsg("");loginPanel("reqForm");};
+$("#lReq").onclick=()=>{loginMsg("");loginPanel("newForm");};
+/* ---------- crear cuenta (negocio o empresa) ---------- */
+let nTipo="negocio";
+$("#nTipo").onclick=e=>{const b=e.target.closest("[data-nt]");if(!b)return;nTipo=b.dataset.nt;
+  $("#nTipo").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  $("#nNomL").textContent=nTipo==="empresa"?"Nombre de la empresa":"Nombre del negocio";
+  $("#nNitL").textContent=nTipo==="empresa"?"NIT de la empresa":"NIT o cédula (opcional)";
+  $("#nNom").placeholder=nTipo==="empresa"?"Ej: Distribuidora La 13 S.A.S.":"Ej: Licorera La 13";$("#newErr").textContent="";};
+$("#nEye").onclick=()=>{const i=$("#nPass");i.type=i.type==="password"?"text":"password";};
+$("#newForm").addEventListener("submit",async e=>{
+  e.preventDefault();const err=$("#newErr"),b=$("#newBtn");err.textContent="";loginMsg("");
+  if(!sb){err.textContent="La app no está conectada a la nube (config.js).";return;}
+  const nom=$("#nNom").value.trim().replace(/\s+/g," "),nit=$("#nNit").value.trim(),mail=$("#nMail").value.trim(),pass=$("#nPass").value;
+  const dig=nit.replace(/\D/g,"");
+  if(nom.length<2){err.textContent=nTipo==="empresa"?"Escribe el nombre de la empresa.":"Escribe el nombre del negocio.";return;}
+  if(nTipo==="empresa"&&dig.length<6){err.textContent="Escribe el NIT de la empresa.";return;}
+  if(nit&&dig.length<6){err.textContent="El NIT o cédula debe tener al menos 6 números, o déjalo vacío.";return;}
+  if(!/\S+@\S+\.\S+/.test(mail)){err.textContent="Escribe un correo válido.";return;}
+  if(pass.length<6){err.textContent="La contraseña debe tener mínimo 6 caracteres.";return;}
+  if(!$("#nAcepto").checked){err.textContent="Debes aceptar los Términos y la Política de privacidad.";return;}
+  b.disabled=true;b.textContent="Creando tu cuenta…";
+  try{
+    if(dig.length>=6){const ok=await sb.rpc("nit_disponible",{p_nit:nit});if(!ok.error&&ok.data===false){err.textContent="Ese NIT ya está registrado. Si es tu empresa, ingresa en 👑 Dueño o escríbenos por WhatsApp.";return;}}
+    if(st.user&&st.user.is_anonymous){try{await sb.auth.signOut();}catch(_){}}
+    const {data,error}=await sb.auth.signUp({email:mail,password:pass,options:{data:{negocio:nom,nit,tipo:nTipo},emailRedirectTo:appUrl()}});
+    if(error){const m=String(error.message||"");
+      err.textContent=/already|registered|exists/i.test(m)?"Ese correo ya tiene una cuenta. Ingresa en 👑 Dueño.":/NIT_REGISTRADO|Database error/i.test(m)?"Ese NIT ya está registrado. Si es tu empresa, ingresa en 👑 Dueño.":/password/i.test(m)?"La contraseña es muy débil. Usa letras y números.":/rate|limit|seconds/i.test(m)?"Demasiados intentos. Espera un momento e intenta de nuevo.":/fetch|network/i.test(m)?"Sin internet. Intenta de nuevo.":"No se pudo crear la cuenta: "+m;return;}
+    try{localStorage.setItem("cp_email",mail);}catch(_){}
+    $("#lEmail").value=mail;$("#nPass").value="";
+    if(data&&data.session){toast("🎉 ¡Bienvenido a DL CUADRA PRO! Tu cuenta Gratis está lista");}
+    else{loginPanel("loginForm");loginMsg("✅ Cuenta creada. Te enviamos un correo a "+mail+" para confirmarla. Después ingresa aquí con tu correo y contraseña.");}
+  }finally{b.disabled=false;b.textContent="Crear cuenta gratis ›";}
+});
 $("#lEye").onclick=()=>{const i=$("#lPass");i.type=i.type==="password"?"text":"password";$("#lEye").setAttribute("aria-label",i.type==="password"?"Mostrar contraseña":"Ocultar contraseña");};
 $("#loginForm").addEventListener("submit",async e=>{
   e.preventDefault();const b=$("#loginBtn"),err=$("#loginErr");err.textContent="";loginMsg("");
@@ -1806,7 +1852,7 @@ window.addEventListener("popstate",()=>{
   if($("#scrim").classList.contains("on")){closeSheet();return;}
   if($("#login").classList.contains("on")){
     if(!$("#pinForm").hidden){st.empOk=null;loginPanel("empForm");return;}
-    if(!$("#empForm").hidden||!$("#reqForm").hidden){loginPanel("loginForm");return;}
+    if(!$("#empForm").hidden||!$("#reqForm").hidden||!$("#newForm").hidden){loginPanel("loginForm");return;}
     toast("Estás en el inicio de DL CUADRA PRO");return;
   }
   const cur=document.querySelector("nav.tabs button.on");
