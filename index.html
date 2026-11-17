@@ -477,7 +477,7 @@ body.standalone .dl-only{display:none!important}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.3 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.4 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1562,26 +1562,39 @@ function installHelp(){
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-install]");if(b){e.preventDefault();installApp();}});
 
-/* ---------- botón "atrás" del celular: no salir de la app ---------- */
-let lastBack=0;
-const guard=()=>{try{history.pushState({cp:"app"},"",location.href);}catch(e){}};
-try{history.replaceState({cp:"root"},"",location.href);}catch(e){}
-guard();
+/* ---------- botón "atrás" del celular: nunca salir de la app ----------
+   Chrome ignora las entradas de historial creadas sin un toque del usuario,
+   por eso el "colchón" de entradas se rellena en cada toque. */
+const BUF=4;
+try{history.replaceState({cp:"app",d:0},"",location.href);}catch(e){}
+function fillBack(){
+  try{let d=(history.state&&history.state.cp==="app"&&history.state.d)||0;
+    while(d<BUF){d++;history.pushState({cp:"app",d},"",location.href);}}catch(e){}
+}
+["pointerdown","keydown","touchstart"].forEach(ev=>window.addEventListener(ev,fillBack,{capture:true,passive:true}));
+function exitToLogin(){
+  if(st.mode!=="db"||!sb||!st.user){toast("Estás en el inicio de DL CUADRA PRO");return;}
+  const caj=isCajero();
+  openSheet(`<h3>¿Salir al inicio?</h3><p class="hint">${caj?"Se terminará tu turno y volverás a la pantalla de ingreso. Para entrar de nuevo necesitas tu PIN.":"Se cerrará la sesión y volverás a la pantalla de ingreso."}</p>
+    <div class="acts"><button class="btn" data-x>Seguir en la app</button><button class="btn pri" data-ok>Salir al inicio</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-ok]").onclick=async()=>{closeSheet();st.perfil=null;await sb.auth.signOut();if(caj){st.empOk=null;loginPanel("empForm");}else loginPanel("loginForm");};
+  });
+}
 window.addEventListener("popstate",()=>{
-  if($("#scanner").classList.contains("on")){closeScanner();scanOpts=null;render();return guard();}
-  if($("#scrim").classList.contains("on")){closeSheet();return guard();}
-  const login=$("#login").classList.contains("on");
-  if(login){
-    if(!$("#pinForm").hidden){st.empOk=null;loginPanel("empForm");return guard();}
-    if(!$("#empForm").hidden||!$("#reqForm").hidden){loginPanel("loginForm");return guard();}
-  }else{
-    const cur=document.querySelector("nav.tabs button.on");
-    if(cur&&cur.dataset.v!=="vender"){st.invF="";document.querySelector('nav.tabs button[data-v="vender"]').click();return guard();}
-    if(st.invF){st.invF="";renderInv();return guard();}
+  // volver a poner una entrada propia encima: el siguiente "atrás" vuelve a caer aquí
+  try{const d=(history.state&&history.state.d)||0;history.pushState({cp:"app",d:d+1},"",location.href);}catch(e){}
+  if($("#scanner").classList.contains("on")){closeScanner();scanOpts=null;render();return;}
+  if($("#scrim").classList.contains("on")){closeSheet();return;}
+  if($("#login").classList.contains("on")){
+    if(!$("#pinForm").hidden){st.empOk=null;loginPanel("empForm");return;}
+    if(!$("#empForm").hidden||!$("#reqForm").hidden){loginPanel("loginForm");return;}
+    toast("Estás en el inicio de DL CUADRA PRO");return;
   }
-  const now=Date.now();
-  if(now-lastBack<2000){history.back();return;}   // segundo toque: salir
-  lastBack=now;toast("Presiona atrás otra vez para salir");guard();
+  const cur=document.querySelector("nav.tabs button.on");
+  if(cur&&cur.dataset.v!=="vender"){st.invF="";document.querySelector('nav.tabs button[data-v="vender"]').click();return;}
+  if(st.invF){st.invF="";renderInv();return;}
+  exitToLogin();
 });
 
 init();
