@@ -1,4 +1,10 @@
-# Control de Ventas e Inventario
+# DL CUADRA PRO
+
+**Cuadra tu caja, todos los días. Inventario + ventas = resultados.**
+
+Desarrollado y administrado por **DL COMPANY -TECHNOLOGY-**.
+
+## Qué es
 
 App web para negocios que necesitan controlar **cuántos productos venden al día** y cuánto inventario les queda. Nació del Excel de un local de venta de bebidas en la Comuna 13 (Medellín).
 
@@ -13,7 +19,11 @@ App web para negocios que necesitan controlar **cuántos productos venden al dí
 
 ```
 index.html            App completa (HTML + CSS + JS)
+legal.html            Términos y condiciones, privacidad y reembolsos
 config.js             URL y clave pública de Supabase + nombre del negocio
+manifest.json         Instalación en el celular (nombre e íconos)
+logo.svg              Logo DL CUADRA PRO (+ icon-192/512, apple-touch-icon)
+dl-company.png        Logo de DL COMPANY -TECHNOLOGY-
 supabase/schema.sql   Tablas, seguridad, funciones y tiempo real
 supabase/seed.sql     Productos iniciales (del Excel) + ejemplo del 3 de julio 2024
 ```
@@ -40,4 +50,5 @@ Sin `config.js` configurado, la app funciona en **modo local** (datos solo en es
 - [ ] Varios negocios y roles (dueño / cajero)
 - [ ] Mejoras visuales y de experiencia
 - [ ] Reportes por semana / mes
-- [ ] Instalable en el celular (PWA)
+- [x] Marca DL CUADRA PRO, créditos DL COMPANY y documentos legales
+- [ ] Instalable en el celular (PWA completa)
