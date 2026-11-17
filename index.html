@@ -477,7 +477,7 @@ body.standalone .dl-only{display:none!important}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.2 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.3 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1561,6 +1561,28 @@ function installHelp(){
   });
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-install]");if(b){e.preventDefault();installApp();}});
+
+/* ---------- botón "atrás" del celular: no salir de la app ---------- */
+let lastBack=0;
+const guard=()=>{try{history.pushState({cp:"app"},"",location.href);}catch(e){}};
+try{history.replaceState({cp:"root"},"",location.href);}catch(e){}
+guard();
+window.addEventListener("popstate",()=>{
+  if($("#scanner").classList.contains("on")){closeScanner();scanOpts=null;render();return guard();}
+  if($("#scrim").classList.contains("on")){closeSheet();return guard();}
+  const login=$("#login").classList.contains("on");
+  if(login){
+    if(!$("#pinForm").hidden){st.empOk=null;loginPanel("empForm");return guard();}
+    if(!$("#empForm").hidden||!$("#reqForm").hidden){loginPanel("loginForm");return guard();}
+  }else{
+    const cur=document.querySelector("nav.tabs button.on");
+    if(cur&&cur.dataset.v!=="vender"){st.invF="";document.querySelector('nav.tabs button[data-v="vender"]').click();return guard();}
+    if(st.invF){st.invF="";renderInv();return guard();}
+  }
+  const now=Date.now();
+  if(now-lastBack<2000){history.back();return;}   // segundo toque: salir
+  lastBack=now;toast("Presiona atrás otra vez para salir");guard();
+});
 
 init();
 })();
