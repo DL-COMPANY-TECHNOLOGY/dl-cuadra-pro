@@ -524,7 +524,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.7 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.7.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -590,6 +590,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
       <label class="fld"><span id="nNomL">Nombre del negocio</span><input id="nNom" maxlength="60" autocomplete="organization" placeholder="Ej: Licorera La 13" required></label>
       <label class="fld"><span id="nNitL">NIT o cédula (opcional)</span><input id="nNit" class="mono" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="900123456-7"></label>
       <label class="fld"><span>Correo electrónico</span><input id="nMail" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required></label>
+      <label class="fld"><span>Repite tu correo</span><input id="nMail2" type="email" autocomplete="off" placeholder="Escríbelo otra vez" required onpaste="return false" ondrop="return false"></label>
       <label class="fld"><span>Contraseña (mínimo 6 caracteres)</span><div class="pwd"><input id="nPass" type="password" autocomplete="new-password" minlength="6" placeholder="••••••••" required><button type="button" id="nEye" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
       <label class="lrow" style="justify-content:flex-start;margin:0 0 12px"><input type="checkbox" id="nAcepto"> <span style="color:var(--muted);font-weight:600">Acepto los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a></span></label>
       <div class="lerr" id="newErr"></div>
@@ -799,12 +800,13 @@ $("#nEye").onclick=()=>{const i=$("#nPass");i.type=i.type==="password"?"text":"p
 $("#newForm").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("#newErr"),b=$("#newBtn");err.textContent="";loginMsg("");
   if(!sb){err.textContent="La app no está conectada a la nube (config.js).";return;}
-  const nom=$("#nNom").value.trim().replace(/\s+/g," "),nit=$("#nNit").value.trim(),mail=$("#nMail").value.trim(),pass=$("#nPass").value;
+  const nom=$("#nNom").value.trim().replace(/\s+/g," "),nit=$("#nNit").value.trim(),mail=$("#nMail").value.trim().toLowerCase(),mail2=$("#nMail2").value.trim().toLowerCase(),pass=$("#nPass").value;
   const dig=nit.replace(/\D/g,"");
   if(nom.length<2){err.textContent=nTipo==="empresa"?"Escribe el nombre de la empresa.":"Escribe el nombre del negocio.";return;}
   if(nTipo==="empresa"&&dig.length<6){err.textContent="Escribe el NIT de la empresa.";return;}
   if(nit&&dig.length<6){err.textContent="El NIT o cédula debe tener al menos 6 números, o déjalo vacío.";return;}
   if(!/\S+@\S+\.\S+/.test(mail)){err.textContent="Escribe un correo válido.";return;}
+  if(mail!==mail2){err.textContent="Los correos no coinciden. Revísalos: con ese correo recuperas tu contraseña si la olvidas.";$("#nMail2").focus();return;}
   if(pass.length<6){err.textContent="La contraseña debe tener mínimo 6 caracteres.";return;}
   if(!$("#nAcepto").checked){err.textContent="Debes aceptar los Términos y la Política de privacidad.";return;}
   b.disabled=true;b.textContent="Creando tu cuenta…";
