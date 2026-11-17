@@ -11,6 +11,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cuadra Pro">
 <script>try{if(localStorage.getItem("cp_theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -350,6 +352,17 @@ html[data-theme="light"] .pinbig span{color:#0e7490;border-color:var(--gold)}
 .lalt{text-align:center;margin:12px 0 0;font-size:13px;font-weight:700;color:var(--muted)}
 .lalt a{color:var(--acc);cursor:pointer}
 html[data-theme="light"] .lalt a,html[data-theme="light"] .empok a{color:#0e7490}
+
+.dlbtn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 18px;border-radius:16px;font-weight:800;font-size:15px;color:#05070d;background:linear-gradient(135deg,#f6dc85,#c9a227 55%,#9c7410);box-shadow:0 8px 24px rgba(201,162,39,.35);width:100%}
+.dlbtn svg{width:20px;height:20px}
+.dlbtn:active{transform:scale(.98)}
+.ldl{max-width:420px;margin:16px auto 0}
+.dlsteps{counter-reset:s;margin:6px 0 14px;padding:0;list-style:none}
+.dlsteps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-weight:600;font-size:14px;line-height:1.45}
+.dlsteps li:first-child{border-top:0}
+.dlsteps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--accSoft);color:var(--acc)}
+.dlsteps b{color:var(--ink)}
+body.standalone .dl-only{display:none!important}
 </style>
 </head>
 <body>
@@ -441,13 +454,14 @@ html[data-theme="light"] .lalt a,html[data-theme="light"] .empok a{color:#0e7490
   <div class="dev-links">
     <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Soporte por WhatsApp</a>
     <a id="lnkPlanes">Planes y precios</a>
+    <a class="dl-only" data-install>Descargar app</a>
   </div>
   <div class="dev-links legal-links">
     <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a>
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.0 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.1 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -522,6 +536,7 @@ html[data-theme="light"] .lalt a,html[data-theme="light"] .empok a{color:#0e7490
     <a class="lplan" id="lPlans">Ver planes y precios →</a>
     <p class="llegal">Al ingresar aceptas los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</p>
   </div>
+  <div class="ldl dl-only"><button class="dlbtn" type="button" data-install><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Descargar app DL CUADRA PRO</button></div>
   <div class="lcredit"><img src="dl-company.png" alt="DL COMPANY -TECHNOLOGY-"><div>Desarrollado por<b>DL COMPANY -TECHNOLOGY-</b>© 2026</div></div>
   <a class="wafab" href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener" aria-label="Soporte por WhatsApp"><svg viewBox="0 0 32 32" fill="#fff"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-3.9-.5-5.6-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1.1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.8 8.8 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.6.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.8 5 2.1.9 3 1 4 .8.7-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.3Z"/></svg></a>
 </div>
@@ -844,6 +859,7 @@ function sessionMenu(){
   openSheet(`<h3>${caj?"👤 "+esc(st.usuario):"👑 Dueño"}</h3><p class="hint">${esc(st.empresa?st.empresa.nombre:"")}${s?" · 📍 "+esc(s.nombre):""}${!caj&&st.user.email?"<br>"+esc(st.user.email):""}</p>
     ${st.sedes.length>1?`<button class="opt" data-m="sede"><span class="ic c1">📍</span><span><b>Cambiar de sede</b><small>Estás en ${esc(s?s.nombre:"-")}</small></span></button>`:""}
     ${!caj?`<button class="opt" data-m="adm"><span class="ic c3">⚙️</span><span><b>Administración</b><small>Empresa, sedes y cajeros</small></span></button>`:""}
+    <button class="opt dl-only" data-install><span class="ic c1">📲</span><span><b>Descargar app</b><small>Instálala en este celular o computador</small></span></button>
     <button class="opt" data-m="out"><span class="ic c2">🚪</span><span><b>${caj?"Terminar turno y salir":"Cerrar sesión"}</b><small>${caj?"Para entrar de nuevo necesitas tu PIN":"Saldrás de este dispositivo"}</small></span></button>
     <button class="btn ghost wide" data-x>Cerrar</button>`,sh=>{
     sh.querySelector("[data-x]").onclick=closeSheet;
@@ -1475,6 +1491,46 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
 // mantener la fecha de "hoy" al pasar la medianoche
 setInterval(()=>{if(st.from>today())return;const t=today();if(st.lastToday&&st.lastToday!==t){if(st.day===st.lastToday)st.day=t;subscribeMovs();render();}st.lastToday=t;},60000);
 st.lastToday=today();
+
+/* ---------- descargar / instalar la app ---------- */
+let installEvt=null;
+const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const ua=navigator.userAgent||"";
+const isIOS=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const inAppBrowser=/FBAN|FBAV|Instagram|Line\/|WhatsApp|TikTok|musical_ly|; wv\)/i.test(ua);
+function markStandalone(){document.body.classList.toggle("standalone",isStandalone());}
+markStandalone();
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;});
+window.addEventListener("appinstalled",()=>{installEvt=null;markStandalone();closeSheet();toast("✅ App instalada. Búscala en tu pantalla de inicio");});
+if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+async function installApp(){
+  if(isStandalone()){toast("Ya estás usando la app instalada ✓");return;}
+  if(installEvt){
+    const e=installEvt;installEvt=null;
+    try{await e.prompt();const r=await e.userChoice;if(r&&r.outcome==="accepted")toast("Instalando DL CUADRA PRO…");}catch(err){installHelp();}
+    return;
+  }
+  installHelp();
+}
+function installHelp(){
+  const url=appUrl();
+  let title="Instala DL CUADRA PRO",steps;
+  if(inAppBrowser){
+    steps=`<li><span>Estás dentro de otra app (WhatsApp, Instagram…). Toca los <b>⋮</b> o <b>···</b> y elige <b>Abrir en el navegador</b> (Chrome o Safari).</span></li><li><span>Ya en el navegador, toca otra vez <b>Descargar app</b>.</span></li>`;
+  }else if(isIOS){
+    steps=`<li><span>Abre esta página en <b>Safari</b>.</span></li><li><span>Toca el botón <b>Compartir</b> <span style="font-size:17px">⬆️</span> (abajo en el centro).</span></li><li><span>Baja y toca <b>Agregar a inicio</b>.</span></li><li><span>Toca <b>Agregar</b>. El ícono de DL CUADRA PRO aparecerá en tu pantalla de inicio.</span></li>`;
+  }else{
+    steps=`<li><span>Abre esta página en <b>Google Chrome</b>.</span></li><li><span>Toca los <b>⋮</b> (arriba a la derecha).</span></li><li><span>Toca <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.</span></li><li><span>Confirma con <b>Instalar</b>. La app aparecerá con su ícono, como cualquier otra.</span></li>`;
+  }
+  openSheet(`<h3>📲 ${title}</h3><p class="hint">Queda como una app en tu celular: se abre en pantalla completa, sin barra del navegador, y se actualiza sola.</p>
+    <ol class="dlsteps">${steps}</ol>
+    <button class="btn wide" data-cp style="margin-bottom:8px">Copiar enlace de la app</button>
+    <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-cp]").onclick=async()=>{try{await navigator.clipboard.writeText(url);toast("Enlace copiado");}catch(e){toast(url);}};
+  });
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-install]");if(b){e.preventDefault();installApp();}});
 
 init();
 })();
