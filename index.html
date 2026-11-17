@@ -378,6 +378,25 @@ body.standalone .dl-only{display:none!important}
 .fbar.zero{background:var(--badSoft);color:var(--bad);border-color:rgba(255,92,122,.4)}
 .fbar.noprice{background:var(--accSoft);color:var(--acc)}
 .fbar button{font-weight:800;font-size:13px;padding:6px 10px;border-radius:10px;border:1px solid currentColor;color:inherit}
+
+.dev-footer{padding:18px 16px 110px!important;margin-top:22px!important}
+.dev-mini{display:flex;align-items:center;justify-content:center;gap:10px;text-align:left;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:#8a96b0;font-weight:700}
+.dev-mini img{width:38px;height:38px;border-radius:10px;border:1px solid #1f2c47}
+.dev-mini b{display:block;color:#fff;font-size:12.5px;letter-spacing:1px}
+.dev-footer .dev-links{margin-top:12px!important;gap:6px 18px!important}
+.dev-footer .dev-links a{font-size:11.5px!important;text-decoration:none!important}
+.dev-footer .dev-links.legal-links a{color:#8a96b0!important;font-weight:700!important}
+.dev-footer .dev-copy{margin:12px 0 0!important}
+.gan{padding:13px 14px}
+.gan .gtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gan .gtop span{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.gan .gtop b{display:block;font-size:26px;font-weight:700;color:var(--ok);letter-spacing:-.3px}
+.gan .gtop b.neg,.gan .gsub b.neg{color:var(--bad)}
+.gan .gtop em{font-style:normal;font-weight:800;font-size:13px;padding:5px 10px;border-radius:99px;background:var(--okSoft);color:var(--ok)}
+.gan .gsub{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.gan .gsub b{color:var(--ink)}
+.gwarn{display:block;width:100%;text-align:left;margin-top:10px;padding:9px 11px;border-radius:11px;background:var(--warnSoft);color:var(--warn);font-weight:700;font-size:12.5px;line-height:1.4}
+body.cajero .gan{display:none}
 </style>
 </head>
 <body>
@@ -433,6 +452,7 @@ body.standalone .dl-only{display:none!important}
       <div class="kpi"><span>QR banco</span><b class="num" id="dQr">$0</b></div>
       <div class="kpi"><span>Gastos</span><b class="num" id="dGa">$0</b></div>
     </div>
+    <div class="card gan dueno-only" id="dGanW" style="margin-bottom:10px"></div>
     <div class="card" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center">
       <div><div style="font-size:12px;font-weight:800;color:var(--muted)">EFECTIVO EN CAJA (efectivo − gastos)</div><b class="num" style="font-size:22px" id="dCaja">$0</b></div>
       <button class="btn sm" id="btnCopy">Copiar resumen</button>
@@ -464,20 +484,18 @@ body.standalone .dl-only{display:none!important}
 </main>
 
 <footer class="dev-footer">
-  <img class="dev-logo" src="dl-company.png" alt="DL COMPANY -TECHNOLOGY-">
-  <p class="dev-by">Desarrollado y administrado por <strong>DL COMPANY -TECHNOLOGY-</strong></p>
-  <p class="dev-desc"><b>DL CUADRA PRO</b> es la plataforma de ventas e inventario de <b>DL COMPANY -TECHNOLOGY-</b>, empresa colombiana dedicada al desarrollo de aplicaciones y soluciones digitales para negocios. Registra cada venta desde el celular, controla tu stock en tiempo real, cobra en efectivo o QR y cuadra tu caja al cierre del día, con tus datos sincronizados en la nube.</p>
+  <div class="dev-mini"><img src="dl-company.png" alt="DL COMPANY -TECHNOLOGY-"><span>Desarrollado por<b>DL COMPANY -TECHNOLOGY-</b></span></div>
   <div class="dev-links">
-    <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Soporte por WhatsApp</a>
-    <a id="lnkPlanes">Planes y precios</a>
+    <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Soporte</a>
+    <a id="lnkPlanes">Planes</a>
     <a class="dl-only" data-install>Descargar app</a>
   </div>
   <div class="dev-links legal-links">
-    <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a>
-    <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
-    <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
+    <a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a>
+    <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
+    <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.4 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.5 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -588,7 +606,7 @@ let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add
 const DEF_CATS=["Cervezas","Licores","Shots","Sin alcohol","Otros","Insumos"];
 
 /* ---------- state ---------- */
-const st={negocio:"",empresa:null,perfil:null,usuario:"",sedes:[],sede:null,empOk:null,linking:false,cats:[],prods:new Map(),movs:[],from:today(),cart:new Map(),cat:"Todos",q:"",qi:"",day:today(),showAll:false,mode:"conn",readonly:false};
+const st={queue:[],costos:new Map(),vcost:new Map(),negocio:"",empresa:null,perfil:null,usuario:"",sedes:[],sede:null,empOk:null,linking:false,cats:[],prods:new Map(),movs:[],from:today(),cart:new Map(),cat:"Todos",q:"",qi:"",day:today(),showAll:false,mode:"conn",readonly:false};
 
 /* ---------- almacenamiento: Supabase (nube) o local (sin configurar) ---------- */
 const CFG=window.APP_CONFIG||{};
@@ -608,12 +626,18 @@ const local={
 function chk({error}){if(error)throw error;}
 const store={
   async venta(items,metodo){
-    if(sb){chk(await sb.rpc("registrar_venta",{p_sede:st.sede,p_fecha:today(),p_items:items.map(i=>({pid:i.pid,cant:i.cant})),p_metodo:metodo}));return refresh();}
+    if(sb){
+      const q={cid:uuid4(),sede:st.sede,items:items.map(i=>({pid:i.pid,nombre:i.nombre,cant:i.cant,precio:i.precio})),metodo,fecha:today(),ts:Date.now(),por:st.usuario||"",cajero_id:(st.perfil&&st.perfil.cajero_id)||null};
+      if(navigator.onLine===false){enqueue(q);return "offline";}
+      try{const r=await sendVenta(q);chk(r);}catch(e){if(isNetErr(e)){enqueue(q);return "offline";}throw e;}
+      await refresh();return "ok";
+    }
     const m=local.movs(),total=items.reduce((s,i)=>s+i.cant*i.precio,0);
     m[rid()]={tipo:"venta",fecha:today(),ts:Date.now(),items,total,metodo};local.saveM(m);
     for(const i of items)local.addStock(i.pid,-i.cant);local.emit();
   },
   async anular(v){
+    if(v.pendiente){toast("Esta venta aún no se ha enviado. Espera a tener internet.");return;}
     if(sb){chk(await sb.rpc("anular_venta",{p_id:v.id}));return refresh();}
     const m=local.movs();delete m[v.id];local.saveM(m);for(const i of v.items||[])local.addStock(i.pid,i.cant);local.emit();
   },
@@ -651,6 +675,10 @@ const store={
     if(sb){chk(await sb.from("productos").update({cat:to}).eq("empresa_id",st.empresa.id).eq("cat",from));return refresh();}
     const p=local.prods();for(const k in p)if(p[k].cat===from)p[k].cat=to;local.saveP(p);local.emit();
   },
+  async setCosto(id,costo){
+    if(sb){chk(await sb.from("costos").upsert({empresa_id:st.empresa.id,producto_id:id,costo,actualizado:new Date().toISOString()}));st.costos.set(id,costo);render();return;}
+    const p=local.prods();if(p[id]){p[id].costo=costo;local.saveP(p);}local.emit();
+  },
   async updProd(id,data){
     if(sb){chk(await sb.from("productos").update(data).eq("empresa_id",st.empresa.id).eq("id",id));return refresh();}
     const p=local.prods();p[id]={...p[id],...data};local.saveP(p);local.emit();
@@ -668,7 +696,7 @@ async function refresh(){
     sb.from("ajustes").select("clave,valor"),
     sb.from("empresas").select("id,nombre,nit,plan").maybeSingle()
   ]);
-  if(pr.error||inv.error||mv.error||em.error){setStatus("Sin conexión","off");return;}
+  if(pr.error||inv.error||mv.error||em.error){setStatus("Sin conexión","off");renderStatus();return;}
   if(!em.data){return boot(true);}   // cajero desactivado o sin acceso
   if(sede!==st.sede)return;          // cambió de sede mientras cargaba
   st.empresa=em.data;
@@ -676,7 +704,15 @@ async function refresh(){
   st.prods=new Map(pr.data.map(p=>[p.id,{...p,stock:stock.get(p.id)||0}]));
   st.movs=mv.data.map(rowToMov);
   if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}}
-  setStatus("● En línea");render();
+  if(isDueno()){
+    const [co,vc]=await Promise.all([sb.from("costos").select("producto_id,costo"),sb.from("venta_costos").select("movimiento_id,costo,sin_costo").eq("sede_id",sede).gte("fecha",st.from)]);
+    if(!co.error)st.costos=new Map(co.data.map(r=>[r.producto_id,r.costo]));
+    if(!vc.error)st.vcost=new Map(vc.data.map(r=>[r.movimiento_id,r]));
+  }else{st.costos=new Map();st.vcost=new Map();}
+  st.serverProds=new Map([...st.prods].map(([k,v])=>[k,v.stock]));
+  overlayQueue();saveCache();
+  setStatus("● En línea");render();renderStatus();
+  if(st.queue.length&&!st.flushing)setTimeout(flushQueue,300);
 }
 const refreshSoon=()=>{clearTimeout(refreshT);refreshT=setTimeout(refresh,250);};
 function subscribeMovs(){
@@ -853,10 +889,15 @@ async function boot(force){
     }
     if(!st.sede){showSedePicker();return;}
     enterApp();
-  }catch(e){console.error(e);setStatus("Sin conexión","off");toast("Sin conexión. Intenta de nuevo.");}
+  }catch(e){
+    console.error(e);
+    if(restoreCache()){enterApp();setStatus("Sin conexión","off");renderStatus();toast("Sin internet: trabajando con los últimos datos guardados");}
+    else{setStatus("Sin conexión","off");toast("Sin conexión. Intenta de nuevo.");}
+  }
   finally{st.booting=false;}
 }
 function enterApp(){
+  loadQueue();
   showLogin(false);loginPanel("loginForm");loginMsg("");applyRole();
   if(isCajero()&&st.day!==today())st.day=today();
   st.loaded=false;startData();render();
@@ -930,6 +971,71 @@ async function init(){
   }
 }
 
+
+/* ---------- ventas sin internet ---------- */
+const uuid4=()=>(crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)));
+const isNetErr=e=>{const m=String((e&&(e.message||e.details))||e||"");return navigator.onLine===false||/fetch|network|Load failed|timeout|ECONN|NetworkError|aborted/i.test(m);};
+const qKey=()=>"cp_queue_"+(st.user?st.user.id:"x");
+const loadQueue=()=>{st.queue=LS.get(qKey(),[]);};
+const saveQueue=()=>LS.set(qKey(),st.queue);
+function sendVenta(q){return sb.rpc("registrar_venta",{p_sede:q.sede,p_fecha:q.fecha,p_items:q.items.map(i=>({pid:i.pid,cant:i.cant})),p_metodo:q.metodo,p_cliente:q.cid,p_ts:new Date(q.ts).toISOString()});}
+function enqueue(q){
+  loadQueue();st.queue.push(q);saveQueue();
+  overlayQueue();render();renderStatus();saveCache();
+}
+function overlayQueue(){
+  // muestra las ventas pendientes como si ya estuvieran registradas
+  loadQueue();
+  st.movs=st.movs.filter(m=>!m.pendiente);
+  if(st.serverProds)for(const [k,s] of st.serverProds){const p=st.prods.get(k);if(p)p.stock=s;}
+  for(const q of st.queue){
+    if(q.sede!==st.sede)continue;
+    for(const it of q.items){const p=st.prods.get(it.pid);if(p)p.stock=(p.stock||0)-it.cant;}
+    st.movs.unshift({id:"q_"+q.cid,tipo:"venta",fecha:q.fecha,ts:q.ts,items:q.items,total:q.items.reduce((s,i)=>s+i.cant*i.precio,0),metodo:q.metodo,sede_id:q.sede,cajero_id:q.cajero_id,por:q.por,pendiente:true});
+  }
+}
+async function flushQueue(){
+  if(!sb||!st.user||st.flushing)return;loadQueue();if(!st.queue.length)return;
+  if(navigator.onLine===false)return;
+  st.flushing=true;let sent=0;
+  try{
+    while(st.queue.length){
+      const q=st.queue[0];
+      let r;try{r=await sendVenta(q);}catch(e){r={error:e};}
+      if(r.error){
+        if(isNetErr(r.error))break;
+        q.fallos=(q.fallos||0)+1;
+        if(q.fallos>=3){const bad=LS.get("cp_qfail",[]);bad.push({...q,error:String(r.error.message||r.error)});LS.set("cp_qfail",bad);st.queue.shift();saveQueue();
+          toast("Una venta guardada sin internet no se pudo registrar: "+(r.error.message||"error"));continue;}
+        saveQueue();break;
+      }
+      st.queue.shift();saveQueue();sent++;
+    }
+  }finally{st.flushing=false;}
+  if(sent){toast(`✅ ${sent} ${sent===1?"venta enviada":"ventas enviadas"} a la nube`);await refresh();}
+  renderStatus();
+}
+function renderStatus(){
+  loadQueue();const n=st.queue.length,s=$("#status");
+  if(n){s.textContent=`⏳ ${n} por enviar`;s.className="status off";}
+  else if(st.perfil&&s.textContent.startsWith("⏳")){s.textContent=navigator.onLine===false?"Sin conexión":"● En línea";s.className="status "+(navigator.onLine===false?"off":"");}
+}
+function saveCache(){
+  if(!st.user||!st.perfil||!st.sede)return;
+  const t=today();
+  LS.set("cp_cache_"+st.user.id,{perfil:st.perfil,empresa:st.empresa,sedes:st.sedes,sede:st.sede,usuario:st.usuario,cats:st.cats,
+    prods:[...st.prods.values()].map(p=>({...p})),serverProds:st.serverProds?[...st.serverProds]:[],movs:st.movs.filter(m=>!m.pendiente&&m.fecha>=t),from:t});
+}
+function restoreCache(){
+  if(!st.user)return false;const c=LS.get("cp_cache_"+st.user.id,null);if(!c||!c.perfil)return false;
+  st.perfil=c.perfil;st.empresa=c.empresa;st.sedes=c.sedes||[];st.sede=c.sede;st.usuario=c.usuario||"";st.cats=c.cats||[];
+  st.prods=new Map((c.prods||[]).map(p=>[p.id,p]));st.serverProds=new Map(c.serverProds||[]);st.movs=c.movs||[];st.from=c.from||today();st.loaded=true;
+  overlayQueue();return true;
+}
+window.addEventListener("online",()=>{setTimeout(flushQueue,800);});
+window.addEventListener("offline",()=>{setStatus("Sin conexión","off");renderStatus();});
+setInterval(()=>{if(st.user&&st.queue&&st.queue.length)flushQueue();},30000);
+
 /* ---------- derived ---------- */
 function catList(){
   const base=(st.cats&&st.cats.length?st.cats:DEF_CATS).slice();
@@ -956,7 +1062,15 @@ function dayStats(day){
     else if(m.tipo==="gasto"){r.gastos.push(m);r.ga+=m.valor;}
   }
   r.ventas.sort((a,b)=>b.ts-a.ts);r.gastos.sort((a,b)=>b.ts-a.ts);
-  r.tot=r.ef+r.qr;return r;
+  r.tot=r.ef+r.qr;
+  r.costo=0;r.sinCosto=0;
+  for(const v of r.ventas){
+    const vc=st.vcost.get(v.id);
+    if(vc){r.costo+=vc.costo;r.sinCosto+=vc.sin_costo;}
+    else for(const it of v.items||[]){const c=st.costos.get(it.pid)||(st.prods.get(it.pid)||{}).costo||0;if(c>0)r.costo+=c*it.cant;else r.sinCosto+=it.cant;}
+  }
+  r.gan=r.tot-r.costo;r.neta=r.gan-r.ga;
+  return r;
 }
 
 /* ---------- render ---------- */
@@ -1022,6 +1136,14 @@ function renderDia(){
   const r=dayStats(day);
   $("#dTot").textContent=fmt(r.tot);$("#dEf").textContent=fmt(r.ef);$("#dQr").textContent=fmt(r.qr);$("#dGa").textContent=fmt(r.ga);
   $("#dCaja").textContent=fmt(r.ef-r.ga);
+  const gw=$("#dGanW");
+  if(isDueno()){
+    const pct=r.tot?Math.round(r.gan*100/r.tot):0;
+    gw.innerHTML=`<div class="gtop"><div><span>💰 Ganancia del día</span><b class="num ${r.gan<0?"neg":""}">${fmt(r.gan)}</b></div>${r.tot?`<em>${pct}%</em>`:""}</div>
+      <div class="gsub"><span>Costo de lo vendido <b class="num">${fmt(r.costo)}</b></span><span>Después de gastos <b class="num ${r.neta<0?"neg":""}">${fmt(r.neta)}</b></span></div>
+      ${r.sinCosto?`<button class="gwarn" type="button" id="gFix">⚠️ ${r.sinCosto} ${r.sinCosto===1?"unidad vendida":"unidades vendidas"} sin precio de compra: la ganancia real es menor. Ponle el costo a tus productos →</button>`:""}`;
+    const gf=$("#gFix");if(gf)gf.onclick=()=>{document.querySelector('nav.tabs button[data-v="inv"]').click();toast("Toca cada producto → Editar → Precio de compra");};
+  }else gw.innerHTML="";
   const hasAj=Object.values(r.per).some(x=>x.aj);
   let rows="",T={ini:0,ent:0,aj:0,vend:0,fin:0,din:0};
   for(const p of prodsArr()){
@@ -1041,7 +1163,7 @@ function renderDia(){
   $("#dPorWrap").hidden=!(st.mode==="db"&&isDueno()&&gk.length);
   $("#dPor").innerHTML=gk.map(k=>`<div class="row"><div class="grow"><div class="t">${k==="Dueño"?"👑":"👤"} ${esc(k)}</div><div class="sub">${grp[k].n} ${grp[k].n===1?"venta":"ventas"} · Efectivo ${fmt(grp[k].ef)} · QR ${fmt(grp[k].qr)}</div></div><b class="num">${fmt(grp[k].t)}</b></div>`).join("");
   $("#dCount").textContent=r.ventas.length;
-  $("#dVentas").innerHTML=r.ventas.map(v=>`<div class="row"><div class="grow"><div class="t">${esc((v.items||[]).map(i=>i.cant+"× "+i.nombre).join(", "))}</div><div class="sub">${hhmm(v.ts)}${por(v)} <span class="pill ${v.metodo==="qr"?"qr":"ef"}">${v.metodo==="qr"?"QR":"Efectivo"}</span></div></div><b class="num">${fmt(v.total)}</b>${mio(v)?`<button class="btn ghost sm" data-anular="${esc(v.id)}">Anular</button>`:""}</div>`).join("")||`<div class="empty">Sin ventas</div>`;
+  $("#dVentas").innerHTML=r.ventas.map(v=>`<div class="row"><div class="grow"><div class="t">${esc((v.items||[]).map(i=>i.cant+"× "+i.nombre).join(", "))}</div><div class="sub">${hhmm(v.ts)}${por(v)} <span class="pill ${v.metodo==="qr"?"qr":"ef"}">${v.metodo==="qr"?"QR":"Efectivo"}</span>${v.pendiente?' <span class="pill low">⏳ Por enviar</span>':""}</div></div><b class="num">${fmt(v.total)}</b>${mio(v)&&!v.pendiente?`<button class="btn ghost sm" data-anular="${esc(v.id)}">Anular</button>`:""}</div>`).join("")||`<div class="empty">Sin ventas</div>`;
 }
 
 /* ---------- sheet ---------- */
@@ -1055,6 +1177,7 @@ function confirmSheet(title,msg,okLabel,fn){
   });
 }
 function fail(e){console.error(e);const m=String(e&&e.message||"");
+  if(isNetErr(e)){toast("Sin internet. Esta acción necesita conexión; intenta de nuevo cuando vuelva la señal.");return;}
   if(e&&e.code==="23505"||/duplicate key|productos_codigo/i.test(m)){toast("Ese código ya está asignado a otro producto");return;}
   if(/codigo/i.test(m)&&/column|schema cache/i.test(m)){toast("Falta actualizar la base de datos (paso SQL)");return;}toast(/fetch|network/i.test(m)?"Sin internet. Intenta de nuevo.":/row-level|permission|JWT/i.test(m)?"Tu sesión expiró. Vuelve a entrar.":"No se pudo guardar: "+(m||"intenta de nuevo"));}
 
@@ -1096,8 +1219,9 @@ function checkout(){
       ok.disabled=true;ok.textContent="Guardando…";
       const its=items.map(({p,c})=>({pid:p.id,nombre:p.nombre,cant:c,precio:p.precio}));
       try{
-        await store.venta(its,metodo);
-        st.cart.clear();closeSheet();render();toast("Venta registrada · "+fmt(t));
+        const res=await store.venta(its,metodo);
+        st.cart.clear();closeSheet();render();
+        toast(res==="offline"?"📴 Sin internet: venta guardada en el celular. Se enviará sola.":"Venta registrada · "+fmt(t));
       }catch(e){ok.disabled=false;ok.textContent="Registrar venta";fail(e);}
     };
   };
@@ -1117,7 +1241,7 @@ $("#btnNewProd").onclick=addProductMenu;
 $("#btnCats").onclick=catManager;
 function invMenu(p){
   if(!p)return;
-  openSheet(`<h3>${esc(p.nombre)}</h3><p class="hint num">📍 ${esc((sedeActual()||{}).nombre||"")} · Stock actual: <b style="color:var(--ink)">${p.stock||0}</b> · Precio: ${p.precio>0?fmt(p.precio):"sin precio"}<br>Categoría: ${esc(p.cat)} · Código: ${p.codigo?`<span class="mono">${esc(p.codigo)}</span>`:"sin código"}</p>
+  openSheet(`<h3>${esc(p.nombre)}</h3><p class="hint num">📍 ${esc((sedeActual()||{}).nombre||"")} · Stock actual: <b style="color:var(--ink)">${p.stock||0}</b> · Precio: ${p.precio>0?fmt(p.precio):"sin precio"}<br>${isDueno()&&(st.costos.get(p.id)||p.costo)?`Costo: ${fmt(st.costos.get(p.id)||p.costo)} · Ganas ${fmt(p.precio-(st.costos.get(p.id)||p.costo))} por unidad<br>`:isDueno()?"Sin precio de compra<br>":""}Categoría: ${esc(p.cat)} · Código: ${p.codigo?`<span class="mono">${esc(p.codigo)}</span>`:"sin código"}</p>
     <div style="display:grid;gap:8px">
       <button class="btn dark wide" data-a="ent">📦 Registrar entrada de mercancía</button>
       ${isDueno()?`<button class="btn wide" data-a="aj">🔢 Ajustar conteo físico</button>
@@ -1154,7 +1278,9 @@ function editProd(p,opts){
   openSheet(`<h3>${isNew?"Nuevo producto":"Editar producto"}</h3><p class="hint">${opts.priceFocus?"Este producto aún no tiene precio. Ponlo para poder venderlo.":isNew?"Si es un vaso, escribe la medida. Ej: Vasos 12 oz.":"&nbsp;"}</p>
     <label class="fld"><span>Nombre</span><input id="n" value="${esc(p.nombre)}" placeholder="Ej: Águila Original 330 ml"></label>
     <div class="two"><label class="fld"><span>Precio de venta</span><input id="pr" inputmode="numeric" class="num" value="${p.precio||""}" placeholder="0"></label>
-    <label class="fld"><span>Categoría</span><select id="ca">${cl.map(c=>`<option ${c===p.cat?"selected":""}>${esc(c)}</option>`).join("")}<option value="__new">➕ Nueva categoría…</option></select></label></div>
+    <label class="fld"><span>Precio de compra</span><input id="co" inputmode="numeric" class="num" value="${(isNew?"":(st.costos.get(p.id)||p.costo||""))}" placeholder="Lo que te cuesta"></label></div>
+    <p class="hint" id="mgn" style="margin:-4px 0 12px"></p>
+    <div class="two" style="grid-template-columns:1fr"><label class="fld"><span>Categoría</span><select id="ca">${cl.map(c=>`<option ${c===p.cat?"selected":""}>${esc(c)}</option>`).join("")}<option value="__new">➕ Nueva categoría…</option></select></label></div>
     <label class="fld" id="caNewW" hidden><span>Nombre de la nueva categoría</span><input id="caNew" maxlength="24" placeholder="Ej: Snacks"></label>
     <label class="fld"><span>Código de barras (opcional)</span><div class="inrow"><input id="cb" class="mono" inputmode="numeric" autocomplete="off" value="${esc(p.codigo||"")}" placeholder="Escanéalo o escríbelo"><button type="button" class="btn sm dark" id="cbScan">📷 Escanear</button></div></label>
     ${isNew?`<label class="fld"><span>Stock inicial</span><input id="sk" inputmode="numeric" class="num" placeholder="0"></label>`:""}
@@ -1164,11 +1290,15 @@ function editProd(p,opts){
     else if(isNew&&opts.codigo)setTimeout(()=>s.querySelector("#n").focus(),50);
     const ca=s.querySelector("#ca"),caW=s.querySelector("#caNewW");
     ca.onchange=()=>{caW.hidden=ca.value!=="__new";if(!caW.hidden)setTimeout(()=>s.querySelector("#caNew").focus(),30);};
+    const mg=()=>{const pv=parseInt(s.querySelector("#pr").value.replace(/\D/g,""),10)||0,cv=parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0;
+      s.querySelector("#mgn").innerHTML=pv&&cv?`Ganas <b style="color:${pv-cv<0?"var(--bad)":"var(--ok)"}">${fmt(pv-cv)}</b> por unidad (${Math.round((pv-cv)*100/pv)}%)`:"El precio de compra solo lo ves tú, para calcular tu ganancia.";};
+    s.querySelector("#pr").oninput=mg;s.querySelector("#co").oninput=mg;mg();
     s.querySelector("#cbScan").onclick=()=>openScanner({title:"Código del producto",onCode:code=>{s.querySelector("#cb").value=code;const o=findByCode(code);if(o&&o.id!==p.id)toast("Ojo: ese código ya es de "+o.nombre);}});
     const del=s.querySelector("[data-del]");if(del)del.onclick=()=>confirmSheet("Eliminar "+p.nombre,"Dejará de aparecer en ventas e inventario. Las ventas pasadas se conservan.","Eliminar",()=>store.updProd(p.id,p.codigo?{activo:false,codigo:null}:{activo:false}));
     s.querySelector("[data-ok]").onclick=async()=>{
       const nombre=s.querySelector("#n").value.trim().replace(/\s+/g," "),precio=parseInt(s.querySelector("#pr").value.replace(/\D/g,""),10)||0;
       let cat=ca.value;const codigo=s.querySelector("#cb").value.trim();
+      const costo=parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0;
       if(!nombre){toast("Escribe el nombre");return;}
       if(cat==="__new"){cat=s.querySelector("#caNew").value.trim().replace(/\s+/g," ");if(!cat){toast("Escribe el nombre de la categoría");return;}
         const ex=catList().find(c=>c.toLowerCase()===cat.toLowerCase());if(ex)cat=ex;}
@@ -1179,7 +1309,9 @@ function editProd(p,opts){
           const sk=parseInt(s.querySelector("#sk").value,10)||0;
           const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;
           await store.newProd(id,data,sk);
-        }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;await store.updProd(p.id,data);}
+          if(costo)await store.setCosto(id,costo);
+        }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;await store.updProd(p.id,data);
+          if(costo!==(st.costos.get(p.id)||p.costo||0))await store.setCosto(p.id,costo);}
         closeSheet();toast("Guardado");
       }catch(e){fail(e);}
     };
@@ -1346,7 +1478,7 @@ $("#dVentas").addEventListener("click",e=>{
 $("#btnCopy").onclick=async()=>{
   const r=dayStats(st.day);const en=(st.empresa&&st.empresa.nombre)||st.negocio,sd=st.mode==="db"&&sedeActual()?sedeActual().nombre:"";let txt=`*${en?en+" · ":""}${sd?sd+" · ":""}Cierre ${nice(st.day)}*\n`;
   for(const p of prodsArr()){const x=r.per[p.id];if(x&&x.vend)txt+=`• ${p.nombre}: ${x.vend} → ${fmt(x.dinero)}\n`;}
-  txt+=`\nEfectivo: ${fmt(r.ef)}\nQR banco: ${fmt(r.qr)}\nGastos: ${fmt(r.ga)}${r.gastos.length?" ("+r.gastos.map(g=>g.desc).join(", ")+")":""}\n*Total ventas: ${fmt(r.tot)}*\nEfectivo en caja: ${fmt(r.ef-r.ga)}`;
+  txt+=`\nEfectivo: ${fmt(r.ef)}\nQR banco: ${fmt(r.qr)}\nGastos: ${fmt(r.ga)}${r.gastos.length?" ("+r.gastos.map(g=>g.desc).join(", ")+")":""}\n*Total ventas: ${fmt(r.tot)}*${isDueno()?`\nGanancia: ${fmt(r.gan)}${r.sinCosto?" (aprox.)":""}`:""}\nEfectivo en caja: ${fmt(r.ef-r.ga)}`;
   try{await navigator.clipboard.writeText(txt);toast("Resumen copiado · pégalo en WhatsApp");}catch(e){toast("No se pudo copiar");}
 };
 
