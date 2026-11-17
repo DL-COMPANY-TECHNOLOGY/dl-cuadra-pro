@@ -3,8 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Control de ventas · Caja e inventario</title>
-<meta name="theme-color" content="#f6f3ee">
+<title>DL CUADRA PRO · Ventas e inventario</title>
+<meta name="description" content="DL CUADRA PRO: cuadra tu caja, todos los días. Inventario + ventas = resultados. Desarrollado por DL COMPANY -TECHNOLOGY-.">
+<meta name="theme-color" content="#05070d">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cuadra Pro">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +19,7 @@
 <style>
 :root{
   --bg:#f6f3ee;--card:#fff;--ink:#1b1a17;--muted:#77716a;--line:#e7e1d8;
-  --acc:#ff5a36;--acc2:#0f8b7a;--accSoft:#ffe7df;--tealSoft:#dcf2ee;
+  --acc:#1d6ff2;--acc2:#0f8b7a;--accSoft:#e3edff;--tealSoft:#dcf2ee;--neon:#22e4ff;--night:#05070d;
   --warn:#d97706;--bad:#d4342a;--badSoft:#fde4e1;--r:16px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -43,7 +50,7 @@ main{padding:0 16px;max-width:900px;margin:0 auto}
 .prod .p.none{color:var(--warn);font-size:12px}
 .prod .s{font-size:11.5px;font-weight:700;color:var(--muted)}
 .prod .s.low{color:var(--warn)}.prod .s.zero{color:var(--bad)}
-.prod .q{position:absolute;top:-7px;right:-7px;min-width:26px;height:26px;padding:0 7px;border-radius:99px;background:var(--acc);color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(255,90,54,.4)}
+.prod .q{position:absolute;top:-7px;right:-7px;min-width:26px;height:26px;padding:0 7px;border-radius:99px;background:var(--acc);color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(29,111,242,.4)}
 .cartbar{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));max-width:876px;margin:0 auto;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:none;align-items:center;gap:10px;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .cartbar.on{display:flex}
 .cartbar .t{font-weight:800;font-size:17px}.cartbar small{display:block;opacity:.7;font-weight:600;font-size:12px}
@@ -129,12 +136,50 @@ nav.tabs button.on{color:var(--acc)}
 .login .err{color:var(--bad);font-weight:700;font-size:13px;min-height:18px;margin:2px 0 8px}
 body.locked nav.tabs,body.locked .cartbar{display:none!important}
 #status{cursor:pointer}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand img{width:40px;height:40px;border-radius:11px;flex:none;box-shadow:0 2px 10px rgba(34,228,255,.25)}
+.brand .bt{font-weight:800;font-size:16px;letter-spacing:.2px;line-height:1.1;white-space:nowrap}
+.brand .bt em{font-style:normal;background:linear-gradient(90deg,#1d6ff2,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .bs{display:block;color:var(--muted);font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+.login{background:radial-gradient(120% 70% at 50% 0%,#12213f 0%,#05070d 60%);color:#e8eefc;overflow:auto;align-items:flex-start}
+.login form{margin:auto}
+.login .hero{text-align:center;margin:8px 0 26px}
+.login .hero img{width:112px;height:112px;border-radius:28px;box-shadow:0 0 40px rgba(34,228,255,.25)}
+.login .hero h2{font-size:28px;margin:16px 0 6px;letter-spacing:1px;color:#fff}
+.login .hero h2 em{font-style:normal;background:linear-gradient(90deg,#22e4ff,#3b82f6,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.login .hero p{margin:0;color:#9fb0d0;font-weight:600;font-size:14px;line-height:1.5}
+.login .hero p b{color:#22e4ff;font-weight:800}
+.login .fld span{color:#9fb0d0}
+.login .fld input{background:#0d1526;border-color:#1f2c47;color:#fff}
+.login .fld input:focus{border-color:#22e4ff}
+.login .btn.pri{background:linear-gradient(90deg,#1d6ff2,#7c3aed);border:0;box-shadow:0 6px 20px rgba(59,130,246,.35)}
+.login .err{color:#ff8a80}
+.login .legal{font-size:12px;color:#7d8bab;text-align:center;margin:14px 0 0;line-height:1.5}
+.login .legal a{color:#9fb0d0}
+.login .credit{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:28px;color:#7d8bab;font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+.login .credit img{width:38px;height:38px;border-radius:10px}
+.login .credit b{display:block;color:#dfe6f5;letter-spacing:.8px}
+.dev-footer{background:var(--night);color:#c9d3e8;text-align:center;padding:34px 22px 30px;margin-top:28px}
+.dev-footer .dev-logo{width:120px;height:120px;border-radius:24px;border:1px solid #1f2c47}
+.dev-footer .dev-by{margin:16px 0 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8a96b0}
+.dev-footer .dev-by strong{display:block;color:#fff;font-size:15px;letter-spacing:1.5px;margin-top:4px}
+.dev-footer .dev-desc{max-width:620px;margin:14px auto 0;font-size:13.5px;line-height:1.65;color:#aab6cf}
+.dev-footer .dev-desc b{color:#fff}
+.dev-footer .dev-links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:18px}
+.dev-footer .dev-links a{color:#22e4ff;font-weight:800;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.dev-footer .dev-links.legal-links a{color:#c9d3e8}
+.dev-footer .dev-copy{margin:22px 0 0;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#5f6b85}
+body.locked .dev-footer{display:none}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.plan.hl{border:2px solid var(--acc)}
+.plan h4{margin:0;font-size:15px;font-weight:800;display:flex;justify-content:space-between;gap:8px}
+.plan ul{margin:8px 0 0 18px;padding:0;font-size:13px;color:var(--muted);font-weight:600;line-height:1.6}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">13</div>
-  <div><h1 id="bizName">Mi negocio</h1><small id="hdrSub">Caja e inventario</small></div>
+  <div class="brand"><img src="logo.svg" alt="DL CUADRA PRO">
+    <div><div class="bt">DL <em>CUADRA PRO</em></div><small class="bs"><span id="bizName">Mi negocio</span><span id="hdrSub"></span></small></div></div>
   <span class="status off" id="status">Conectando…</span>
 </header>
 
@@ -192,6 +237,22 @@ body.locked nav.tabs,body.locked .cartbar{display:none!important}
   </section>
 </main>
 
+<footer class="dev-footer">
+  <img class="dev-logo" src="dl-company.png" alt="DL COMPANY -TECHNOLOGY-">
+  <p class="dev-by">Desarrollado y administrado por <strong>DL COMPANY -TECHNOLOGY-</strong></p>
+  <p class="dev-desc"><b>DL CUADRA PRO</b> es la plataforma de ventas e inventario de <b>DL COMPANY -TECHNOLOGY-</b>, empresa colombiana dedicada al desarrollo de aplicaciones y soluciones digitales para negocios. Registra cada venta desde el celular, controla tu stock en tiempo real, cobra en efectivo o QR y cuadra tu caja al cierre del día, con tus datos sincronizados en la nube.</p>
+  <div class="dev-links">
+    <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Soporte por WhatsApp</a>
+    <a id="lnkPlanes">Planes y precios</a>
+  </div>
+  <div class="dev-links legal-links">
+    <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a>
+    <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
+    <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
+  </div>
+  <p class="dev-copy">DL CUADRA PRO v1.0 · Plataforma oficial de ventas e inventario © 2026</p>
+</footer>
+
 <div class="cartbar" id="cartbar">
   <div style="flex:1"><div class="t num" id="cbTot">$0</div><small id="cbN">0 productos</small></div>
   <button class="btn ghost sm" id="cbClear" style="color:#fff9">Vaciar</button>
@@ -206,13 +267,17 @@ body.locked nav.tabs,body.locked .cartbar{display:none!important}
 
 <div class="login" id="login">
   <form id="loginForm" autocomplete="on">
-    <div class="logo">13</div>
-    <h2>Iniciar sesión</h2>
-    <p>Entra con el usuario que creaste en Supabase.</p>
+    <div class="hero">
+      <img src="logo.svg" alt="Logo DL CUADRA PRO">
+      <h2>DL <em>CUADRA PRO</em></h2>
+      <p>Cuadra tu caja, todos los días.<br><b>Inventario + ventas = resultados.</b></p>
+    </div>
     <label class="fld"><span>Correo</span><input id="lEmail" type="email" autocomplete="username" required></label>
     <label class="fld"><span>Contraseña</span><input id="lPass" type="password" autocomplete="current-password" required></label>
     <div class="err" id="loginErr"></div>
     <button class="btn pri wide" id="loginBtn" type="submit">Entrar</button>
+    <p class="legal">Al iniciar sesión aceptas los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>.<br>¿No tienes cuenta? <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20quiero%20una%20cuenta%20de%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Pídela por WhatsApp</a></p>
+    <div class="credit"><img src="dl-company.png" alt="DL COMPANY -TECHNOLOGY-"><div>Desarrollado por<b>DL COMPANY -TECHNOLOGY-</b></div></div>
   </form>
 </div>
 
@@ -337,15 +402,15 @@ function startData(){
 function stopData(){if(channel){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();render();}
 
 async function init(){
-  $("#bizName").textContent=CFG.NEGOCIO||"Mi negocio";document.title=(CFG.NEGOCIO||"Control de ventas")+" · Caja e inventario";
+  $("#bizName").textContent=CFG.NEGOCIO||"Mi negocio";
   render();
   if(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase){
     st.mode="db";
     sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
     sb.auth.onAuthStateChange((ev,session)=>{
       const u=session?.user||null,was=st.user?.id;st.user=u;
-      if(u){showLogin(false);$("#hdrSub").textContent=u.email;if(was!==u.id)startData();}
-      else{showLogin(true);setStatus("Sin sesión","off");$("#hdrSub").textContent="Caja e inventario";stopData();}
+      if(u){showLogin(false);$("#hdrSub").textContent=" · "+u.email;if(was!==u.id)startData();}
+      else{showLogin(true);setStatus("Sin sesión","off");$("#hdrSub").textContent="";stopData();}
     });
     window.addEventListener("online",refreshSoon);
     document.addEventListener("visibilitychange",()=>{if(!document.hidden&&st.user)refreshSoon();});
@@ -589,6 +654,14 @@ $("#btnCopy").onclick=async()=>{
   txt+=`\nEfectivo: ${fmt(r.ef)}\nQR banco: ${fmt(r.qr)}\nGastos: ${fmt(r.ga)}${r.gastos.length?" ("+r.gastos.map(g=>g.desc).join(", ")+")":""}\n*Total ventas: ${fmt(r.tot)}*\nEfectivo en caja: ${fmt(r.ef-r.ga)}`;
   try{await navigator.clipboard.writeText(txt);toast("Resumen copiado · pégalo en WhatsApp");}catch(e){toast("No se pudo copiar");}
 };
+
+/* ---------- planes ---------- */
+const WA_PLANES="https://wa.me/573218641539?text=Hola%20DL%20Company,%20quiero%20informaci%C3%B3n%20de%20los%20planes%20de%20DL%20CUADRA%20PRO";
+$("#lnkPlanes").onclick=()=>openSheet(`<h3>Planes DL CUADRA PRO</h3><p class="hint">Te asesoramos y activamos tu cuenta por WhatsApp.</p>
+  <div class="plan hl"><h4><span>DL CUADRA PRO</span><span>Precio por WhatsApp</span></h4><ul><li>Punto de venta: efectivo y QR, con cálculo de vueltas.</li><li>Inventario con alertas de stock bajo y agotado.</li><li>Cierre del día: inicial, entradas, vendido, final y gastos.</li><li>Datos en la nube y sincronización entre celulares.</li><li>Soporte por WhatsApp.</li></ul></div>
+  <a class="btn pri wide" style="display:block;text-align:center;text-decoration:none" href="${WA_PLANES}" target="_blank" rel="noopener">Pedir mi plan por WhatsApp</a>
+  <p class="hint" style="margin-top:10px;text-align:center">Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
+  <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;});
 
 /* ---------- tabs ---------- */
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
