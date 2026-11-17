@@ -330,6 +330,26 @@ html[data-theme="light"] .lrow input{accent-color:#c9a227}
 html[data-theme="light"] .opt{background:#fff}
 html[data-theme="light"] .codebox{color:#0e7490;border-color:var(--gold)}
 html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 0 2px rgba(201,162,39,.45)}
+
+.ctxbar{display:flex;align-items:center;gap:8px;padding:8px 16px 0;max-width:900px;margin:0 auto;position:relative;z-index:1}
+.ctxchip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;border:1px solid var(--line2);background:var(--card);font-weight:800;font-size:12.5px;color:var(--ink);max-width:62vw}
+.ctxchip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctxchip svg{width:14px;height:14px;flex:none;color:var(--acc)}
+.rolechip{margin-left:auto;font-size:12px;font-weight:800;padding:6px 11px;border-radius:99px;background:var(--vioSoft);color:#d0a8ff;white-space:nowrap;cursor:pointer;max-width:40vw;overflow:hidden;text-overflow:ellipsis}
+html[data-theme="light"] .rolechip{color:#6d28d9}
+html[data-theme="light"] .ctxchip{background:#fff}
+html[data-theme="light"] .ctxchip svg{color:#a37b12}
+body.cajero .dueno-only{display:none!important}
+.pinbig{display:flex;justify-content:center;gap:10px;margin:6px 0 18px}
+.pinbig span{width:58px;height:70px;border-radius:16px;display:grid;place-items:center;font-family:"Space Grotesk",monospace;font-size:36px;font-weight:700;background:var(--accSoft);border:1px solid var(--line2);color:var(--acc)}
+html[data-theme="light"] .pinbig span{color:#0e7490;border-color:var(--gold)}
+.pin{font-family:"Space Grotesk",monospace;font-size:26px!important;letter-spacing:14px;text-align:center}
+.empok{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:11px 14px;border-radius:14px;background:var(--okSoft);border:1px solid rgba(46,242,160,.3);color:var(--ok);font-weight:800;font-size:14px;margin-bottom:14px}
+.empok a{color:var(--acc);cursor:pointer;font-size:13px}
+.lmsg{background:var(--warnSoft);color:var(--warn);border:1px solid rgba(255,181,71,.35);border-radius:13px;padding:10px 13px;font-size:13px;font-weight:700;margin:14px 0 0;text-align:left}
+.lalt{text-align:center;margin:12px 0 0;font-size:13px;font-weight:700;color:var(--muted)}
+.lalt a{color:var(--acc);cursor:pointer}
+html[data-theme="light"] .lalt a,html[data-theme="light"] .empok a{color:#0e7490}
 </style>
 </head>
 <body>
@@ -342,6 +362,10 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
   </button>
 </header>
+<div class="ctxbar" id="ctxbar">
+  <button class="ctxchip" id="sedeBtn" type="button" aria-label="Sede actual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="sedeName">Sede principal</span></button>
+  <span class="rolechip" id="roleChip">👑 Dueño</span>
+</div>
 
 <main>
   <!-- VENDER -->
@@ -360,15 +384,15 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
       <div class="kpi"><span>Stock bajo (≤3)</span><b class="num" id="kLow">0</b></div>
       <div class="kpi"><span>Agotados</span><b class="num" id="kZero">0</b></div>
     </div>
-    <div class="sec"><h2>Productos</h2><div class="secbtns"><button class="btn sm" id="btnCats">Categorías</button><button class="btn sm dark" id="btnNewProd">+ Producto</button></div></div>
+    <div class="sec"><h2>Productos</h2><div class="secbtns dueno-only"><button class="btn sm" id="btnCats">Categorías</button><button class="btn sm dark" id="btnNewProd">+ Producto</button></div></div>
     <div class="srow" style="margin:0 0 10px"><input class="search" id="qi" placeholder="Buscar producto o código…" autocomplete="off"><button class="scanbtn" id="scanInv" type="button" aria-label="Escanear para buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg></button></div>
     <div class="card" id="invList"></div>
-    <p class="hint" style="color:var(--muted);font-size:12.5px;font-weight:600;margin:10px 2px 0">Toca un producto para registrar entrada de mercancía, ajustar el conteo físico o editar precio, categoría y código de barras.</p>
+    <p class="hint dueno-only" style="color:var(--muted);font-size:12.5px;font-weight:600;margin:10px 2px 0">Toca un producto para registrar entrada de mercancía, ajustar el conteo físico o editar precio, categoría y código de barras.</p>
   </section>
 
   <!-- DÍA -->
   <section class="view" id="v-dia">
-    <div class="datebar">
+    <div class="datebar dueno-only">
       <button class="btn sm" id="dPrev">‹</button>
       <input type="date" id="dDate">
       <button class="btn sm" id="dNext">›</button>
@@ -385,6 +409,8 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
       <button class="btn sm" id="btnCopy">Copiar resumen</button>
     </div>
 
+    <div id="dPorWrap" hidden><div class="sec"><h2>Ventas por cajero</h2></div><div class="card" id="dPor"></div></div>
+
     <div class="sec"><h2>Inventario del día</h2><label class="toggle"><input type="checkbox" id="showAll"> Ver todos</label></div>
     <div class="card tblwrap"><table class="tbl num" id="dTable"></table></div>
 
@@ -394,6 +420,17 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
     <div class="sec"><h2>Ventas registradas</h2><span class="pill" id="dCount">0</span></div>
     <div class="card" id="dVentas"></div>
     <div style="height:20px"></div>
+  </section>
+  <!-- ADMINISTRACIÓN (solo dueño) -->
+  <section class="view" id="v-admin">
+    <div id="admWarn" style="margin-top:14px"></div>
+    <div class="sec"><h2>Empresa</h2><button class="btn sm" id="admEmpEdit">Editar</button></div>
+    <div class="card" id="admEmp"></div>
+    <div class="sec"><h2>Sedes</h2><button class="btn sm dark" id="admSedeNew">+ Sede</button></div>
+    <div class="card" id="admSedes"></div>
+    <div class="sec"><h2>Cajeros</h2><button class="btn sm dark" id="admCajNew">+ Cajero</button></div>
+    <div class="card" id="admCajeros"></div>
+    <p class="hint" style="color:var(--muted);font-size:12.5px;font-weight:600;margin:10px 2px 0">Cada cajero entra con <b>Acceso empresa</b>: nombre de la empresa + NIT, y luego su usuario + PIN. Solo ve las sedes que le asignes; no puede cambiar precios, productos ni conteos.</p>
   </section>
 </main>
 
@@ -410,7 +447,7 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v1.1 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.0 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -423,6 +460,7 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
   <button class="on" data-v="vender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>Vender</button>
   <button data-v="inv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Inventario</button>
   <button data-v="dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 15h3M8 18h6"/></svg>Cierre del día</button>
+  <button data-v="admin" id="tabAdmin" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>Admin</button>
 </nav>
 
 <div class="login" id="login">
@@ -436,7 +474,8 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
     <div class="lsub">Ventas e inventario</div>
     <p class="lslogan">Cuadra tu caja, todos los días.<br><b>Inventario + ventas = resultados.</b></p>
     <span class="lbadge">BY DL COMPANY -TECHNOLOGY-</span>
-    <div class="ltabs"><button type="button" class="on" data-lt="in">Iniciar sesión</button><button type="button" data-lt="req">Solicitar cuenta</button></div>
+    <div class="lmsg" id="lMsg" hidden></div>
+    <div class="ltabs" id="lTabs"><button type="button" class="on" data-lt="in">👑 Dueño</button><button type="button" data-lt="emp">🏢 Acceso empresa</button></div>
 
     <form id="loginForm" autocomplete="on">
       <label class="fld"><span>Correo electrónico</span><input id="lEmail" type="email" autocomplete="username" placeholder="tucorreo@ejemplo.com" required></label>
@@ -445,6 +484,28 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
       <div class="lerr" id="loginErr"></div>
       <button class="lgo" id="loginBtn" type="submit">Ingresar a DL CUADRA PRO ›</button>
     </form>
+
+    <form id="empForm" hidden>
+      <p class="hint" style="margin:0 0 14px;color:var(--muted);font-weight:600;font-size:13.5px">Para cajeros y empleados. Pídele al dueño el nombre de la empresa, el NIT, tu usuario y tu PIN.</p>
+      <label class="fld"><span>Nombre de la empresa</span><input id="eNom" autocomplete="organization" placeholder="Ej: Bebidas Comuna 13" required></label>
+      <label class="fld"><span>NIT de la empresa</span><input id="eNit" class="mono" inputmode="numeric" autocomplete="off" placeholder="900123456-7" required></label>
+      <div class="lerr" id="empErr"></div>
+      <button class="lgo" id="empBtn" type="submit">Continuar ›</button>
+    </form>
+
+    <form id="pinForm" hidden>
+      <div class="empok"><span>🏢 <span id="pEmp"></span></span><a id="pBack">Cambiar</a></div>
+      <label class="fld"><span>Tu usuario</span><input id="pUsr" autocomplete="username" autocapitalize="characters" placeholder="Ej: DL COMPANY" required></label>
+      <label class="fld"><span>PIN de 4 números</span><input id="pPin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="one-time-code" placeholder="••••" required></label>
+      <div class="lerr" id="pinErr"></div>
+      <button class="lgo" id="pinBtn" type="submit">Ingresar ›</button>
+    </form>
+
+    <div id="sedePick" hidden>
+      <p class="lslogan" style="margin-top:6px"><b>¿En qué sede vas a trabajar hoy?</b></p>
+      <div id="sedeList" style="text-align:left"></div>
+      <p class="lalt"><a id="spSalir">Salir</a></p>
+    </div>
 
     <form id="reqForm" hidden>
       <p class="hint" style="margin:0 0 14px;color:var(--muted);font-weight:600;font-size:13.5px">Déjanos tus datos y te creamos la cuenta de tu negocio. Te contactamos por WhatsApp.</p>
@@ -457,6 +518,7 @@ html[data-theme="light"] .scanbtn{box-shadow:0 6px 18px rgba(59,130,246,.3),0 0 
       <button class="lgo" type="submit">Solicitar por WhatsApp ›</button>
     </form>
 
+    <p class="lalt">¿Tu negocio aún no tiene cuenta? <a id="lReq">Solicítala aquí</a></p>
     <a class="lplan" id="lPlans">Ver planes y precios →</a>
     <p class="llegal">Al ingresar aceptas los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</p>
   </div>
@@ -495,7 +557,7 @@ let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add
 const DEF_CATS=["Cervezas","Licores","Shots","Sin alcohol","Otros","Insumos"];
 
 /* ---------- state ---------- */
-const st={negocio:"",cats:[],prods:new Map(),movs:[],from:today(),cart:new Map(),cat:"Todos",q:"",qi:"",day:today(),showAll:false,mode:"conn",readonly:false};
+const st={negocio:"",empresa:null,perfil:null,usuario:"",sedes:[],sede:null,empOk:null,linking:false,cats:[],prods:new Map(),movs:[],from:today(),cart:new Map(),cat:"Todos",q:"",qi:"",day:today(),showAll:false,mode:"conn",readonly:false};
 
 /* ---------- almacenamiento: Supabase (nube) o local (sin configurar) ---------- */
 const CFG=window.APP_CONFIG||{};
@@ -503,7 +565,7 @@ const LS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){re
 let sb=null,channel=null,refreshT=null;
 
 // fila de la base de datos -> objeto que usa la app
-const rowToMov=r=>({id:r.id,tipo:r.tipo,fecha:r.fecha,ts:new Date(r.ts).getTime(),items:r.items||[],total:r.total||0,metodo:r.metodo,pid:r.pid,nombre:r.nombre,cant:r.cant||0,desc:r.descr,valor:r.valor||0});
+const rowToMov=r=>({id:r.id,tipo:r.tipo,fecha:r.fecha,ts:new Date(r.ts).getTime(),items:r.items||[],total:r.total||0,metodo:r.metodo,pid:r.pid,nombre:r.nombre,cant:r.cant||0,desc:r.descr,valor:r.valor||0,sede_id:r.sede_id,cajero_id:r.cajero_id,por:r.por||""});
 
 const local={
   prods(){return LS.get("cb_prods",{})},movs(){return LS.get("cb_movs",{})},
@@ -515,7 +577,7 @@ const local={
 function chk({error}){if(error)throw error;}
 const store={
   async venta(items,metodo){
-    if(sb){chk(await sb.rpc("registrar_venta",{p_fecha:today(),p_items:items.map(i=>({pid:i.pid,cant:i.cant})),p_metodo:metodo}));return refresh();}
+    if(sb){chk(await sb.rpc("registrar_venta",{p_sede:st.sede,p_fecha:today(),p_items:items.map(i=>({pid:i.pid,cant:i.cant})),p_metodo:metodo}));return refresh();}
     const m=local.movs(),total=items.reduce((s,i)=>s+i.cant*i.precio,0);
     m[rid()]={tipo:"venta",fecha:today(),ts:Date.now(),items,total,metodo};local.saveM(m);
     for(const i of items)local.addStock(i.pid,-i.cant);local.emit();
@@ -525,16 +587,16 @@ const store={
     const m=local.movs();delete m[v.id];local.saveM(m);for(const i of v.items||[])local.addStock(i.pid,i.cant);local.emit();
   },
   async entrada(p,c){
-    if(sb){chk(await sb.rpc("registrar_entrada",{p_pid:p.id,p_cant:c,p_fecha:today()}));return refresh();}
+    if(sb){chk(await sb.rpc("registrar_entrada",{p_sede:st.sede,p_pid:p.id,p_cant:c,p_fecha:today()}));return refresh();}
     const m=local.movs();m[rid()]={tipo:"entrada",fecha:today(),ts:Date.now(),pid:p.id,nombre:p.nombre,cant:c};local.saveM(m);local.addStock(p.id,c);local.emit();
   },
   async ajuste(p,contado){
-    if(sb){const r=await sb.rpc("ajustar_stock",{p_pid:p.id,p_contado:contado,p_fecha:today()});chk(r);await refresh();return r.data;}
+    if(sb){const r=await sb.rpc("ajustar_stock",{p_sede:st.sede,p_pid:p.id,p_contado:contado,p_fecha:today()});chk(r);await refresh();return r.data;}
     const cur=local.prods()[p.id]?.stock||0,d=contado-cur;if(!d)return 0;
     const m=local.movs();m[rid()]={tipo:"ajuste",fecha:today(),ts:Date.now(),pid:p.id,nombre:p.nombre,cant:d};local.saveM(m);local.addStock(p.id,d);local.emit();return d;
   },
   async gasto(desc,valor,fecha){
-    if(sb){chk(await sb.from("movimientos").insert({tipo:"gasto",fecha,descr:desc,valor}));return refresh();}
+    if(sb){chk(await sb.from("movimientos").insert({empresa_id:st.empresa.id,sede_id:st.sede,cajero_id:st.perfil.cajero_id||null,tipo:"gasto",fecha,descr:desc,valor}));return refresh();}
     const m=local.movs();m[rid()]={tipo:"gasto",fecha,ts:Date.now(),desc,valor};local.saveM(m);local.emit();
   },
   async delMov(id){
@@ -542,40 +604,47 @@ const store={
     const m=local.movs();delete m[id];local.saveM(m);local.emit();
   },
   async newProd(id,data,stockIni){
-    if(sb){chk(await sb.from("productos").insert({id,...data,stock:0}));if(stockIni)chk(await sb.rpc("ajustar_stock",{p_pid:id,p_contado:stockIni,p_fecha:today()}));return refresh();}
+    if(sb){chk(await sb.from("productos").insert({empresa_id:st.empresa.id,id,...data}));if(stockIni)chk(await sb.rpc("ajustar_stock",{p_sede:st.sede,p_pid:id,p_contado:stockIni,p_fecha:today()}));return refresh();}
     const p=local.prods();p[id]={...data,stock:0};local.saveP(p);
     if(stockIni){const m=local.movs();m[rid()]={tipo:"ajuste",fecha:today(),ts:Date.now(),pid:id,nombre:data.nombre,cant:stockIni};local.saveM(m);local.addStock(id,stockIni);}local.emit();
   },
   async setNegocio(nombre){
-    if(sb){chk(await sb.from("ajustes").upsert({clave:"negocio",valor:nombre,actualizado:new Date().toISOString()}));st.negocio=nombre;renderHeader();return;}
+    if(sb){chk(await sb.from("empresas").update({nombre}).eq("id",st.empresa.id));st.empresa={...st.empresa,nombre};renderHeader();return;}
     LS.set("cb_negocio",nombre);local.emit();
   },
   async setCats(arr){
-    if(sb){chk(await sb.from("ajustes").upsert({clave:"categorias",valor:JSON.stringify(arr),actualizado:new Date().toISOString()}));st.cats=arr;render();return;}
+    if(sb){chk(await sb.from("ajustes").upsert({empresa_id:st.empresa.id,clave:"categorias",valor:JSON.stringify(arr),actualizado:new Date().toISOString()}));st.cats=arr;render();return;}
     LS.set("cb_cats",arr);local.emit();
   },
   async moveCat(from,to){
-    if(sb){chk(await sb.from("productos").update({cat:to}).eq("cat",from));return refresh();}
+    if(sb){chk(await sb.from("productos").update({cat:to}).eq("empresa_id",st.empresa.id).eq("cat",from));return refresh();}
     const p=local.prods();for(const k in p)if(p[k].cat===from)p[k].cat=to;local.saveP(p);local.emit();
   },
   async updProd(id,data){
-    if(sb){chk(await sb.from("productos").update(data).eq("id",id));return refresh();}
+    if(sb){chk(await sb.from("productos").update(data).eq("empresa_id",st.empresa.id).eq("id",id));return refresh();}
     const p=local.prods();p[id]={...p[id],...data};local.saveP(p);local.emit();
   }
 };
 
 async function refresh(){
   if(!sb){local.emit();return;}
-  const [pr,mv]=await Promise.all([
+  if(!st.user||!st.perfil||!st.sede)return;
+  const sede=st.sede;
+  const [pr,inv,mv,aj,em]=await Promise.all([
     sb.from("productos").select("*"),
-    sb.from("movimientos").select("*").gte("fecha",st.from).order("ts",{ascending:false}).limit(5000)
+    sb.from("inventario").select("producto_id,stock").eq("sede_id",sede),
+    sb.from("movimientos").select("*").eq("sede_id",sede).gte("fecha",st.from).order("ts",{ascending:false}).limit(5000),
+    sb.from("ajustes").select("clave,valor"),
+    sb.from("empresas").select("id,nombre,nit,plan").maybeSingle()
   ]);
-  if(pr.error||mv.error){setStatus("Sin conexión","off");return;}
-  st.prods=new Map(pr.data.map(p=>[p.id,p]));
+  if(pr.error||inv.error||mv.error||em.error){setStatus("Sin conexión","off");return;}
+  if(!em.data){return boot(true);}   // cajero desactivado o sin acceso
+  if(sede!==st.sede)return;          // cambió de sede mientras cargaba
+  st.empresa=em.data;
+  const stock=new Map(inv.data.map(r=>[r.producto_id,r.stock]));
+  st.prods=new Map(pr.data.map(p=>[p.id,{...p,stock:stock.get(p.id)||0}]));
   st.movs=mv.data.map(rowToMov);
-  const aj=await sb.from("ajustes").select("clave,valor");
-  if(!aj.error){const n=aj.data.find(x=>x.clave==="negocio");st.negocio=(n&&n.valor)||"";
-    const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}}
+  if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}}
   setStatus("● En línea");render();
 }
 const refreshSoon=()=>{clearTimeout(refreshT);refreshT=setTimeout(refresh,250);};
@@ -586,16 +655,30 @@ function subscribeMovs(){
 }
 function setStatus(t,c){const s=$("#status");s.textContent=t;s.className="status "+(c||"");}
 
-/* ---------- sesión ---------- */
+/* ---------- sesión, empresa, sedes y rol ---------- */
+const isDueno=()=>st.mode!=="db"||(st.perfil&&st.perfil.rol==="dueno");
+const isCajero=()=>st.mode==="db"&&st.perfil&&st.perfil.rol==="cajero";
+const sedeActual=()=>st.sedes.find(s=>s.id===st.sede)||null;
+const appUrl=()=>location.origin+location.pathname;
 function showLogin(on){$("#login").classList.toggle("on",on);document.body.classList.toggle("locked",on);}
+function loginPanel(name){
+  ["loginForm","empForm","pinForm","sedePick","reqForm"].forEach(id=>{$("#"+id).hidden=id!==name;});
+  $("#lTabs").hidden=name==="sedePick";
+  document.querySelectorAll("[data-lt]").forEach(x=>x.classList.toggle("on",(x.dataset.lt==="in"&&name==="loginForm")||(x.dataset.lt==="emp"&&["empForm","pinForm"].includes(name))));
+}
+function loginMsg(m){$("#lMsg").textContent=m||"";$("#lMsg").hidden=!m;}
 try{const em=localStorage.getItem("cp_email");if(em){$("#lEmail").value=em;}else if(localStorage.getItem("cp_remember")==="0")$("#lRemember").checked=false;}catch(e){}
+(function(){const e=LS.get("cp_emp",null);if(e){$("#eNom").value=e.nombre||"";$("#eNit").value=e.nit||"";$("#pUsr").value=e.usr||"";}})();
 document.querySelectorAll("[data-lt]").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll("[data-lt]").forEach(x=>x.classList.toggle("on",x===b));
-  $("#loginForm").hidden=b.dataset.lt!=="in";$("#reqForm").hidden=b.dataset.lt!=="req";
+  loginMsg("");
+  if(b.dataset.lt==="in")loginPanel("loginForm");
+  else if(b.dataset.lt==="emp")loginPanel(st.empOk?"pinForm":"empForm");
+  else loginPanel("reqForm");
 });
+$("#lReq").onclick=()=>{loginMsg("");loginPanel("reqForm");};
 $("#lEye").onclick=()=>{const i=$("#lPass");i.type=i.type==="password"?"text":"password";$("#lEye").setAttribute("aria-label",i.type==="password"?"Mostrar contraseña":"Ocultar contraseña");};
 $("#loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();const b=$("#loginBtn"),err=$("#loginErr");err.textContent="";
+  e.preventDefault();const b=$("#loginBtn"),err=$("#loginErr");err.textContent="";loginMsg("");
   if(!sb){err.textContent="La app no está conectada a la nube (config.js).";return;}
   b.disabled=true;b.textContent="Ingresando…";
   const email=$("#lEmail").value.trim();
@@ -605,6 +688,65 @@ $("#loginForm").addEventListener("submit",async e=>{
   try{if($("#lRemember").checked){localStorage.setItem("cp_email",email);localStorage.setItem("cp_remember","1");}else{localStorage.removeItem("cp_email");localStorage.setItem("cp_remember","0");}}catch(_){}
   $("#lPass").value="";
 });
+
+/* acceso empresa: paso 1 (empresa + NIT) y paso 2 (usuario + PIN) */
+async function sesionAnonima(){
+  if(st.user&&st.user.is_anonymous)return null;
+  const {error}=await sb.auth.signInAnonymously();
+  return error;
+}
+const ERR_CAJ={datos:"Empresa o NIT incorrectos. Escribe el nombre igual a como lo tiene el dueño en la app.",inactivo:"Tu usuario está desactivado. Habla con el dueño.",espera:"Demasiados intentos en esta empresa. Espera 15 minutos.",es_dueno:"Cierra la sesión de dueño para entrar como cajero.",sin_sesion:"No se pudo iniciar. Intenta de nuevo."};
+$("#empForm").addEventListener("submit",async e=>{
+  e.preventDefault();const err=$("#empErr"),b=$("#empBtn");err.textContent="";loginMsg("");
+  if(!sb){err.textContent="La app no está conectada a la nube (config.js).";return;}
+  const nom=$("#eNom").value.trim(),nit=$("#eNit").value.trim();
+  if(!nom||nit.replace(/\D/g,"").length<5){err.textContent="Escribe el nombre de la empresa y el NIT.";return;}
+  b.disabled=true;b.textContent="Verificando…";st.linking=true;
+  try{
+    const ae=await sesionAnonima();
+    if(ae){err.textContent=/disabled|not enabled/i.test(ae.message)?"El acceso de empresas aún no está activado. Escríbenos por WhatsApp.":/fetch|network/i.test(ae.message)?"Sin internet. Intenta de nuevo.":"No se pudo iniciar: "+ae.message;return;}
+    const {data,error}=await sb.rpc("ingresar_cajero",{p_empresa:nom,p_nit:nit,p_usuario:null,p_pin:null});
+    if(error){err.textContent="No se pudo verificar: "+error.message;return;}
+    if(!data||!data.ok){err.textContent=ERR_CAJ[data&&data.error]||"Empresa o NIT incorrectos.";return;}
+    st.empOk={nombre:nom,nit};$("#pEmp").textContent=nom;
+    const prev=LS.get("cp_emp",{});LS.set("cp_emp",{...prev,nombre:nom,nit});
+    loginPanel("pinForm");setTimeout(()=>($("#pUsr").value?$("#pPin"):$("#pUsr")).focus(),50);
+  }finally{b.disabled=false;b.textContent="Continuar ›";}
+});
+$("#pBack").onclick=()=>{st.empOk=null;loginPanel("empForm");};
+$("#pPin").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);});
+$("#pinForm").addEventListener("submit",async e=>{
+  e.preventDefault();const err=$("#pinErr"),b=$("#pinBtn");err.textContent="";
+  const usr=$("#pUsr").value.trim(),pin=$("#pPin").value.trim();
+  if(!usr){err.textContent="Escribe tu usuario.";return;}
+  if(!/^\d{4}$/.test(pin)){err.textContent="El PIN tiene 4 números.";return;}
+  b.disabled=true;b.textContent="Ingresando…";st.linking=true;
+  try{
+    const ae=await sesionAnonima();if(ae){err.textContent="No se pudo iniciar: "+ae.message;return;}
+    const {data,error}=await sb.rpc("ingresar_cajero",{p_empresa:st.empOk.nombre,p_nit:st.empOk.nit,p_usuario:usr,p_pin:pin});
+    if(error){err.textContent="No se pudo verificar: "+error.message;return;}
+    if(!data||!data.ok){
+      const d=data||{};
+      err.textContent=d.error==="pin"?"Usuario o PIN incorrecto"+(d.quedan?` · te quedan ${d.quedan} intentos`:""):d.error==="bloqueado"?`Demasiados intentos. Espera ${d.minutos} minutos o pide al dueño un PIN nuevo.`:(ERR_CAJ[d.error]||"No se pudo ingresar.");
+      $("#pPin").value="";return;
+    }
+    $("#pPin").value="";
+    const prev=LS.get("cp_emp",{});LS.set("cp_emp",{...prev,usr});
+    LS.set("cp_usr_"+st.user.id,data.usuario||usr);
+    st.linking=false;st.empOk=null;
+    await boot(true);
+  }finally{b.disabled=false;b.textContent="Ingresar ›";st.linking=false;}
+});
+function showSedePicker(){
+  showLogin(true);loginPanel("sedePick");
+  const list=st.sedes.filter(s=>s.activa!==false);
+  $("#sedeList").innerHTML=list.length?list.map(s=>`<button class="opt" type="button" data-sp="${esc(s.id)}"><span class="ic c1">📍</span><span><b>${esc(s.nombre)}</b><small>Toca para trabajar en esta sede</small></span></button>`).join("")
+    :`<p class="lerr">No tienes sedes asignadas. Habla con el dueño.</p>`;
+  $("#sedeList").onclick=e=>{const b=e.target.closest("[data-sp]");if(!b)return;elegirSede(b.dataset.sp);enterApp();};
+}
+function elegirSede(id){st.sede=id;if(st.user)LS.set("cp_sede_"+st.user.id,id);st.cart.clear();st.loaded=false;st.from=today();}
+$("#spSalir").onclick=()=>{sb&&sb.auth.signOut();};
+
 $("#reqForm").addEventListener("submit",e=>{
   e.preventDefault();const v=id=>$(id).value.trim();
   if(!v("#rNom")||!v("#rNeg")||!v("#rCel")||!v("#rMail")){$("#reqErr").textContent="Completa nombre, negocio, celular y correo.";return;}
@@ -623,7 +765,7 @@ $("#lForgot").onclick=()=>{
     ok.onclick=async()=>{const em=s.querySelector("#fe").value.trim();if(!/\S+@\S+\.\S+/.test(em)){toast("Escribe un correo válido");return;}
       if(!sb){toast("La app no está conectada a la nube");return;}
       ok.disabled=true;ok.textContent="Enviando…";
-      const {error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});
+      const {error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:appUrl()});
       ok.disabled=false;ok.textContent="Enviar enlace";
       if(error){toast(/rate|limit/i.test(error.message)?"Espera un rato e intenta de nuevo":/not authorized|not_authorized/i.test(error.message)?"Por ahora pide la recuperación por WhatsApp":"No se pudo enviar: "+error.message);return;}
       closeSheet();toast("Revisa tu correo (también en spam)");};
@@ -641,20 +783,97 @@ function newPasswordSheet(){
       closeSheet();toast("Contraseña actualizada ✓");};
   });
 }
-$("#status").addEventListener("click",()=>{
-  if(!sb||!st.user)return;
-  confirmSheet("Cerrar sesión",`Sesión iniciada como ${st.user.email}.`,"Cerrar sesión",async()=>{await sb.auth.signOut();});
-});
-function startData(){
-  st.loaded=false;subscribeMovs();
-  if(channel)sb.removeChannel(channel);
-  channel=sb.channel("cambios")
-    .on("postgres_changes",{event:"*",schema:"public",table:"productos"},refreshSoon)
-    .on("postgres_changes",{event:"*",schema:"public",table:"movimientos"},refreshSoon)
-    .on("postgres_changes",{event:"*",schema:"public",table:"ajustes"},refreshSoon)
-    .subscribe();
+
+/* contexto: perfil + empresa + sedes */
+async function loadContext(){
+  const uid=st.user.id;
+  const pf=await sb.from("perfiles").select("rol,empresa_id,cajero_id").eq("user_id",uid).maybeSingle();
+  if(pf.error)throw pf.error;
+  if(!pf.data)return {ok:false,why:"sin_perfil"};
+  const [em,se]=await Promise.all([sb.from("empresas").select("id,nombre,nit,plan").maybeSingle(),sb.from("sedes").select("*").order("orden").order("creado")]);
+  if(em.error)throw em.error;if(se.error)throw se.error;
+  if(!em.data)return {ok:false,why:"inactivo"};
+  st.perfil=pf.data;st.empresa=em.data;
+  let sedes=se.data||[];
+  if(pf.data.rol==="cajero"){
+    const cs=await sb.from("cajero_sedes").select("sede_id");if(cs.error)throw cs.error;
+    const ids=new Set((cs.data||[]).map(x=>x.sede_id));sedes=sedes.filter(s=>ids.has(s.id)&&s.activa);
+    st.usuario=LS.get("cp_usr_"+uid,"Cajero");
+  }else st.usuario="Dueño";
+  st.sedes=sedes;
+  const saved=LS.get("cp_sede_"+uid,null);
+  if(sedes.some(s=>s.id===saved))st.sede=saved;
+  else if(pf.data.rol==="dueno"||sedes.length===1){const s=sedes.find(x=>x.activa)||sedes[0];st.sede=s?s.id:null;if(st.sede)LS.set("cp_sede_"+uid,st.sede);}
+  else st.sede=null;
+  return {ok:true};
 }
-function stopData(){if(channel){sb.removeChannel(channel);channel=null;}st.negocio="";st.cats=[];st.prods=new Map();st.movs=[];st.cart.clear();render();}
+async function boot(force){
+  if(st.booting&&!force)return;st.booting=true;
+  try{
+    const r=await loadContext();
+    if(!r.ok){
+      stopData();showLogin(true);
+      if(st.user&&st.user.is_anonymous){
+        if(st.linking)return;
+        if(r.why==="inactivo"){await sb.auth.signOut();loginMsg("Tu acceso de cajero terminó o fue desactivado. Vuelve a ingresar o habla con el dueño.");}
+        loginPanel(st.empOk?"pinForm":"empForm");return;
+      }
+      await sb.auth.signOut();loginMsg("Tu cuenta no está vinculada a una empresa. Escríbenos por WhatsApp.");return;
+    }
+    if(!st.sede){showSedePicker();return;}
+    enterApp();
+  }catch(e){console.error(e);setStatus("Sin conexión","off");toast("Sin conexión. Intenta de nuevo.");}
+  finally{st.booting=false;}
+}
+function enterApp(){
+  showLogin(false);loginPanel("loginForm");loginMsg("");applyRole();
+  if(isCajero()&&st.day!==today())st.day=today();
+  st.loaded=false;startData();render();
+}
+function applyRole(){
+  const caj=isCajero();
+  document.body.classList.toggle("cajero",!!caj);
+  $("#tabAdmin").hidden=!(st.mode==="db"&&isDueno());
+  if($("#tabAdmin").hidden&&$("#v-admin").classList.contains("on"))document.querySelector('nav.tabs button[data-v="vender"]').click();
+}
+$("#status").addEventListener("click",sessionMenu);
+$("#roleChip").addEventListener("click",sessionMenu);
+function sessionMenu(){
+  if(!sb||!st.user||!st.perfil)return;
+  const s=sedeActual(),caj=isCajero();
+  openSheet(`<h3>${caj?"👤 "+esc(st.usuario):"👑 Dueño"}</h3><p class="hint">${esc(st.empresa?st.empresa.nombre:"")}${s?" · 📍 "+esc(s.nombre):""}${!caj&&st.user.email?"<br>"+esc(st.user.email):""}</p>
+    ${st.sedes.length>1?`<button class="opt" data-m="sede"><span class="ic c1">📍</span><span><b>Cambiar de sede</b><small>Estás en ${esc(s?s.nombre:"-")}</small></span></button>`:""}
+    ${!caj?`<button class="opt" data-m="adm"><span class="ic c3">⚙️</span><span><b>Administración</b><small>Empresa, sedes y cajeros</small></span></button>`:""}
+    <button class="opt" data-m="out"><span class="ic c2">🚪</span><span><b>${caj?"Terminar turno y salir":"Cerrar sesión"}</b><small>${caj?"Para entrar de nuevo necesitas tu PIN":"Saldrás de este dispositivo"}</small></span></button>
+    <button class="btn ghost wide" data-x>Cerrar</button>`,sh=>{
+    sh.querySelector("[data-x]").onclick=closeSheet;
+    const bs=sh.querySelector('[data-m="sede"]');if(bs)bs.onclick=sedeMenu;
+    const ba=sh.querySelector('[data-m="adm"]');if(ba)ba.onclick=()=>{closeSheet();document.querySelector('nav.tabs button[data-v="admin"]').click();};
+    sh.querySelector('[data-m="out"]').onclick=async()=>{closeSheet();const wasCaj=caj;st.perfil=null;await sb.auth.signOut();if(wasCaj){st.empOk=null;loginPanel("empForm");}};
+  });
+}
+function sedeMenu(){
+  const list=isCajero()?st.sedes:st.sedes;
+  openSheet(`<h3>¿En qué sede?</h3><p class="hint">Las ventas e inventario que veas serán de la sede que elijas.</p>
+    ${list.map(s=>`<button class="opt" data-sd="${esc(s.id)}"><span class="ic c1">📍</span><span><b>${esc(s.nombre)}${s.id===st.sede?" ✓":""}</b><small>${s.activa===false?"Sede inactiva":s.id===st.sede?"Sede actual":"Cambiar a esta sede"}</small></span></button>`).join("")}
+    <button class="btn ghost wide" data-x>Cerrar</button>`,sh=>{
+    sh.querySelector("[data-x]").onclick=closeSheet;
+    sh.querySelectorAll("[data-sd]").forEach(b=>b.onclick=()=>{closeSheet();if(b.dataset.sd===st.sede)return;elegirSede(b.dataset.sd);subscribeMovs();render();toast("📍 "+(sedeActual()||{}).nombre);});
+  });
+}
+$("#sedeBtn").onclick=()=>{if(st.mode!=="db")return;if(st.sedes.length>1)sedeMenu();else toast("📍 "+((sedeActual()||{}).nombre||"Sede"));};
+
+function startData(){
+  subscribeMovs();
+  if(!sb)return;
+  if(channel)sb.removeChannel(channel);
+  channel=sb.channel("cambios");
+  for(const t of ["productos","movimientos","ajustes","inventario"])channel.on("postgres_changes",{event:"*",schema:"public",table:t},refreshSoon);
+  for(const t of ["sedes","empresas"])channel.on("postgres_changes",{event:"*",schema:"public",table:t},ctxSoon);
+  channel.subscribe();
+}
+let ctxT=null;const ctxSoon=()=>{clearTimeout(ctxT);ctxT=setTimeout(async()=>{if(!st.user||!st.perfil)return;try{const r=await loadContext();if(!r.ok)return boot(true);if(!st.sede)return showSedePicker();render();if($("#v-admin").classList.contains("on"))loadAdmin();}catch(e){}},300);};
+function stopData(){if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
 
 async function init(){
   render();
@@ -664,15 +883,18 @@ async function init(){
     sb.auth.onAuthStateChange((ev,session)=>{
       if(ev==="PASSWORD_RECOVERY")setTimeout(newPasswordSheet,300);
       const u=session?.user||null,was=st.user?.id;st.user=u;
-      if(u){showLogin(false);if(was!==u.id)startData();}
-      else{showLogin(true);setStatus("Sin sesión","off");stopData();}
+      if(!u){st.perfil=null;st.empresa=null;st.sedes=[];st.sede=null;showLogin(true);if($("#sedePick").hidden===false)loginPanel("loginForm");setStatus("Sin sesión","off");stopData();applyRole();return;}
+      if(was===u.id&&st.perfil)return;
+      setTimeout(()=>boot(),0);
     });
     window.addEventListener("online",refreshSoon);
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden&&st.user)refreshSoon();});
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden&&st.user&&st.perfil)refreshSoon();});
+    setInterval(()=>{if(st.user&&st.perfil&&!document.hidden)refreshSoon();},90000);
   }else{
     st.mode="local";setStatus("Modo local","off");
+    st.perfil={rol:"dueno"};st.usuario="Dueño";st.sedes=[{id:"local",nombre:"Sede principal",activa:true}];st.sede="local";
     $("#offBanner").innerHTML='<div class="banner">Modo local: los datos se guardan solo en este navegador. Configura Supabase en <b>config.js</b> para guardarlos en la nube.</div>';
-    subscribeMovs();
+    applyRole();subscribeMovs();
   }
 }
 
@@ -707,12 +929,16 @@ function dayStats(day){
 
 /* ---------- render ---------- */
 function renderHeader(){
-  const n=(st.negocio||"").trim();
+  const n=((st.empresa&&st.empresa.nombre)||st.negocio||"").trim();
   $("#bizName").textContent=n||"Pon el nombre de tu negocio aquí";
   $("#bizBtn").classList.toggle("empty",!n);
+  $("#bizBtn").disabled=!!isCajero();
+  const s=sedeActual();$("#sedeName").textContent=s?s.nombre:"Sede principal";
+  $("#roleChip").textContent=isCajero()?"👤 "+st.usuario:"👑 Dueño";
+  $("#ctxbar").hidden=st.mode==="db"&&!st.perfil;
   document.title=(n?n+" · ":"")+"DL CUADRA PRO";
 }
-function render(){renderHeader();renderVender();renderInv();renderDia();renderCart();}
+function render(){renderHeader();renderVender();renderInv();renderDia();renderCart();if($("#v-admin").classList.contains("on"))renderAdmin();}
 function stockCls(s){return s<=0?"zero":s<=3?"low":"";}
 function renderVender(){
   const ps=prodsArr();const cats=["Todos",...catList().filter(c=>ps.some(p=>p.cat===c))];
@@ -727,7 +953,7 @@ function renderVender(){
       ${inCart?`<span class="q">${inCart}</span>`:""}
       <span class="n">${esc(p.nombre)}</span>
       <span class="s ${stockCls(s)}">${s<=0?"Agotado":"Quedan "+s}</span>
-      ${p.precio>0?`<span class="p num">${fmt(p.precio)}</span>`:`<span class="p none">Toca para poner precio</span>`}
+      ${p.precio>0?`<span class="p num">${fmt(p.precio)}</span>`:`<span class="p none">${isCajero()?"Sin precio":"Toca para poner precio"}</span>`}
     </button>`;}).join("")||`<div class="empty" style="grid-column:1/-1">Sin resultados</div>`;
 }
 function renderCart(){
@@ -767,9 +993,15 @@ function renderDia(){
   }
   $("#dTable").innerHTML=rows?`<thead><tr><th>Producto</th><th>Inicial</th><th>Entró</th>${hasAj?"<th>Ajuste</th>":""}<th>Vendió</th><th>Final</th><th>Ventas $</th></tr></thead><tbody>${rows}<tr class="tot"><td>Total</td><td>${T.ini}</td><td>${T.ent||""}</td>${hasAj?`<td>${T.aj||""}</td>`:""}<td class="sold">${T.vend}</td><td>${T.fin}</td><td>${fmt(T.din)}</td></tr></tbody>`
     :`<tbody><tr><td class="empty" style="text-align:center">Sin movimientos este día${st.showAll?"":" · activa “Ver todos” para ver el inventario completo"}</td></tr></tbody>`;
-  $("#dGastos").innerHTML=r.gastos.map(g=>`<div class="row"><div class="grow"><div class="t">${esc(g.desc)}</div><div class="sub">${hhmm(g.ts)}</div></div><b class="num">${fmt(g.valor)}</b><button class="btn ghost sm" data-delmov="${esc(g.id)}">✕</button></div>`).join("")||`<div class="empty">Sin gastos</div>`;
+  const mio=m=>isDueno()||(st.perfil&&m.cajero_id&&m.cajero_id===st.perfil.cajero_id&&m.fecha===today());
+  const por=m=>m.por&&st.mode==="db"?` · ${esc(m.por)}`:"";
+  $("#dGastos").innerHTML=r.gastos.map(g=>`<div class="row"><div class="grow"><div class="t">${esc(g.desc)}</div><div class="sub">${hhmm(g.ts)}${por(g)}</div></div><b class="num">${fmt(g.valor)}</b>${mio(g)?`<button class="btn ghost sm" data-delmov="${esc(g.id)}">✕</button>`:""}</div>`).join("")||`<div class="empty">Sin gastos</div>`;
+  const grp={};for(const v of r.ventas){const k=v.por||"Sin nombre";(grp[k]=grp[k]||{n:0,t:0,ef:0,qr:0});grp[k].n++;grp[k].t+=v.total;if(v.metodo==="qr")grp[k].qr+=v.total;else grp[k].ef+=v.total;}
+  const gk=Object.keys(grp).sort((a,b)=>grp[b].t-grp[a].t);
+  $("#dPorWrap").hidden=!(st.mode==="db"&&isDueno()&&gk.length);
+  $("#dPor").innerHTML=gk.map(k=>`<div class="row"><div class="grow"><div class="t">${k==="Dueño"?"👑":"👤"} ${esc(k)}</div><div class="sub">${grp[k].n} ${grp[k].n===1?"venta":"ventas"} · Efectivo ${fmt(grp[k].ef)} · QR ${fmt(grp[k].qr)}</div></div><b class="num">${fmt(grp[k].t)}</b></div>`).join("");
   $("#dCount").textContent=r.ventas.length;
-  $("#dVentas").innerHTML=r.ventas.map(v=>`<div class="row"><div class="grow"><div class="t">${esc((v.items||[]).map(i=>i.cant+"× "+i.nombre).join(", "))}</div><div class="sub">${hhmm(v.ts)} <span class="pill ${v.metodo==="qr"?"qr":"ef"}">${v.metodo==="qr"?"QR":"Efectivo"}</span></div></div><b class="num">${fmt(v.total)}</b><button class="btn ghost sm" data-anular="${esc(v.id)}">Anular</button></div>`).join("")||`<div class="empty">Sin ventas</div>`;
+  $("#dVentas").innerHTML=r.ventas.map(v=>`<div class="row"><div class="grow"><div class="t">${esc((v.items||[]).map(i=>i.cant+"× "+i.nombre).join(", "))}</div><div class="sub">${hhmm(v.ts)}${por(v)} <span class="pill ${v.metodo==="qr"?"qr":"ef"}">${v.metodo==="qr"?"QR":"Efectivo"}</span></div></div><b class="num">${fmt(v.total)}</b>${mio(v)?`<button class="btn ghost sm" data-anular="${esc(v.id)}">Anular</button>`:""}</div>`).join("")||`<div class="empty">Sin ventas</div>`;
 }
 
 /* ---------- sheet ---------- */
@@ -791,7 +1023,7 @@ $("#cats").addEventListener("click",e=>{const b=e.target.closest("[data-cat]");i
 $("#q").addEventListener("input",e=>{st.q=e.target.value;renderVender();});
 $("#grid").addEventListener("click",e=>{
   const b=e.target.closest("[data-pid]");if(!b)return;const p=st.prods.get(b.dataset.pid);if(!p)return;
-  if(!(p.precio>0)){editProd(p,{priceFocus:true});return;}
+  if(!(p.precio>0)){if(isCajero()){toast("Este producto no tiene precio. Avísale al dueño.");return;}editProd(p,{priceFocus:true});return;}
   st.cart.set(p.id,(st.cart.get(p.id)||0)+1);renderVender();renderCart();
   if(navigator.vibrate)try{navigator.vibrate(8)}catch(_){}
 });
@@ -839,16 +1071,16 @@ $("#btnNewProd").onclick=addProductMenu;
 $("#btnCats").onclick=catManager;
 function invMenu(p){
   if(!p)return;
-  openSheet(`<h3>${esc(p.nombre)}</h3><p class="hint num">Stock actual: <b style="color:var(--ink)">${p.stock||0}</b> · Precio: ${p.precio>0?fmt(p.precio):"sin precio"}<br>Categoría: ${esc(p.cat)} · Código: ${p.codigo?`<span class="mono">${esc(p.codigo)}</span>`:"sin código"}</p>
+  openSheet(`<h3>${esc(p.nombre)}</h3><p class="hint num">📍 ${esc((sedeActual()||{}).nombre||"")} · Stock actual: <b style="color:var(--ink)">${p.stock||0}</b> · Precio: ${p.precio>0?fmt(p.precio):"sin precio"}<br>Categoría: ${esc(p.cat)} · Código: ${p.codigo?`<span class="mono">${esc(p.codigo)}</span>`:"sin código"}</p>
     <div style="display:grid;gap:8px">
       <button class="btn dark wide" data-a="ent">📦 Registrar entrada de mercancía</button>
-      <button class="btn wide" data-a="aj">🔢 Ajustar conteo físico</button>
-      <button class="btn wide" data-a="ed">✏️ Editar nombre, precio, categoría o código</button>
+      ${isDueno()?`<button class="btn wide" data-a="aj">🔢 Ajustar conteo físico</button>
+      <button class="btn wide" data-a="ed">✏️ Editar nombre, precio, categoría o código</button>`:`<p class="hint" style="margin:4px 0 0">Para cambiar precio, datos o conteo, habla con el dueño.</p>`}
       <button class="btn ghost wide" data-x>Cerrar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     s.querySelector('[data-a="ent"]').onclick=()=>entrada(p);
-    s.querySelector('[data-a="aj"]').onclick=()=>ajuste(p);
-    s.querySelector('[data-a="ed"]').onclick=()=>editProd(p);
+    if(isDueno()){s.querySelector('[data-a="aj"]').onclick=()=>ajuste(p);
+    s.querySelector('[data-a="ed"]').onclick=()=>editProd(p);}
   });
 }
 function entrada(p){
@@ -920,6 +1152,7 @@ function addProductMenu(){
   });
 }
 function unknownCode(code,ctx){
+  if(isCajero()){openSheet(`<h3>Producto no registrado</h3><p class="hint">Este código aún no está en el inventario. Avísale al dueño para que lo registre.</p><div class="codebox">${esc(code)}</div><button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;});return;}
   openSheet(`<h3>Código no registrado</h3><p class="hint">Este código todavía no pertenece a ningún producto.</p>
     <div class="codebox">${esc(code)}</div>
     <button class="opt" data-o="new"><span class="ic c2">➕</span><span><b>Registrar producto nuevo</b><small>Crear un producto con este código</small></span></button>
@@ -1065,7 +1298,7 @@ $("#dVentas").addEventListener("click",e=>{
   });
 });
 $("#btnCopy").onclick=async()=>{
-  const r=dayStats(st.day);let txt=`*${st.negocio?st.negocio+" · ":""}Cierre ${nice(st.day)}*\n`;
+  const r=dayStats(st.day);const en=(st.empresa&&st.empresa.nombre)||st.negocio,sd=st.mode==="db"&&sedeActual()?sedeActual().nombre:"";let txt=`*${en?en+" · ":""}${sd?sd+" · ":""}Cierre ${nice(st.day)}*\n`;
   for(const p of prodsArr()){const x=r.per[p.id];if(x&&x.vend)txt+=`• ${p.nombre}: ${x.vend} → ${fmt(x.dinero)}\n`;}
   txt+=`\nEfectivo: ${fmt(r.ef)}\nQR banco: ${fmt(r.qr)}\nGastos: ${fmt(r.ga)}${r.gastos.length?" ("+r.gastos.map(g=>g.desc).join(", ")+")":""}\n*Total ventas: ${fmt(r.tot)}*\nEfectivo en caja: ${fmt(r.ef-r.ga)}`;
   try{await navigator.clipboard.writeText(txt);toast("Resumen copiado · pégalo en WhatsApp");}catch(e){toast("No se pudo copiar");}
@@ -1088,8 +1321,9 @@ document.querySelectorAll(".themebtn").forEach(b=>b.onclick=toggleTheme);
 
 /* ---------- nombre del negocio ---------- */
 $("#bizBtn").onclick=()=>{
+  if(isCajero())return;
   openSheet(`<h3>Nombre de tu negocio</h3><p class="hint">Así aparecerá en la app y en el resumen del cierre del día, en todos los celulares del negocio.</p>
-    <label class="fld"><span>Nombre del negocio</span><input id="nb" maxlength="40" placeholder="Pon el nombre de tu negocio aquí" value="${esc(st.negocio)}"></label>
+    <label class="fld"><span>Nombre del negocio</span><input id="nb" maxlength="40" placeholder="Pon el nombre de tu negocio aquí" value="${esc((st.empresa&&st.empresa.nombre)||st.negocio)}"></label>
     <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
     const inp=s.querySelector("#nb");setTimeout(()=>inp.focus(),60);
     s.querySelector("[data-x]").onclick=closeSheet;
@@ -1099,6 +1333,127 @@ $("#bizBtn").onclick=()=>{
     s.querySelector("[data-ok]").onclick=save;inp.onkeydown=e=>{if(e.key==="Enter")save();};
   });
 };
+
+/* ---------- administración (solo dueño) ---------- */
+st.adm={cajeros:[],cs:[]};
+async function loadAdmin(){
+  if(st.mode!=="db"||!isDueno())return;
+  const [c,cs]=await Promise.all([sb.from("cajeros").select("id,usuario,activo,bloqueado_hasta,creado").order("creado"),sb.from("cajero_sedes").select("cajero_id,sede_id")]);
+  if(c.error||cs.error){toast("No se pudo cargar la administración");return;}
+  st.adm.cajeros=c.data||[];st.adm.cs=cs.data||[];renderAdmin();
+}
+const nitOk=n=>String(n||"").replace(/\D/g,"").length>=6;
+function renderAdmin(){
+  if(st.mode!=="db"||!isDueno()||!st.empresa)return;
+  const e=st.empresa;
+  $("#admWarn").innerHTML=nitOk(e.nit)?"":`<div class="banner">⚠️ Pon el NIT real de la empresa. Sin él, tus cajeros no pueden ingresar.</div>`;
+  $("#admEmp").innerHTML=`<div class="row"><div class="grow"><div class="sub">Nombre de la empresa</div><div class="t">${esc(e.nombre)}</div></div></div>
+    <div class="row"><div class="grow"><div class="sub">NIT</div><div class="t mono">${nitOk(e.nit)?esc(e.nit):"Sin NIT"}</div></div></div>
+    <div class="row"><div class="grow"><div class="sub">Acceso de cajeros</div><div class="t" style="white-space:normal;font-weight:600;font-size:13px">Tus cajeros entran con <b>Acceso empresa</b> usando este nombre y NIT, su usuario y su PIN.</div></div></div>`;
+  $("#admSedes").innerHTML=st.sedes.map(s=>`<div class="row" data-sedeed="${esc(s.id)}" style="cursor:pointer"><div class="grow"><div class="t">📍 ${esc(s.nombre)}</div><div class="sub">${st.adm.cs.filter(x=>x.sede_id===s.id).length} cajeros</div></div><span class="pill ${s.activa?"ef":"zero"}">${s.activa?"Activa":"Inactiva"}</span></div>`).join("")||`<div class="empty">Sin sedes</div>`;
+  const sn=id=>(st.sedes.find(s=>s.id===id)||{}).nombre||"?";
+  $("#admCajeros").innerHTML=st.adm.cajeros.map(c=>{
+    const bl=c.bloqueado_hasta&&new Date(c.bloqueado_hasta)>new Date();
+    const ss=st.adm.cs.filter(x=>x.cajero_id===c.id).map(x=>sn(x.sede_id));
+    return `<div class="row" data-cajed="${esc(c.id)}" style="cursor:pointer"><div class="grow"><div class="t">👤 ${esc(c.usuario)}</div><div class="sub">${ss.length?esc(ss.join(", ")):"Sin sede"}</div></div><span class="pill ${!c.activo?"zero":bl?"low":"ef"}">${!c.activo?"Inactivo":bl?"Bloqueado":"Activo"}</span></div>`;
+  }).join("")||`<div class="empty">Aún no tienes cajeros. Crea el primero con “+ Cajero”.</div>`;
+}
+$("#admEmpEdit").onclick=()=>{
+  const e=st.empresa;
+  openSheet(`<h3>Datos de la empresa</h3><p class="hint">Tus cajeros usan este nombre y NIT para ingresar. Si los cambias, avísales.</p>
+    <label class="fld"><span>Nombre de la empresa</span><input id="en" maxlength="60" value="${esc(e.nombre)}"></label>
+    <label class="fld"><span>NIT</span><input id="et" class="mono" inputmode="numeric" maxlength="20" value="${nitOk(e.nit)?esc(e.nit):""}" placeholder="900123456-7"></label>
+    <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-ok]").onclick=async()=>{
+      const nombre=s.querySelector("#en").value.trim().replace(/\s+/g," "),nit=s.querySelector("#et").value.trim();
+      if(!nombre){toast("Escribe el nombre");return;}if(!nitOk(nit)){toast("Escribe un NIT válido");return;}
+      try{chk(await sb.from("empresas").update({nombre,nit}).eq("id",e.id));st.empresa={...e,nombre,nit};closeSheet();render();renderAdmin();toast("Empresa guardada");}
+      catch(err){toast(/duplicate|unico|unique/i.test(String(err.message))?"Ese NIT ya está registrado en otra empresa":"No se pudo guardar: "+err.message);}
+    };
+  });
+};
+$("#admSedeNew").onclick=()=>sedeSheet(null);
+$("#admSedes").onclick=ev=>{const r=ev.target.closest("[data-sedeed]");if(r)sedeSheet(st.sedes.find(s=>s.id===r.dataset.sedeed));};
+function sedeSheet(sd){
+  const isNew=!sd;sd=sd||{nombre:"",activa:true};
+  const unica=!isNew&&st.sedes.filter(s=>s.activa).length<=1&&sd.activa;
+  openSheet(`<h3>${isNew?"Nueva sede":"Editar sede"}</h3><p class="hint">${isNew?"Cada sede tiene su propio inventario, caja y cierre.":"El nombre se puede cambiar cuando quieras."}</p>
+    <label class="fld"><span>Nombre de la sede</span><input id="sn" maxlength="40" value="${esc(sd.nombre)}" placeholder="Ej: Sede Centro"></label>
+    ${isNew?"":`<label class="toggle" style="margin:4px 0 14px"><input type="checkbox" id="sa" ${sd.activa?"checked":""} ${unica?"disabled":""}> Sede activa ${unica?"(es tu única sede activa)":""}</label>`}
+    <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;setTimeout(()=>s.querySelector("#sn").focus(),50);
+    s.querySelector("[data-ok]").onclick=async()=>{
+      const nombre=s.querySelector("#sn").value.trim().replace(/\s+/g," ");if(!nombre){toast("Escribe el nombre de la sede");return;}
+      if(st.sedes.some(x=>x.id!==sd.id&&x.nombre.toLowerCase()===nombre.toLowerCase())){toast("Ya existe una sede con ese nombre");return;}
+      try{
+        if(isNew)chk(await sb.from("sedes").insert({empresa_id:st.empresa.id,nombre,orden:st.sedes.length}));
+        else{const activa=s.querySelector("#sa")?s.querySelector("#sa").checked:true;chk(await sb.from("sedes").update({nombre,activa}).eq("id",sd.id));}
+        closeSheet();await loadContext();render();await loadAdmin();toast(isNew?"Sede creada":"Sede guardada");
+      }catch(e){fail(e);}
+    };
+  });
+}
+function sedeChecks(sel){
+  return `<div class="card" style="margin-bottom:12px">${st.sedes.filter(s=>s.activa).map(s=>`<label class="row" style="cursor:pointer"><input type="checkbox" class="csd" value="${esc(s.id)}" ${sel.includes(s.id)?"checked":""} style="width:20px;height:20px;accent-color:#22e4ff"><div class="grow"><div class="t">📍 ${esc(s.nombre)}</div></div></label>`).join("")}</div>`;
+}
+const checked=s=>[...s.querySelectorAll(".csd:checked")].map(x=>x.value);
+$("#admCajNew").onclick=()=>{
+  if(!nitOk(st.empresa.nit)){toast("Primero pon el NIT de la empresa");$("#admEmpEdit").click();return;}
+  openSheet(`<h3>Nuevo cajero</h3><p class="hint">La app le genera un PIN de 4 números solo para él.</p>
+    <label class="fld"><span>Usuario del cajero</span><input id="cu" maxlength="30" placeholder="Ej: DL COMPANY o Juan"></label>
+    <div class="fld"><span>Sedes donde puede trabajar</span></div>${sedeChecks([st.sede])}
+    <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Crear y generar PIN</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;setTimeout(()=>s.querySelector("#cu").focus(),50);
+    const ok=s.querySelector("[data-ok]");
+    ok.onclick=async()=>{
+      const usr=s.querySelector("#cu").value.trim().replace(/\s+/g," "),sedes=checked(s);
+      if(usr.length<2){toast("Escribe el usuario del cajero");return;}if(!sedes.length){toast("Elige al menos una sede");return;}
+      ok.disabled=true;
+      try{const {data,error}=await sb.rpc("crear_cajero",{p_usuario:usr,p_sedes:sedes});if(error)throw error;
+        await loadAdmin();pinSheet(data.usuario,data.pin,sedes);}catch(e){ok.disabled=false;fail(e);}
+    };
+  });
+};
+function pinSheet(usr,pin,sedes){
+  const e=st.empresa,sn=(sedes||[]).map(id=>(st.sedes.find(s=>s.id===id)||{}).nombre).filter(Boolean).join(", ");
+  const msg=`Hola ${usr}, este es tu acceso a DL CUADRA PRO:\n\n🔗 ${appUrl()}\n1. Toca "Acceso empresa"\n2. Empresa: ${e.nombre}\n3. NIT: ${e.nit}\n4. Usuario: ${usr}\n5. PIN: ${pin}\n${sn?"📍 Sede: "+sn+"\n":""}\nNo compartas tu PIN con nadie.`;
+  openSheet(`<h3>PIN de ${esc(usr)}</h3><p class="hint">Anótalo o envíalo ahora. Por seguridad no se puede volver a ver; si lo pierde, genera uno nuevo.</p>
+    <div class="pinbig">${esc(pin).split("").map(d=>`<span>${d}</span>`).join("")}</div>
+    <a class="btn pri wide" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Enviar acceso por WhatsApp</a>
+    <button class="btn wide" data-cp style="margin-bottom:8px">Copiar acceso</button>
+    <button class="btn ghost wide" data-x>Listo</button>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-cp]").onclick=async()=>{try{await navigator.clipboard.writeText(msg);toast("Acceso copiado");}catch(e){toast("No se pudo copiar");}};
+  });
+}
+$("#admCajeros").onclick=ev=>{const r=ev.target.closest("[data-cajed]");if(r)cajeroSheet(st.adm.cajeros.find(c=>c.id===r.dataset.cajed));};
+function cajeroSheet(c){
+  if(!c)return;
+  const sel=st.adm.cs.filter(x=>x.cajero_id===c.id).map(x=>x.sede_id);
+  const bl=c.bloqueado_hasta&&new Date(c.bloqueado_hasta)>new Date();
+  openSheet(`<h3>👤 ${esc(c.usuario)}</h3><p class="hint">${!c.activo?"Desactivado: no puede ingresar.":bl?"Bloqueado por intentos fallidos. Generar un PIN nuevo lo desbloquea.":"Activo."}</p>
+    <button class="opt" data-c="pin"><span class="ic c1">🔑</span><span><b>Generar PIN nuevo</b><small>El PIN anterior deja de servir y se cierra su sesión</small></span></button>
+    <div class="fld" style="margin-top:6px"><span>Sedes donde puede trabajar</span></div>${sedeChecks(sel)}
+    <label class="fld"><span>Usuario</span><input id="cu" maxlength="30" value="${esc(c.usuario)}"></label>
+    <div class="acts" style="margin-bottom:10px"><button class="btn pri" data-c="save">Guardar cambios</button></div>
+    <div class="acts"><button class="btn" data-c="act">${c.activo?"⛔ Desactivar":"✅ Activar"}</button><button class="btn ghost" data-c="del" style="color:var(--bad)">Eliminar</button></div>
+    <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector('[data-c="pin"]').onclick=()=>confirmSheet("PIN nuevo para "+c.usuario,"El PIN actual dejará de funcionar y su sesión abierta se cerrará.","Generar PIN",async()=>{
+      const {data,error}=await sb.rpc("regenerar_pin",{p_cajero:c.id});if(error)throw error;await loadAdmin();pinSheet(c.usuario,data,sel);});
+    s.querySelector('[data-c="save"]').onclick=async()=>{
+      const usr=s.querySelector("#cu").value.trim().replace(/\s+/g," "),sedes=checked(s);
+      if(usr.length<2){toast("Escribe el usuario");return;}if(!sedes.length){toast("Elige al menos una sede");return;}
+      if(st.adm.cajeros.some(x=>x.id!==c.id&&x.usuario.toLowerCase()===usr.toLowerCase())){toast("Ya existe un cajero con ese usuario");return;}
+      try{if(usr!==c.usuario)chk(await sb.from("cajeros").update({usuario:usr}).eq("id",c.id));
+        const {error}=await sb.rpc("sedes_de_cajero",{p_cajero:c.id,p_sedes:sedes});if(error)throw error;
+        closeSheet();await loadAdmin();toast("Cajero guardado");}catch(e){fail(e);}
+    };
+    s.querySelector('[data-c="act"]').onclick=async()=>{try{chk(await sb.from("cajeros").update({activo:!c.activo}).eq("id",c.id));closeSheet();await loadAdmin();toast(c.activo?"Cajero desactivado":"Cajero activado");}catch(e){fail(e);}};
+    s.querySelector('[data-c="del"]').onclick=()=>confirmSheet("Eliminar a "+c.usuario,"No podrá volver a ingresar. Sus ventas pasadas se conservan.","Eliminar",async()=>{chk(await sb.from("cajeros").delete().eq("id",c.id));await loadAdmin();toast("Cajero eliminado");});
+  });
+}
 
 /* ---------- planes ---------- */
 const WA_PLANES="https://wa.me/573218641539?text=Hola%20DL%20Company,%20quiero%20informaci%C3%B3n%20de%20los%20planes%20de%20DL%20CUADRA%20PRO";
@@ -1113,7 +1468,8 @@ $("#lnkPlanes").onclick=showPlanes;$("#lPlans").onclick=showPlanes;
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));
-  if(b.dataset.v==="dia"&&st.day!==today()&&st.day>today())setDay(today());
+  if(b.dataset.v==="dia"&&st.day!==today()&&(st.day>today()||isCajero()))setDay(today());
+  if(b.dataset.v==="admin"){renderAdmin();loadAdmin();}
   renderCart();window.scrollTo(0,0);
 });
 // mantener la fecha de "hoy" al pasar la medianoche
