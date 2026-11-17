@@ -363,6 +363,21 @@ html[data-theme="light"] .lalt a,html[data-theme="light"] .empok a{color:#0e7490
 .dlsteps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--accSoft);color:var(--acc)}
 .dlsteps b{color:var(--ink)}
 body.standalone .dl-only{display:none!important}
+
+.kbtn{text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%;transition:transform .1s,box-shadow .2s,border-color .2s}
+.kbtn:active{transform:scale(.97)}
+.kbtn small{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-top:3px}
+.kwarn b{color:var(--warn)}.kbad b{color:var(--bad)}
+.kbtn.on{border-color:var(--acc);box-shadow:var(--glow)}
+.kwarn.on{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn),0 0 18px rgba(255,181,71,.25)}
+.kbad.on{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad),0 0 18px rgba(255,92,122,.25)}
+.kbtn.on small{color:var(--ink)}
+#invFilter{scroll-margin-top:140px}
+.fbar{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:11px 14px;border-radius:14px;margin:0 0 10px;font-weight:800;font-size:14px;border:1px solid var(--line2);background:var(--card)}
+.fbar.low{background:var(--warnSoft);color:var(--warn);border-color:rgba(255,181,71,.4)}
+.fbar.zero{background:var(--badSoft);color:var(--bad);border-color:rgba(255,92,122,.4)}
+.fbar.noprice{background:var(--accSoft);color:var(--acc)}
+.fbar button{font-weight:800;font-size:13px;padding:6px 10px;border-radius:10px;border:1px solid currentColor;color:inherit}
 </style>
 </head>
 <body>
@@ -393,11 +408,12 @@ body.standalone .dl-only{display:none!important}
   <section class="view" id="v-inv">
     <div class="kpis">
       <div class="kpi"><span>Unidades en stock</span><b class="num" id="kUnits">0</b></div>
-      <div class="kpi"><span>Productos</span><b class="num" id="kProd">0</b><small id="kNoPrice"></small></div>
-      <div class="kpi"><span>Stock bajo (≤3)</span><b class="num" id="kLow">0</b></div>
-      <div class="kpi"><span>Agotados</span><b class="num" id="kZero">0</b></div>
+      <button class="kpi kbtn" type="button" data-kf="noprice"><span>Productos</span><b class="num" id="kProd">0</b><small id="kNoPrice"></small></button>
+      <button class="kpi kbtn kwarn" type="button" data-kf="low"><span>Stock bajo (≤3)</span><b class="num" id="kLow">0</b><small>Toca para ver cuáles</small></button>
+      <button class="kpi kbtn kbad" type="button" data-kf="zero"><span>Agotados</span><b class="num" id="kZero">0</b><small>Toca para ver cuáles</small></button>
     </div>
     <div class="sec"><h2>Productos</h2><div class="secbtns dueno-only"><button class="btn sm" id="btnCats">Categorías</button><button class="btn sm dark" id="btnNewProd">+ Producto</button></div></div>
+    <div id="invFilter"></div>
     <div class="srow" style="margin:0 0 10px"><input class="search" id="qi" placeholder="Buscar producto o código…" autocomplete="off"><button class="scanbtn" id="scanInv" type="button" aria-label="Escanear para buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg></button></div>
     <div class="card" id="invList"></div>
     <p class="hint dueno-only" style="color:var(--muted);font-size:12.5px;font-weight:600;margin:10px 2px 0">Toca un producto para registrar entrada de mercancía, ajustar el conteo físico o editar precio, categoría y código de barras.</p>
@@ -461,7 +477,7 @@ body.standalone .dl-only{display:none!important}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Política de reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.1 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.2 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -981,9 +997,17 @@ function renderInv(){
   const ps=prodsArr();let u=0,np=0,low=0,z=0;
   for(const p of ps){const s=p.stock||0;u+=Math.max(0,s);if(!(p.precio>0))np++;if(s<=0)z++;else if(s<=3)low++;}
   $("#kUnits").textContent=u.toLocaleString("es-CO");$("#kProd").textContent=ps.length;$("#kLow").textContent=low;$("#kZero").textContent=z;
-  const kn=$("#kNoPrice");kn.textContent=!ps.length?"":np?np+(np===1?" sin precio":" sin precio"):"Todos con precio ✓";kn.className=np?"":"okc";
+  const kn=$("#kNoPrice");kn.textContent=!ps.length?"":np?np+" sin precio · toca para ver":"Todos con precio ✓";kn.className=np?"":"okc";
+  const f=st.invF||"";
+  document.querySelectorAll("[data-kf]").forEach(b=>b.classList.toggle("on",b.dataset.kf===f));
+  const FT={low:["⚠️","Stock bajo (3 o menos)"],zero:["⛔","Productos agotados"],noprice:["🏷️","Productos sin precio"]};
+  const okF=p=>{const s=p.stock||0;return !f||(f==="low"?s>0&&s<=3:f==="zero"?s<=0:!(p.precio>0));};
+  const nF=f?ps.filter(okF).length:0;
+  $("#invFilter").innerHTML=f?`<div class="fbar ${f}"><span>${FT[f][0]} ${FT[f][1]}: ${nF}</span><button type="button" data-kfx>Ver todos</button></div>`:"";
   const q=st.qi.trim().toLowerCase();let h="",last="";
-  for(const p of ps.filter(p=>matchQ(p,q))){
+  const lst=ps.filter(p=>okF(p)&&matchQ(p,q));
+  if(f==="low")lst.sort((a,b)=>(a.stock||0)-(b.stock||0));
+  for(const p of lst){
     if(p.cat!==last){h+=`<div class="catH">${esc(p.cat)}</div>`;last=p.cat;}
     const s=p.stock||0,c=stockCls(s);
     h+=`<div class="row" data-inv="${esc(p.id)}" style="cursor:pointer">
@@ -991,7 +1015,7 @@ function renderInv(){
       ${c?`<span class="pill ${c}">${c==="zero"?"Agotado":"Bajo"}</span>`:""}
       <span class="stk num">${s}</span></div>`;
   }
-  $("#invList").innerHTML=h||`<div class="empty">${st.prods.size?"Sin resultados":"Sin productos todavía"}</div>`;
+  $("#invList").innerHTML=h||`<div class="empty">${f&&!q?(f==="zero"?"No tienes productos agotados ✓":f==="low"?"No tienes productos con stock bajo ✓":"Todos tus productos tienen precio ✓"):st.prods.size?"Sin resultados":"Sin productos todavía"}</div>`;
 }
 function renderDia(){
   const day=st.day;$("#dDate").value=day;$("#dNext").disabled=day>=today();
@@ -1082,6 +1106,12 @@ function checkout(){
 
 /* ---------- inventario ---------- */
 $("#qi").addEventListener("input",e=>{st.qi=e.target.value;renderInv();});
+document.querySelectorAll("[data-kf]").forEach(b=>b.onclick=()=>{
+  if(b.dataset.kf==="noprice"&&!document.querySelector("#kNoPrice").textContent.includes("sin precio")){st.invF="";renderInv();return;}
+  st.invF=st.invF===b.dataset.kf?"":b.dataset.kf;renderInv();
+  if(st.invF)setTimeout(()=>$("#invFilter").scrollIntoView({behavior:"smooth",block:"start"}),50);
+});
+$("#invFilter").addEventListener("click",e=>{if(e.target.closest("[data-kfx]")){st.invF="";renderInv();}});
 $("#invList").addEventListener("click",e=>{const r=e.target.closest("[data-inv]");if(r)invMenu(st.prods.get(r.dataset.inv));});
 $("#btnNewProd").onclick=addProductMenu;
 $("#btnCats").onclick=catManager;
