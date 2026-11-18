@@ -605,7 +605,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.3 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.3.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2437,7 +2437,7 @@ function textoPedido(P){
 }
 function pedidoSheet(){
   const C=pedCfg(),sedeId=st.sede||"local";
-  const P={prov:"",num:"",fecha:addD(today(),1),dir:C.dir[sedeId]||"",nombre:C.nombre||"",nota:"",items:[]};
+  const P={prov:"",num:"",fecha:today(),dir:C.dir[sedeId]||"",nombre:C.nombre||"",nota:"",items:[]};
   if(C.proveedores[0]){P.prov=C.proveedores[0].n;P.num=C.proveedores[0].num||"";}
   for(const p of prodsArr().filter(p=>(p.stock||0)<=minOf(p)).sort((a,b)=>(a.stock||0)-(b.stock||0))){const pr=presOf(p);P.items.push({pid:p.id,nombre:p.nombre,u:pr.u,c:pr.c,cant:sugCant(p,pr)});}
   let q="",ver=false;
