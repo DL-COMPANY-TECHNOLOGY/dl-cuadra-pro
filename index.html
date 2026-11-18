@@ -452,9 +452,9 @@ html[data-theme="light"] .bellbtn{background:#fff;color:var(--gold)}
 details.cdet summary{cursor:pointer;font-weight:800;color:var(--acc);padding:6px 0}
 
 /* ---------- reportes ---------- */
-.rsheet .rranges{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin:0 -2px}
-.rsheet .rranges button{flex:none;padding:8px 12px;border-radius:99px;border:1px solid var(--line2);background:transparent;color:var(--muted);font-weight:800;font-size:13px;cursor:pointer}
-.rsheet .rranges button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04121a;border-color:transparent}
+.rranges{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin:0 -2px}
+.rranges button{flex:none;padding:8px 12px;border-radius:99px;border:1px solid var(--line2);background:transparent;color:var(--muted);font-weight:800;font-size:13px;cursor:pointer}
+.rranges button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04121a;border-color:transparent}
 .rdates{display:flex;gap:8px;margin:0 0 8px}.rdates input{flex:1;min-width:0}
 .rbars{display:flex;align-items:flex-end;gap:3px;height:130px;padding:8px 4px 0;border-bottom:1px solid var(--line2)}
 .rbars div{flex:1;min-width:3px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--acc),var(--acc2));position:relative}
@@ -605,7 +605,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.4 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.4.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2400,8 +2400,13 @@ $("#btnFiado").onclick=fiadoSheet;
 /* ---------- pedido a proveedor ---------- */
 const UNIDADES=[["und","Unidad","und","und"],["botella","Botella","botella","botellas"],["paquete","Paquete","paquete","paquetes"],["canasta","Canasta","canasta","canastas"],["sixpack","Sixpack","sixpack","sixpacks"],["paca","Paca","paca","pacas"],["caja","Caja","caja","cajas"],["bolsa","Bolsa","bolsa","bolsas"],["docena","Docena","docena","docenas"],["bulto","Bulto","bulto","bultos"],["garrafa","Garrafa","garrafa","garrafas"]];
 const UMAP=Object.fromEntries(UNIDADES.map(u=>[u[0],u]));
+const plural=w=>/[aeiouáéíóú]$/i.test(w)?w+"s":/z$/i.test(w)?w.slice(0,-1)+"ces":w+"es";
+const misUnidades=()=>(pedCfg().unidades||[]).filter(u=>u&&u.k&&u.s);
+function uInfo(k){if(UMAP[k])return UMAP[k];const c=misUnidades().find(u=>u.k===k);if(c)return [c.k,c.s.charAt(0).toUpperCase()+c.s.slice(1),c.s.toLowerCase(),(c.p||plural(c.s)).toLowerCase()];
+  if(k&&k.startsWith("x:")){const n=k.slice(2);return [k,n.charAt(0).toUpperCase()+n.slice(1),n,plural(n)];}return UMAP.und;}
+const todasUnidades=()=>[...UNIDADES,...misUnidades().map(u=>uInfo(u.k))];
 function presOf(p){
-  if(p.pedido_unidad&&UMAP[p.pedido_unidad])return {u:p.pedido_unidad,c:p.pedido_contenido||null};
+  if(p.pedido_unidad&&(UMAP[p.pedido_unidad]||p.pedido_unidad.startsWith("x:")))return {u:p.pedido_unidad,c:p.pedido_contenido||null};
   const t=((p.nombre||"")+" "+(p.cat||"")).toLowerCase();
   if(/shot/.test(t))return {u:"botella",c:null};
   if(/vaso/.test(t))return {u:"paquete",c:50};
@@ -2412,12 +2417,12 @@ function presOf(p){
 }
 const sugCant=(p,pr)=>{const need=Math.max(minOf(p)*2-(p.stock||0),1);if(pr.u==="botella"&&/shot/i.test(p.nombre))return 1;return pr.c&&pr.c>1?Math.max(1,Math.ceil(need/pr.c)):need;};
 function linea(it){
-  const U=UMAP[it.u]||UMAP.und,n=it.cant;
+  const U=uInfo(it.u),n=it.cant;
   if(it.u==="und")return `• ${it.nombre}: ${n} und`;
   return `• ${it.nombre}: ${n} ${n===1?U[2]:U[3]}${it.c&&it.c>1?` x${it.c} und`:""}`;
 }
 const PKEY=()=>"cp_pedido_"+((st.empresa&&st.empresa.id)||"local");
-function pedCfg(){let a={};try{a=JSON.parse(localStorage.getItem(PKEY())||"{}")||{};}catch(e){}const s=st.pedidoCfg||{};return {proveedores:s.proveedores||a.proveedores||[],nombre:s.nombre||a.nombre||"",dir:Object.assign({},a.dir||{},s.dir||{})};}
+function pedCfg(){let a={};try{a=JSON.parse(localStorage.getItem(PKEY())||"{}")||{};}catch(e){}const s=st.pedidoCfg||{};return {proveedores:s.proveedores||a.proveedores||[],nombre:s.nombre||a.nombre||"",dir:Object.assign({},a.dir||{},s.dir||{}),unidades:s.unidades||a.unidades||[]};}
 async function guardarPedCfg(c){
   try{localStorage.setItem(PKEY(),JSON.stringify(c));}catch(e){}
   st.pedidoCfg=c;
@@ -2473,13 +2478,22 @@ function renombrarProv(old,nuevo){
   for(const p of L)p.pedido_proveedor=nuevo;
   if(sb&&st.mode==="db"&&isDueno()&&L.length)sb.from("productos").update({pedido_proveedor:nuevo}).eq("empresa_id",st.empresa.id).in("id",L.map(p=>p.id)).then(()=>{},()=>{});
 }
+const DKEY=()=>"cp_pedido_borrador_"+((st.empresa&&st.empresa.id)||"local")+"_"+(st.sede||"local");
+function leerBorr(){try{const d=JSON.parse(localStorage.getItem(DKEY())||"null");if(d&&Date.now()-(d.ts||0)<7*864e5)return d;}catch(e){}return {drafts:{},last:null};}
 function pedidoSheet(provIdx){
-  const C=pedCfg(),sedeId=st.sede||"local";
+  const C=pedCfg(),sedeId=st.sede||"local",B=leerBorr();B.drafts=B.drafts||{};
   const P={prov:"",num:"",fecha:today(),dir:C.dir[sedeId]||"",nombre:C.nombre||"",nota:"",items:[]};
-  const elegir=x=>{P.prov=x?x.n:"";P.num=x?(x.num||""):"";
-    const k=provKey(P.prov),hay=pedCfg().proveedores.length;
+  let recuperado=false;
+  const save=()=>{if(enviado)return;B.drafts[provKey(P.prov)]={prov:P.prov,num:P.num,fecha:P.fecha,nota:P.nota,items:P.items};B.last=provKey(P.prov);B.dir=P.dir;B.nombre=P.nombre;B.ts=Date.now();try{localStorage.setItem(DKEY(),JSON.stringify(B));}catch(e){}};
+  const limpiarBorr=k=>{delete B.drafts[k];if(B.last===k)B.last=null;B.ts=Date.now();try{localStorage.setItem(DKEY(),JSON.stringify(B));}catch(e){}};
+  const elegir=(x,fresco)=>{const k=provKey(x?x.n:"");const d=!fresco&&B.drafts[k];
+    if(d&&d.items&&d.items.length){P.prov=d.prov||(x?x.n:"");P.num=d.num||(x?(x.num||""):"");P.fecha=d.fecha&&d.fecha>=today()?d.fecha:today();P.nota=d.nota||"";P.items=d.items.filter(it=>st.prods.has(it.pid));recuperado=true;return;}
+    recuperado=false;P.prov=x?x.n:"";P.num=x?(x.num||""):"";P.nota="";
+    const hay=pedCfg().proveedores.length;
     P.items=bajos().filter(p=>!hay||!p.pedido_proveedor||provKey(p.pedido_proveedor)===k).map(itemDe);};
-  elegir(C.proveedores[provIdx!=null?provIdx:0]||null);
+  if(B.dir!=null&&!P.dir)P.dir=B.dir;if(B.nombre&&!P.nombre)P.nombre=B.nombre;
+  if(provIdx==null&&B.last!=null&&B.drafts[B.last]){const d=B.drafts[B.last];elegir(C.proveedores.find(x=>provKey(x.n)===B.last)||{n:d.prov||"",num:d.num||""});}
+  else elegir(C.proveedores[provIdx!=null?provIdx:0]||null);
   let q="",ver=false,enviado=null;
   const draw=s=>{
     const provs=pedCfg().proveedores,enP=new Set(P.items.map(x=>x.pid)),k=provKey(P.prov);
@@ -2493,7 +2507,7 @@ function pedidoSheet(provIdx){
       s.querySelectorAll("[data-sig]").forEach(b=>b.onclick=()=>pedidoSheet(+b.dataset.sig));return;
     }
     const ql=q.trim().toLowerCase(),busc=ql?prodsArr().filter(p=>!enP.has(p.id)&&matchQ(p,ql)).slice(0,6):[];
-    const esNuevo=!provs.some(x=>provKey(x.n)===k);
+    const esNuevo=!provs.some(x=>provKey(x.n)===k);save();
     s.innerHTML=`<div class="grab"></div><h3>🛒 Pedido al proveedor</h3><p class="hint">Revisa productos, cantidades y presentación. Todo se puede cambiar.</p>
       <div class="sec" style="margin:6px 0 4px"><h2 style="font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Proveedor</h2><button class="btn sm" type="button" id="pvM">🚚 Mis proveedores</button></div>
       ${provs.length?`<div class="rranges" id="pvL">${provs.map((x,i)=>`<button type="button" data-pv="${i}" class="${provKey(x.n)===k&&!esNuevo?"on":""}">${esc(x.n)}</button>`).join("")}<button type="button" data-pv="new" class="${esNuevo?"on":""}">＋ Nuevo</button></div>`:""}
@@ -2505,11 +2519,12 @@ function pedidoSheet(provIdx){
       <label class="fld"><span>Dirección de entrega${st.mode==="db"&&sedeActual()?" · "+esc(sedeActual().nombre):""}</span><input id="pD" maxlength="120" value="${esc(P.dir)}" placeholder="Ej: Cra 100 #34-20, Comuna 13"></label>
       <label class="fld"><span>A nombre de</span><input id="pN" maxlength="40" value="${esc(P.nombre)}" placeholder="Quién recibe el pedido"></label>
       <div class="ctit">Productos (${P.items.length})</div>
+      ${recuperado?`<div class="rnote" style="color:var(--ok)">💾 Recuperamos el pedido que estabas armando. <a style="color:var(--acc);cursor:pointer" data-reset>Empezar de nuevo</a></div>`:""}
       ${otros.length?`<div class="rnote" style="color:var(--muted)">📦 ${otros.length} ${otros.length===1?"producto bajo es":"productos bajos son"} de otros proveedores. <a style="color:var(--acc);cursor:pointer" data-addotros>Agregarlos aquí</a></div>`:""}
       <div class="card" id="pI">${P.items.map((it,i)=>{const pr=st.prods.get(it.pid)||{};return `<div class="rrow" style="flex-wrap:wrap;gap:8px">
         <div class="grow" style="flex-basis:100%"><div class="t">${esc(it.nombre)}</div><div class="sub">${(pr.stock||0)<=0?"Agotado":"Quedan "+(pr.stock||0)} · mín ${minOf(pr)}${pr.pedido_proveedor&&provKey(pr.pedido_proveedor)!==k?" · antes: "+esc(pr.pedido_proveedor):""}</div></div>
         <div class="stepper"><button type="button" data-m="${i}">−</button><b class="num">${it.cant}</b><button type="button" data-p="${i}">+</button></div>
-        <select data-u="${i}" style="flex:1;min-width:96px;padding:9px 8px;border-radius:11px">${UNIDADES.map(u=>`<option value="${u[0]}" ${u[0]===it.u?"selected":""}>${u[1]}</option>`).join("")}</select>
+        <select data-u="${i}" style="flex:1;min-width:96px;padding:9px 8px;border-radius:11px">${todasUnidades().map(u=>`<option value="${esc(u[0])}" ${u[0]===it.u?"selected":""}>${esc(u[1])}</option>`).join("")}${!todasUnidades().some(u=>u[0]===it.u)?`<option value="${esc(it.u)}" selected>${esc(uInfo(it.u)[1])}</option>`:""}<option value="__nueva">➕ Otra presentación…</option></select>
         ${!["und","botella","garrafa"].includes(it.u)?`<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);font-weight:700">x<input data-c="${i}" class="num" inputmode="numeric" value="${it.c||""}" placeholder="und" style="width:54px;padding:8px 6px;border-radius:10px"></label>`:""}
         <button type="button" class="btn ghost sm" data-r="${i}" aria-label="Quitar" style="color:var(--bad)">✕</button></div>`;}).join("")||'<div class="empty">Agrega los productos que vas a pedir a este proveedor</div>'}</div>
       <input class="search" id="pQ" placeholder="＋ Agregar otro producto…" value="${esc(q)}" autocomplete="off" style="margin:8px 0 0">
@@ -2518,7 +2533,8 @@ function pedidoSheet(provIdx){
       <details class="cdet" ${ver?"open":""} id="pV"><summary>👁️ Ver cómo queda el mensaje</summary><div class="card" style="padding:12px;white-space:pre-wrap;font-size:13.5px;line-height:1.45">${esc(textoPedido(P))}</div></details>
       <button class="rxl" type="button" id="pGo" style="background:#1fa855">📲 Enviar pedido${P.prov?" a "+esc(P.prov):""} por WhatsApp</button>
       <div class="acts"><button class="btn" data-x>Cancelar</button></div>`;
-    const prev=()=>{const pv=s.querySelector("#pV .card");if(pv)pv.textContent=textoPedido(P);};
+    const prev=()=>{const pv=s.querySelector("#pV .card");if(pv)pv.textContent=textoPedido(P);save();};
+    const rs=s.querySelector("[data-reset]");if(rs)rs.onclick=()=>{limpiarBorr(provKey(P.prov));elegir(provs.find(x=>provKey(x.n)===provKey(P.prov))||{n:P.prov,num:P.num},true);draw(s);};
     const keep=(id,f)=>{const el=s.querySelector(id);if(el)el.oninput=()=>{f(el.value);prev();};};
     keep("#pvN",v=>P.prov=v.trim());keep("#pvW",v=>P.num=v.trim());keep("#pD",v=>P.dir=v.trim());keep("#pN",v=>P.nombre=v.trim());keep("#pNo",v=>P.nota=v.trim());
     s.querySelector("#pvM").onclick=()=>provManager(()=>openSheet("",draw));
@@ -2534,7 +2550,12 @@ function pedidoSheet(provIdx){
       else if(b.dataset.r!=null){P.items.splice(+b.dataset.r,1);}
       else return;draw(s);};
     I.onchange=e=>{const el=e.target;
-      if(el.dataset.u!=null){const it=P.items[+el.dataset.u];it.u=el.value;const d={canasta:30,sixpack:6,paca:12,docena:12,paquete:it.c||50,caja:it.c||24}[it.u];it.c=["und","botella","garrafa"].includes(it.u)?null:(d||it.c||null);draw(s);}};
+      if(el.dataset.u!=null){const it=P.items[+el.dataset.u];
+        if(el.value==="__nueva"){const nm=(prompt("Nombre de la presentación (en singular). Ej: Bidón, Rollo, Cubeta","")||"").trim().replace(/\s+/g," ").slice(0,16);
+          if(!nm){draw(s);return;}const k="x:"+nm.toLowerCase();const c=pedCfg();c.unidades=c.unidades||[];
+          if(!UMAP[nm.toLowerCase()]&&!c.unidades.some(u=>u.k===k)){c.unidades.push({k,s:nm,p:plural(nm)});guardarPedCfg(c);toast("Presentación “"+nm+"” guardada");}
+          it.u=UMAP[nm.toLowerCase()]?nm.toLowerCase():k;it.c=it.c||null;save();draw(s);return;}
+        it.u=el.value;const d={canasta:30,sixpack:6,paca:12,docena:12,paquete:it.c||50,caja:it.c||24}[it.u];it.c=["und","botella","garrafa"].includes(it.u)?null:(d||it.c||null);save();draw(s);}};
     I.oninput=e=>{const el=e.target;if(el.dataset.c!=null){const v=parseInt(el.value.replace(/\D/g,""),10);P.items[+el.dataset.c].c=v>0?Math.min(v,10000):null;prev();}};
     I.querySelectorAll(".stepper b").forEach((b,i)=>{b.style.cursor="pointer";b.onclick=()=>{const it=P.items[i];const v=prompt("Cantidad de "+it.nombre,it.cant);const n=parseInt(v,10);if(n>0){it.cant=Math.min(n,100000);draw(s);}};});
     const pq=s.querySelector("#pQ");pq.oninput=()=>{q=pq.value;const pos=pq.selectionStart;draw(s);const n=s.querySelector("#pQ");n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}};
@@ -2551,7 +2572,7 @@ function pedidoSheet(provIdx){
       if(sb&&st.mode==="db"&&isDueno()&&ch.length)Promise.all(ch.map(it=>{const d={pedido_unidad:it.u,pedido_contenido:it.c||null};if(P.prov)d.pedido_proveedor=P.prov;return sb.from("productos").update(d).eq("empresa_id",st.empresa.id).eq("id",it.pid);})).catch(()=>{});
       try{await navigator.clipboard.writeText(txt);}catch(_){}
       window.open("https://wa.me/"+n+"?text="+encodeURIComponent(txt),"_blank","noopener");
-      enviado=P.prov||"tu proveedor";draw(s);
+      limpiarBorr(provKey(P.prov));enviado=P.prov||"tu proveedor";draw(s);
     };
   };
   openSheet("",draw);
