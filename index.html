@@ -449,6 +449,22 @@ html[data-theme="light"] .bellbtn{background:#fff;color:var(--gold)}
 .ctit{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px}
 .cinv .row .num.z{color:var(--bad)}.cinv .row .num.l{color:var(--warn)}
 details.cdet summary{cursor:pointer;font-weight:800;color:var(--acc);padding:6px 0}
+
+/* ---------- reportes ---------- */
+.rsheet .rranges{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin:0 -2px}
+.rsheet .rranges button{flex:none;padding:8px 12px;border-radius:99px;border:1px solid var(--line2);background:transparent;color:var(--muted);font-weight:800;font-size:13px;cursor:pointer}
+.rsheet .rranges button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04121a;border-color:transparent}
+.rdates{display:flex;gap:8px;margin:0 0 8px}.rdates input{flex:1;min-width:0}
+.rbars{display:flex;align-items:flex-end;gap:3px;height:130px;padding:8px 4px 0;border-bottom:1px solid var(--line2)}
+.rbars div{flex:1;min-width:3px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--acc),var(--acc2));position:relative}
+.rbars div.z{background:var(--line2);min-height:2px}
+.rlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;margin:4px 2px 0}
+.rrow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:0}.rrow .grow{min-width:0;flex:1}
+.rrow .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rrow .sub{font-size:12px;color:var(--muted);font-weight:600}
+.rmeter{height:5px;border-radius:9px;background:var(--line);margin-top:5px;overflow:hidden}.rmeter i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.rnote{font-size:12.5px;color:var(--warn);font-weight:700;margin:6px 0}
+.rxl{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:14px;border:0;background:#1d6f42;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin:12px 0 4px}
 /* ---------- guía interactiva ---------- */
 .tour{position:fixed;inset:0;z-index:58;display:none}
 .tour.on{display:block}
@@ -530,6 +546,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
       <button class="btn sm" id="dNext">›</button>
       <button class="btn sm" id="dToday">Hoy</button>
     </div>
+    <button class="cierrebtn dueno-only" type="button" id="btnRep" style="margin-top:2px"><span class="ci">📊</span><span><b>Reportes de la semana y el mes</b><small>Ventas, productos top, cajeros y descarga a Excel</small></span></button>
     <div class="kpis">
       <div class="kpi hl"><span>Ventas del día</span><b class="num" id="dTot">$0</b></div>
       <div class="kpi"><span>Efectivo</span><b class="num" id="dEf">$0</b></div>
@@ -584,7 +601,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.9.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.0 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1073,6 +1090,7 @@ function sessionMenu(){
   openSheet(`<h3>${caj?"👤 "+esc(st.usuario):"👑 Dueño"}</h3><p class="hint">${esc(st.empresa?st.empresa.nombre:"")}${s?" · 📍 "+esc(s.nombre):""}${!caj&&st.user.email?"<br>"+esc(st.user.email):""}</p>
     ${st.sedes.length>1?`<button class="opt" data-m="sede"><span class="ic c1">📍</span><span><b>Cambiar de sede</b><small>Estás en ${esc(s?s.nombre:"-")}</small></span></button>`:""}
     ${!caj?`<button class="opt" data-m="adm"><span class="ic c3">⚙️</span><span><b>Administración</b><small>Empresa, sedes y cajeros</small></span></button>`:""}
+    ${!caj?`<button class="opt" data-m="rep"><span class="ic c1">📊</span><span><b>Reportes y Excel</b><small>Semana, mes o las fechas que quieras</small></span></button>`:""}
     <button class="opt" data-m="guia"><span class="ic c3">🧭</span><span><b>Ver guía de la app</b><small>Te muestro paso a paso cómo se usa</small></span></button>
     <button class="opt dl-only" data-install><span class="ic c1">📲</span><span><b>Descargar app</b><small>Instálala en este celular o computador</small></span></button>
     <button class="opt" data-m="out"><span class="ic c2">🚪</span><span><b>${caj?"Terminar turno y salir":"Cerrar sesión"}</b><small>${caj?"Para entrar de nuevo necesitas tu PIN":"Saldrás de este dispositivo"}</small></span></button>
@@ -1080,6 +1098,7 @@ function sessionMenu(){
     sh.querySelector("[data-x]").onclick=closeSheet;
     const bs=sh.querySelector('[data-m="sede"]');if(bs)bs.onclick=sedeMenu;
     const ba=sh.querySelector('[data-m="adm"]');if(ba)ba.onclick=()=>{closeSheet();document.querySelector('nav.tabs button[data-v="admin"]').click();};
+    const br=sh.querySelector('[data-m="rep"]');if(br)br.onclick=()=>{closeSheet();setTimeout(reportes,200);};
     sh.querySelector('[data-m="guia"]').onclick=()=>{closeSheet();setTimeout(()=>startTour(caj?"cajero":"dueno",true),250);};
     sh.querySelector('[data-m="out"]').onclick=async()=>{closeSheet();const wasCaj=caj;st.perfil=null;await sb.auth.signOut();if(wasCaj){st.empOk=null;loginPanel("empForm");}};
   });
@@ -1831,9 +1850,9 @@ function cajeroSheet(c){
 /* ---------- planes ---------- */
 const PLANES={
   gratis:{n:"Gratis",p:0,ico:"🆓",f:["1 sede, solo el dueño","Hasta 15 productos","Historial de 3 días","Sin escáner, ganancia ni ventas sin internet"]},
-  pro:{n:"Pro",p:19900,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Historial de 90 días"]},
+  pro:{n:"Pro",p:19900,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Historial de 90 días"]},
   premium:{n:"Premium",p:39900,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
-  empresarial:{n:"Premium Empresarial",p:79900,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Panel del dueño para todas las sedes (próximamente)"]}
+  empresarial:{n:"Premium Empresarial",p:79900,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Reportes de todas las sedes juntas","Panel del dueño para todas las sedes (próximamente)"]}
 };
 const ORDEN=["gratis","pro","premium","empresarial"];
 const planActual=()=>(st.mode!=="db"?"empresarial":(st.plan&&st.plan.plan)||"gratis");
@@ -1841,7 +1860,7 @@ const LIM=()=>(st.plan&&st.plan.limites)||{productos:null,cajeros:null,sedes:nul
 const puede=k=>st.mode!=="db"||!!LIM()[k];
 async function loadPlan(){if(!sb)return;const r=await sb.rpc("mi_plan");if(!r.error&&r.data)st.plan=r.data;}
 const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:()=>"Tu plan incluye una sola sede.",
-  costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",historial:l=>`Tu plan muestra los últimos ${l} días.`};
+  costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",historial:l=>`Tu plan muestra los últimos ${l} días.`};
 function showPlanes(motivo){
   const cur=planActual(),e=st.empresa||{};
   const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ($${PLANES[k].p.toLocaleString("es-CO")}/mes).${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
@@ -2087,6 +2106,143 @@ $("#admAviso").onclick=()=>{
   });
 };
 
+/* ---------- reportes semanales / mensuales + Excel ---------- */
+const ds=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const pd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ds(d);};
+const corto=s=>pd(s).toLocaleDateString("es-CO",{day:"numeric",month:"short"});
+function rango(k){
+  const t=today(),d=pd(t),dow=(d.getDay()+6)%7;
+  if(k==="hoy")return [t,t];
+  if(k==="sem")return [addD(t,-dow),t];
+  if(k==="sem-1")return [addD(t,-dow-7),addD(t,-dow-1)];
+  if(k==="7d")return [addD(t,-6),t];
+  if(k==="mes")return [ds(new Date(d.getFullYear(),d.getMonth(),1)),t];
+  if(k==="mes-1")return [ds(new Date(d.getFullYear(),d.getMonth()-1,1)),ds(new Date(d.getFullYear(),d.getMonth(),0))];
+  if(k==="30d")return [addD(t,-29),t];
+  return null;
+}
+const REP={k:"sem",desde:null,hasta:null,todas:false,data:null};
+async function fetchAll(mk){const out=[];for(let i=0;i<50000;i+=1000){const r=await mk().range(i,i+999);if(r.error)throw r.error;out.push(...(r.data||[]));if(!r.data||r.data.length<1000)break;}return out;}
+async function cargarReporte(){
+  const [a,b]=[REP.desde,REP.hasta];
+  const cols="id,tipo,fecha,ts,items,total,metodo,descr,valor,por,sede_id,pid,nombre,cant";
+  const movs=await fetchAll(()=>{let q=sb.from("movimientos").select(cols).gte("fecha",a).lte("fecha",b).order("ts",{ascending:true});if(!REP.todas)q=q.eq("sede_id",st.sede);return q;});
+  let vc=[];if(puede("costos")){vc=await fetchAll(()=>{let q=sb.from("venta_costos").select("movimiento_id,costo,sin_costo").gte("fecha",a).lte("fecha",b);if(!REP.todas)q=q.eq("sede_id",st.sede);return q;});}
+  return calcReporte(movs,new Map(vc.map(x=>[x.movimiento_id,x])),a,b);
+}
+function calcReporte(movs,vc,a,b){
+  const R={a,b,ventas:[],gastos:[],entradas:[],tot:0,ef:0,qr:0,ga:0,n:0,costo:0,sinCosto:0,dias:{},prod:{},cat:{},caj:{},sede:{},hora:Array(24).fill(0)};
+  for(let d=a;d<=b;d=addD(d,1))R.dias[d]={t:0,n:0,ga:0};
+  for(const m of movs){
+    if(m.tipo==="venta"){
+      R.ventas.push(m);R.n++;R.tot+=m.total;if(m.metodo==="qr")R.qr+=m.total;else R.ef+=m.total;
+      const D=R.dias[m.fecha]||(R.dias[m.fecha]={t:0,n:0,ga:0});D.t+=m.total;D.n++;
+      const c=R.caj[m.por||"Sin nombre"]||(R.caj[m.por||"Sin nombre"]={n:0,t:0});c.n++;c.t+=m.total;
+      const sn=sedeNom(m.sede_id),S=R.sede[sn]||(R.sede[sn]={n:0,t:0});S.n++;S.t+=m.total;
+      R.hora[new Date(m.ts).getHours()]+=m.total;
+      const v=vc.get(m.id);if(v){R.costo+=v.costo;R.sinCosto+=v.sin_costo;}
+      for(const it of m.items||[]){const P=R.prod[it.pid]||(R.prod[it.pid]={n:it.nombre,cant:0,t:0});P.cant+=it.cant;P.t+=it.cant*it.precio;
+        const cat=((st.prods.get(it.pid)||{}).cat)||"Sin categoría";const C=R.cat[cat]||(R.cat[cat]={cant:0,t:0});C.cant+=it.cant;C.t+=it.cant*it.precio;}
+    }else if(m.tipo==="gasto"){R.gastos.push(m);R.ga+=m.valor;const D=R.dias[m.fecha]||(R.dias[m.fecha]={t:0,n:0,ga:0});D.ga+=m.valor;}
+    else if(m.tipo==="entrada")R.entradas.push(m);
+  }
+  R.gan=R.tot-R.costo;R.neta=R.gan-R.ga;R.ticket=R.n?Math.round(R.tot/R.n):0;
+  return R;
+}
+const ord=o=>Object.entries(o).sort((x,y)=>y[1].t-x[1].t);
+function reportes(){
+  if(!sb||st.mode!=="db"||!isDueno())return;
+  if(!REP.desde){const r=rango(REP.k);REP.desde=r[0];REP.hasta=r[1];}
+  const multi=st.sedes.length>1;
+  const R_=[["hoy","Hoy"],["sem","Esta semana"],["sem-1","Semana pasada"],["mes","Este mes"],["mes-1","Mes pasado"],["30d","Últimos 30 días"],["otro","Otras fechas"]];
+  openSheet(`<div class="rsheet"><h3>📊 Reportes</h3>
+    <div class="rranges" id="rR">${R_.map(([k,l])=>`<button type="button" data-rk="${k}" class="${REP.k===k?"on":""}">${l}</button>`).join("")}</div>
+    <div class="rdates" id="rD" ${REP.k==="otro"?"":"hidden"}><input type="date" id="rA" value="${REP.desde}" max="${today()}"><input type="date" id="rB" value="${REP.hasta}" max="${today()}"></div>
+    ${multi?`<div class="seg" id="rS" style="margin:0 0 10px"><button type="button" data-rs="1" class="${REP.todas?"":"on"}">📍 ${esc(sedeNom(st.sede))}</button><button type="button" data-rs="all" class="${REP.todas?"on":""}">🏢 Todas las sedes</button></div>`:""}
+    <div id="rBody"><div class="empty">Cargando…</div></div></div>`,s=>{
+    s.querySelector("#rR").onclick=e=>{const b=e.target.closest("[data-rk]");if(!b)return;REP.k=b.dataset.rk;
+      s.querySelectorAll("#rR button").forEach(x=>x.classList.toggle("on",x===b));s.querySelector("#rD").hidden=REP.k!=="otro";
+      if(REP.k!=="otro"){const r=rango(REP.k);REP.desde=r[0];REP.hasta=r[1];s.querySelector("#rA").value=REP.desde;s.querySelector("#rB").value=REP.hasta;pinta(s);}};
+    const fd=()=>{let a=s.querySelector("#rA").value,b=s.querySelector("#rB").value;if(!a||!b)return;if(a>b)[a,b]=[b,a];REP.desde=a;REP.hasta=b;pinta(s);};
+    s.querySelector("#rA").onchange=fd;s.querySelector("#rB").onchange=fd;
+    const rs=s.querySelector("#rS");if(rs)rs.onclick=e=>{const b=e.target.closest("[data-rs]");if(!b)return;
+      if(b.dataset.rs==="all"&&LIM().sedes===1){upsell("sedes");return;}
+      REP.todas=b.dataset.rs==="all";rs.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));pinta(s);};
+    pinta(s);
+  });
+}
+async function pinta(s){
+  const body=s.querySelector("#rBody");if(!body)return;body.innerHTML='<div class="empty">Cargando…</div>';
+  const tok=REP.tok=Math.random();
+  let R;try{R=await cargarReporte();}catch(e){if(REP.tok===tok)body.innerHTML=`<div class="empty">${isNetErr(e)?"Sin internet. Intenta de nuevo cuando vuelva la señal.":"No se pudo cargar: "+esc(e.message||e)}</div>`;return;}
+  if(REP.tok!==tok||!s.isConnected)return;REP.data=R;
+  const hist=LIM().historial,minF=hist?addD(today(),-(hist-1)):null;
+  const nota=minF&&R.a<minF?`<div class="rnote">🔒 Tu plan muestra solo los últimos ${hist} días (desde el ${corto(minF)}). <a style="color:var(--acc);cursor:pointer" data-up>Ver planes</a></div>`:"";
+  const dias=Object.entries(R.dias).sort((x,y)=>x[0]<y[0]?-1:1),mx=Math.max(1,...dias.map(([,v])=>v.t));
+  const mejor=dias.reduce((m,x)=>x[1].t>(m?m[1].t:0)?x:m,null);
+  const prods=Object.values(R.prod).sort((x,y)=>y.cant-x.cant),pmx=Math.max(1,...prods.map(p=>p.cant));
+  const cats=ord(R.cat),cmx=Math.max(1,...cats.map(([,v])=>v.t));
+  const cajs=ord(R.caj),sedes=ord(R.sede);
+  const hmx=Math.max(...R.hora),hp=hmx?R.hora.indexOf(hmx):-1;
+  const gas={};for(const g of R.gastos){const k=(g.descr||"Gasto").trim();gas[k]=(gas[k]||0)+g.valor;}
+  const gL=Object.entries(gas).sort((x,y)=>y[1]-x[1]);
+  const meter=(v,m)=>`<div class="rmeter"><i style="width:${Math.max(3,Math.round(v*100/m))}%"></i></div>`;
+  body.innerHTML=`${nota}
+    <p class="hint" style="margin:0 0 8px">${corto(R.a)} – ${corto(R.b)} ${REP.todas?"· todas las sedes":"· "+esc(sedeNom(st.sede))}</p>
+    <div class="cgrid"><div><span>Ventas</span><b class="num">${fmt(R.tot)}</b></div><div><span>N.º de ventas</span><b class="num">${R.n}</b></div>
+      <div><span>Efectivo</span><b class="num">${fmt(R.ef)}</b></div><div><span>QR banco</span><b class="num">${fmt(R.qr)}</b></div>
+      <div><span>Gastos</span><b class="num">${fmt(R.ga)}</b></div><div><span>Venta promedio</span><b class="num">${fmt(R.ticket)}</b></div>
+      ${puede("costos")?`<div><span>💰 Ganancia</span><b class="num" style="color:${R.gan<0?"var(--bad)":"var(--ok)"}">${fmt(R.gan)}</b></div><div><span>Después de gastos</span><b class="num" style="color:${R.neta<0?"var(--bad)":"var(--ok)"}">${fmt(R.neta)}</b></div>`:""}
+    </div>
+    ${R.sinCosto&&puede("costos")?`<div class="rnote">⚠️ ${R.sinCosto} unidades vendidas sin precio de compra: la ganancia real es menor.</div>`:""}
+    ${dias.length>1?`<div class="ctit">Ventas por día${mejor&&mejor[1].t?` · mejor: ${corto(mejor[0])} (${fmt(mejor[1].t)})`:""}</div>
+      <div class="card" style="padding:10px 10px 8px"><div class="rbars">${dias.map(([d,v])=>`<div class="${v.t?"":"z"}" style="height:${v.t?Math.max(4,Math.round(v.t*100/mx)):0}%" title="${corto(d)}: ${fmt(v.t)}"></div>`).join("")}</div>
+      <div class="rlbl"><span>${corto(R.a)}</span><span>${corto(R.b)}</span></div></div>`:""}
+    ${hp>=0?`<p class="hint" style="margin:8px 2px 0">⏰ Hora con más ventas: <b>${hp}:00 – ${hp+1}:00</b></p>`:""}
+    <div class="ctit">Productos más vendidos</div><div class="card">${prods.slice(0,10).map((p,i)=>`<div class="rrow"><b style="width:20px;color:var(--muted)">${i+1}</b><div class="grow"><div class="t">${esc(p.n)}</div><div class="sub">${p.cant} ${p.cant===1?"unidad":"unidades"}</div>${meter(p.cant,pmx)}</div><b class="num">${fmt(p.t)}</b></div>`).join("")||'<div class="empty">Sin ventas en estas fechas</div>'}</div>
+    ${prods.length>10?`<p class="hint" style="margin:6px 2px">… y ${prods.length-10} productos más en el Excel.</p>`:""}
+    ${cats.length?`<div class="ctit">Por categoría</div><div class="card">${cats.map(([k,v])=>`<div class="rrow"><div class="grow"><div class="t">${esc(k)}</div><div class="sub">${v.cant} unidades</div>${meter(v.t,cmx)}</div><b class="num">${fmt(v.t)}</b></div>`).join("")}</div>`:""}
+    ${cajs.length?`<div class="ctit">Por cajero</div><div class="card">${cajs.map(([k,v])=>`<div class="rrow"><div class="grow"><div class="t">${k==="Dueño"?"👑":"👤"} ${esc(k)}</div><div class="sub">${v.n} ventas</div></div><b class="num">${fmt(v.t)}</b></div>`).join("")}</div>`:""}
+    ${REP.todas&&sedes.length?`<div class="ctit">Por sede</div><div class="card">${sedes.map(([k,v])=>`<div class="rrow"><div class="grow"><div class="t">📍 ${esc(k)}</div><div class="sub">${v.n} ventas</div></div><b class="num">${fmt(v.t)}</b></div>`).join("")}</div>`:""}
+    ${gL.length?`<div class="ctit">Gastos</div><div class="card">${gL.map(([k,v])=>`<div class="rrow"><div class="grow"><div class="t">${esc(k)}</div></div><b class="num">${fmt(v)}</b></div>`).join("")}</div>`:""}
+    <button class="rxl" type="button" id="rXl"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Descargar en Excel${puede("costos")?"":" 🔒"}</button>
+    <div class="acts"><button class="btn pri" data-x>Cerrar</button></div>`;
+  body.querySelector("[data-x]").onclick=closeSheet;
+  const up=body.querySelector("[data-up]");if(up)up.onclick=()=>upsell("historial",hist);
+  body.querySelector("#rXl").onclick=()=>{if(!puede("costos")){upsell("excel");return;}excelReporte(R);};
+}
+let xlsxP=null;
+function loadXLSX(){if(window.XLSX)return Promise.resolve();return xlsxP||(xlsxP=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";sc.onload=res;sc.onerror=()=>{xlsxP=null;rej(new Error("No se pudo cargar el generador de Excel. Revisa tu internet."));};document.head.appendChild(sc);}));}
+async function excelReporte(R){
+  const b=$("#rXl");if(b){b.disabled=true;b.lastChild.textContent="Preparando Excel…";}
+  try{
+    await loadXLSX();const X=window.XLSX,wb=X.utils.book_new();
+    const add=(name,rows,widths)=>{const ws=X.utils.aoa_to_sheet(rows);if(widths)ws["!cols"]=widths.map(w=>({wch:w}));X.utils.book_append_sheet(wb,ws,name);};
+    const en=(st.empresa&&st.empresa.nombre)||"",sd=REP.todas?"Todas las sedes":sedeNom(st.sede);
+    const costos=puede("costos");
+    const res=[["DL CUADRA PRO · Reporte de ventas"],["Negocio",en],["Sede",sd],["Desde",R.a],["Hasta",R.b],["Generado",new Date().toLocaleString("es-CO")],[],
+      ["Ventas totales",R.tot],["Número de ventas",R.n],["Venta promedio",R.ticket],["Efectivo",R.ef],["QR banco",R.qr],["Gastos",R.ga],["Efectivo menos gastos",R.ef-R.ga]];
+    if(costos)res.push(["Costo de lo vendido",R.costo],["Ganancia",R.gan],["Ganancia después de gastos",R.neta]);
+    add("Resumen",res,[28,22]);
+    add("Por día",[["Fecha","Día","N.º ventas","Ventas","Gastos"],...Object.entries(R.dias).sort((x,y)=>x[0]<y[0]?-1:1).map(([d,v])=>[d,pd(d).toLocaleDateString("es-CO",{weekday:"long"}),v.n,v.t,v.ga])],[12,12,11,14,12]);
+    add("Productos",[["Producto","Categoría","Unidades vendidas","Ventas $"],...Object.entries(R.prod).sort((x,y)=>y[1].cant-x[1].cant).map(([pid,p])=>[p.n,((st.prods.get(pid)||{}).cat)||"",p.cant,p.t])],[28,16,16,14]);
+    add("Categorías",[["Categoría","Unidades","Ventas $"],...ord(R.cat).map(([k,v])=>[k,v.cant,v.t])],[22,12,14]);
+    add("Cajeros",[["Cajero","N.º ventas","Ventas $"],...ord(R.caj).map(([k,v])=>[k,v.n,v.t])],[22,12,14]);
+    if(REP.todas)add("Sedes",[["Sede","N.º ventas","Ventas $"],...ord(R.sede).map(([k,v])=>[k,v.n,v.t])],[22,12,14]);
+    const det=[["Fecha","Hora","Sede","Cajero","Pago","Producto","Cantidad","Precio","Subtotal","Total venta"]];
+    for(const v of R.ventas){const h=new Date(v.ts).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});(v.items||[]).forEach((it,i)=>det.push([v.fecha,h,sedeNom(v.sede_id),v.por||"",v.metodo==="qr"?"QR":"Efectivo",it.nombre,it.cant,it.precio,it.cant*it.precio,i===0?v.total:""]));}
+    add("Ventas detalle",det,[11,7,16,14,9,26,9,10,11,11]);
+    add("Gastos",[["Fecha","Descripción","Valor","Registró","Sede"],...R.gastos.map(g=>[g.fecha,g.descr||"",g.valor,g.por||"",sedeNom(g.sede_id)])],[11,28,12,14,16]);
+    if(R.entradas.length)add("Entradas",[["Fecha","Producto","Cantidad","Registró","Sede"],...R.entradas.map(m=>[m.fecha,m.nombre||((st.prods.get(m.pid)||{}).nombre)||"",m.cant,m.por||"",sedeNom(m.sede_id)])],[11,26,10,14,16]);
+    if(!REP.todas)add("Inventario actual",[["Producto","Categoría","Stock","Precio venta"],...prodsArr().map(p=>[p.nombre,p.cat||"",p.stock||0,p.precio||0])],[28,16,9,12]);
+    const fn=`DL-Cuadra-Pro_${(en||"reporte").replace(/[^\wáéíóúñÁÉÍÓÚÑ]+/g,"-").slice(0,30)}_${R.a}_a_${R.b}.xlsx`;
+    X.writeFile(wb,fn);toast("📥 Excel descargado");
+  }catch(e){toast(e.message||"No se pudo crear el Excel");}
+  finally{if(b){b.disabled=false;b.lastChild.textContent="Descargar en Excel";}}
+}
+$("#btnRep").onclick=reportes;
+
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
 const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
@@ -2111,6 +2267,7 @@ function dueñoSteps(){
     {view:"inv",el:"#invList",t:"Entradas y ajustes",p:"Toca un producto para registrar la <b>mercancía que llega</b>, corregir el conteo físico o editar el precio. El <b>precio de compra</b> solo lo ves tú."+lockTxt("costos","Pro")},
     {view:"vender",el:"#grid",t:"2. Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b>, elige efectivo o QR, y el stock se descuenta solo."},
     {view:"vender",el:"#q",t:"Busca rápido",p:"Escribe el nombre o el código para encontrar el producto. Con el botón de al lado puedes escanearlo."},
+    {view:"dia",el:"#btnRep",t:"📊 Reportes",p:"Mira cómo te fue en la semana o el mes: productos más vendidos, ventas por día, por cajero y por categoría. Descárgalo en Excel."+lockTxt("costos","Pro").replace("Disponible","Excel disponible")},
     {view:"dia",el:"#dTot",t:"3. Cierre del día",p:"Aquí ves cuánto vendiste hoy: efectivo, QR, gastos y lo que debe haber en caja. Cuadra tu caja todos los días."},
     {view:"dia",el:"#dGanW",t:"💰 Tu ganancia",p:"La app calcula cuánto ganaste con el precio de compra de tus productos. Tus cajeros nunca la ven."+lockTxt("costos","Pro"),skipIfHidden:true},
     {view:"dia",el:"#btnCierre",t:"Cierra la caja",p:"Al final del día toca aquí: el cierre queda <b>guardado</b> con las ventas, los gastos y el inventario. Puedes anotar cuánto efectivo contaste y la app te dice si cuadra."},
