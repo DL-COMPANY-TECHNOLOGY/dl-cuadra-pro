@@ -584,7 +584,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.9 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.9.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -654,6 +654,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
       <label class="fld"><span>Repite tu correo</span><input id="nMail2" type="email" autocomplete="off" placeholder="Escríbelo otra vez" required onpaste="return false" ondrop="return false"></label>
       <label class="fld"><span>Contraseña (mínimo 6 caracteres)</span><div class="pwd"><input id="nPass" type="password" autocomplete="new-password" minlength="6" placeholder="••••••••" required><button type="button" id="nEye" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
       <label class="lrow" style="justify-content:flex-start;margin:0 0 12px"><input type="checkbox" id="nAcepto"> <span style="color:var(--muted);font-weight:600">Acepto los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a></span></label>
+      <input type="text" id="nWeb" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <div class="lerr" id="newErr"></div>
       <button class="lgo" id="newBtn" type="submit">Crear cuenta gratis ›</button>
       <p class="lalt">¿Necesitas ayuda? <a href="https://wa.me/573218641539?text=Hola%20DL%20Company,%20necesito%20ayuda%20para%20crear%20mi%20cuenta%20de%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></p>
@@ -840,6 +841,7 @@ const sedeActual=()=>st.sedes.find(s=>s.id===st.sede)||null;
 const appUrl=()=>location.origin+location.pathname;
 function showLogin(on){$("#login").classList.toggle("on",on);document.body.classList.toggle("locked",on);}
 function loginPanel(name){
+  if(name==="newForm"&&$("#newForm").hidden)newFormT=Date.now();
   ["loginForm","empForm","pinForm","sedePick","reqForm","newForm"].forEach(id=>{$("#"+id).hidden=id!==name;});
   $("#lTabs").hidden=name==="sedePick";
   document.querySelectorAll("[data-lt]").forEach(x=>x.classList.toggle("on",(x.dataset.lt==="in"&&name==="loginForm")||(x.dataset.lt==="emp"&&["empForm","pinForm"].includes(name))||(x.dataset.lt==="new"&&name==="newForm")));
@@ -856,7 +858,7 @@ document.querySelectorAll("[data-lt]").forEach(b=>b.onclick=()=>{
 });
 $("#lReq").onclick=()=>{loginMsg("");loginPanel("newForm");};
 /* ---------- crear cuenta (negocio o empresa) ---------- */
-let nTipo="negocio";
+let nTipo="negocio",newFormT=Date.now();
 $("#nTipo").onclick=e=>{const b=e.target.closest("[data-nt]");if(!b)return;nTipo=b.dataset.nt;
   $("#nTipo").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
   $("#nNomL").textContent=nTipo==="empresa"?"Nombre de la empresa":"Nombre del negocio";
@@ -875,6 +877,7 @@ $("#newForm").addEventListener("submit",async e=>{
   if(!/\S+@\S+\.\S+/.test(mail)){err.textContent="Escribe un correo válido.";return;}
   if(mail!==mail2){err.textContent="Los correos no coinciden. Revísalos: con ese correo recuperas tu contraseña si la olvidas.";$("#nMail2").focus();return;}
   if(pass.length<6){err.textContent="La contraseña debe tener mínimo 6 caracteres.";return;}
+  if($("#nWeb").value||Date.now()-newFormT<2500){err.textContent="Revisa los datos e intenta de nuevo.";newFormT=Date.now();return;}
   if(!$("#nAcepto").checked){err.textContent="Debes aceptar los Términos y la Política de privacidad.";return;}
   b.disabled=true;b.textContent="Creando tu cuenta…";
   try{
