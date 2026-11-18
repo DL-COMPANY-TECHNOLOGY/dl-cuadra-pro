@@ -605,7 +605,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.3.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.4 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2435,18 +2435,68 @@ function textoPedido(P){
   t+=`\n\nMuchas gracias, quedo pendiente. 🙏`;
   return t;
 }
-function pedidoSheet(){
+const provKey=s=>(s||"").trim().toLowerCase();
+const bajos=()=>prodsArr().filter(p=>(p.stock||0)<=minOf(p)).sort((a,b)=>(a.stock||0)-(b.stock||0));
+const itemDe=p=>{const pr=presOf(p);return {pid:p.id,nombre:p.nombre,u:pr.u,c:pr.c,cant:sugCant(p,pr)};};
+function provManager(back){
+  const draw=s=>{const c=pedCfg(),L=c.proveedores;
+    s.innerHTML=`<div class="grab"></div><h3>🚚 Mis proveedores</h3><p class="hint">Agrega todos los que uses. Cada producto recuerda a qué proveedor se le pide.</p>
+      <div class="card">${L.map((x,i)=>{const n=prodsArr().filter(p=>provKey(p.pedido_proveedor)===provKey(x.n)).length;return `<div class="rrow"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">${x.num?"📱 "+esc(x.num):"Sin WhatsApp"} · ${n} ${n===1?"producto":"productos"}</div></div><button class="btn sm" type="button" data-ed="${i}">Editar</button></div>`;}).join("")||'<div class="empty">Aún no tienes proveedores</div>'}</div>
+      <div class="acts"><button class="btn" data-x>‹ Volver</button><button class="btn pri" data-new>＋ Agregar proveedor</button></div>`;
+    s.querySelector("[data-x]").onclick=back;
+    s.querySelector("[data-new]").onclick=()=>provForm(null,()=>openSheet("",draw));
+    s.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>provForm(+b.dataset.ed,()=>openSheet("",draw)));
+  };
+  openSheet("",draw);
+}
+function provForm(i,back){
+  const c=pedCfg(),x=i==null?{n:"",num:""}:c.proveedores[i];
+  openSheet(`<h3>${i==null?"＋ Nuevo proveedor":"✏️ "+esc(x.n)}</h3>
+    <label class="fld"><span>Nombre del proveedor</span><input id="vN" maxlength="40" value="${esc(x.n)}" placeholder="Ej: Distribuidora Bavaria"></label>
+    <label class="fld"><span>WhatsApp</span><input id="vW" class="mono" inputmode="tel" maxlength="16" value="${esc(x.num||"")}" placeholder="3001234567"></label>
+    <label class="fld"><span>¿Qué te vende? (opcional)</span><input id="vO" maxlength="80" value="${esc(x.nota||"")}" placeholder="Ej: cervezas y gaseosas"></label>
+    <div class="acts">${i!=null?'<button class="btn ghost" data-del style="color:var(--bad);flex:0 0 auto">Eliminar</button>':""}<button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=back;
+    s.querySelector("[data-ok]").onclick=()=>{const n=s.querySelector("#vN").value.trim().replace(/\s+/g," "),num=s.querySelector("#vW").value.trim(),nota=s.querySelector("#vO").value.trim();
+      if(!n){toast("Escribe el nombre");return;}const d=num.replace(/\D/g,"");if(d&&d.length<10){toast("El WhatsApp debe tener 10 dígitos");return;}
+      const dup=c.proveedores.findIndex(y=>provKey(y.n)===provKey(n));if(dup>=0&&dup!==i){toast("Ya tienes un proveedor con ese nombre");return;}
+      const old=i!=null?c.proveedores[i].n:null;
+      if(i==null)c.proveedores.push({n,num,nota});else c.proveedores[i]={n,num,nota};
+      guardarPedCfg(c);
+      if(old&&provKey(old)!==provKey(n))renombrarProv(old,n);
+      toast("Proveedor guardado");back();};
+    const del=s.querySelector("[data-del]");if(del)del.onclick=()=>{c.proveedores.splice(i,1);guardarPedCfg(c);renombrarProv(x.n,null);toast("Proveedor eliminado");back();};
+  });
+}
+function renombrarProv(old,nuevo){
+  const L=prodsArr().filter(p=>provKey(p.pedido_proveedor)===provKey(old));
+  for(const p of L)p.pedido_proveedor=nuevo;
+  if(sb&&st.mode==="db"&&isDueno()&&L.length)sb.from("productos").update({pedido_proveedor:nuevo}).eq("empresa_id",st.empresa.id).in("id",L.map(p=>p.id)).then(()=>{},()=>{});
+}
+function pedidoSheet(provIdx){
   const C=pedCfg(),sedeId=st.sede||"local";
   const P={prov:"",num:"",fecha:today(),dir:C.dir[sedeId]||"",nombre:C.nombre||"",nota:"",items:[]};
-  if(C.proveedores[0]){P.prov=C.proveedores[0].n;P.num=C.proveedores[0].num||"";}
-  for(const p of prodsArr().filter(p=>(p.stock||0)<=minOf(p)).sort((a,b)=>(a.stock||0)-(b.stock||0))){const pr=presOf(p);P.items.push({pid:p.id,nombre:p.nombre,u:pr.u,c:pr.c,cant:sugCant(p,pr)});}
-  let q="",ver=false;
+  const elegir=x=>{P.prov=x?x.n:"";P.num=x?(x.num||""):"";
+    const k=provKey(P.prov),hay=pedCfg().proveedores.length;
+    P.items=bajos().filter(p=>!hay||!p.pedido_proveedor||provKey(p.pedido_proveedor)===k).map(itemDe);};
+  elegir(C.proveedores[provIdx!=null?provIdx:0]||null);
+  let q="",ver=false,enviado=null;
   const draw=s=>{
-    const provs=pedCfg().proveedores,enP=new Set(P.items.map(x=>x.pid));
+    const provs=pedCfg().proveedores,enP=new Set(P.items.map(x=>x.pid)),k=provKey(P.prov);
+    const otros=bajos().filter(p=>!enP.has(p.id)&&p.pedido_proveedor&&provKey(p.pedido_proveedor)!==k);
+    if(enviado){
+      const pend=provs.map((x,i)=>({x,i,n:bajos().filter(p=>provKey(p.pedido_proveedor)===provKey(x.n)).length})).filter(o=>provKey(o.x.n)!==provKey(enviado));
+      s.innerHTML=`<div class="grab"></div><h3>✅ Pedido enviado</h3><p class="hint">Se abrió WhatsApp con el pedido para <b>${esc(enviado)}</b>.</p>
+        ${pend.length?`<div class="ctit">¿Pedir a otro proveedor?</div><div class="card">${pend.map(o=>`<button type="button" class="rrow" data-sig="${o.i}" style="width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;text-align:left;cursor:pointer"><div class="grow"><div class="t">🚚 ${esc(o.x.n)}</div><div class="sub">${o.n?o.n+" "+(o.n===1?"producto bajo":"productos bajos"):"Elige qué pedirle"}</div></div><span style="color:var(--acc);font-weight:800">Pedir ›</span></button>`).join("")}</div>`:""}
+        <div class="acts"><button class="btn" data-otro>＋ Otro pedido</button><button class="btn pri" data-x>Listo</button></div>`;
+      s.querySelector("[data-x]").onclick=closeSheet;s.querySelector("[data-otro]").onclick=()=>pedidoSheet();
+      s.querySelectorAll("[data-sig]").forEach(b=>b.onclick=()=>pedidoSheet(+b.dataset.sig));return;
+    }
     const ql=q.trim().toLowerCase(),busc=ql?prodsArr().filter(p=>!enP.has(p.id)&&matchQ(p,ql)).slice(0,6):[];
+    const esNuevo=!provs.some(x=>provKey(x.n)===k);
     s.innerHTML=`<div class="grab"></div><h3>🛒 Pedido al proveedor</h3><p class="hint">Revisa productos, cantidades y presentación. Todo se puede cambiar.</p>
-      <div class="ctit">Proveedor</div>
-      ${provs.length?`<div class="rranges" id="pvL">${provs.map((x,i)=>`<button type="button" data-pv="${i}" class="${x.n===P.prov?"on":""}">${esc(x.n)}</button>`).join("")}<button type="button" data-pv="new" class="${!provs.some(x=>x.n===P.prov)?"on":""}">＋ Otro</button></div>`:""}
+      <div class="sec" style="margin:6px 0 4px"><h2 style="font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Proveedor</h2><button class="btn sm" type="button" id="pvM">🚚 Mis proveedores</button></div>
+      ${provs.length?`<div class="rranges" id="pvL">${provs.map((x,i)=>`<button type="button" data-pv="${i}" class="${provKey(x.n)===k&&!esNuevo?"on":""}">${esc(x.n)}</button>`).join("")}<button type="button" data-pv="new" class="${esNuevo?"on":""}">＋ Nuevo</button></div>`:""}
       <div class="two"><label class="fld"><span>Nombre</span><input id="pvN" maxlength="40" value="${esc(P.prov)}" placeholder="Ej: Distribuidora Medellín"></label>
       <label class="fld"><span>WhatsApp</span><input id="pvW" class="mono" inputmode="tel" maxlength="16" value="${esc(P.num)}" placeholder="3001234567"></label></div>
       <div class="ctit">Entrega</div>
@@ -2455,23 +2505,27 @@ function pedidoSheet(){
       <label class="fld"><span>Dirección de entrega${st.mode==="db"&&sedeActual()?" · "+esc(sedeActual().nombre):""}</span><input id="pD" maxlength="120" value="${esc(P.dir)}" placeholder="Ej: Cra 100 #34-20, Comuna 13"></label>
       <label class="fld"><span>A nombre de</span><input id="pN" maxlength="40" value="${esc(P.nombre)}" placeholder="Quién recibe el pedido"></label>
       <div class="ctit">Productos (${P.items.length})</div>
+      ${otros.length?`<div class="rnote" style="color:var(--muted)">📦 ${otros.length} ${otros.length===1?"producto bajo es":"productos bajos son"} de otros proveedores. <a style="color:var(--acc);cursor:pointer" data-addotros>Agregarlos aquí</a></div>`:""}
       <div class="card" id="pI">${P.items.map((it,i)=>{const pr=st.prods.get(it.pid)||{};return `<div class="rrow" style="flex-wrap:wrap;gap:8px">
-        <div class="grow" style="flex-basis:100%"><div class="t">${esc(it.nombre)}</div><div class="sub">${(pr.stock||0)<=0?"Agotado":"Quedan "+(pr.stock||0)} · mín ${minOf(pr)}</div></div>
+        <div class="grow" style="flex-basis:100%"><div class="t">${esc(it.nombre)}</div><div class="sub">${(pr.stock||0)<=0?"Agotado":"Quedan "+(pr.stock||0)} · mín ${minOf(pr)}${pr.pedido_proveedor&&provKey(pr.pedido_proveedor)!==k?" · antes: "+esc(pr.pedido_proveedor):""}</div></div>
         <div class="stepper"><button type="button" data-m="${i}">−</button><b class="num">${it.cant}</b><button type="button" data-p="${i}">+</button></div>
         <select data-u="${i}" style="flex:1;min-width:96px;padding:9px 8px;border-radius:11px">${UNIDADES.map(u=>`<option value="${u[0]}" ${u[0]===it.u?"selected":""}>${u[1]}</option>`).join("")}</select>
         ${!["und","botella","garrafa"].includes(it.u)?`<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);font-weight:700">x<input data-c="${i}" class="num" inputmode="numeric" value="${it.c||""}" placeholder="und" style="width:54px;padding:8px 6px;border-radius:10px"></label>`:""}
-        <button type="button" class="btn ghost sm" data-r="${i}" aria-label="Quitar" style="color:var(--bad)">✕</button></div>`;}).join("")||'<div class="empty">Agrega los productos que vas a pedir</div>'}</div>
+        <button type="button" class="btn ghost sm" data-r="${i}" aria-label="Quitar" style="color:var(--bad)">✕</button></div>`;}).join("")||'<div class="empty">Agrega los productos que vas a pedir a este proveedor</div>'}</div>
       <input class="search" id="pQ" placeholder="＋ Agregar otro producto…" value="${esc(q)}" autocomplete="off" style="margin:8px 0 0">
-      ${busc.length?`<div class="card" style="margin-top:6px">${busc.map(p=>`<button type="button" class="rrow" data-add="${esc(p.id)}" style="width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;text-align:left;cursor:pointer"><div class="grow"><div class="t">${esc(p.nombre)}</div><div class="sub">Quedan ${p.stock||0}</div></div><span style="color:var(--acc);font-weight:800">Agregar</span></button>`).join("")}</div>`:""}
+      ${busc.length?`<div class="card" style="margin-top:6px">${busc.map(p=>`<button type="button" class="rrow" data-add="${esc(p.id)}" style="width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;text-align:left;cursor:pointer"><div class="grow"><div class="t">${esc(p.nombre)}</div><div class="sub">Quedan ${p.stock||0}${p.pedido_proveedor?" · "+esc(p.pedido_proveedor):""}</div></div><span style="color:var(--acc);font-weight:800">Agregar</span></button>`).join("")}</div>`:""}
       <label class="fld" style="margin-top:10px"><span>Nota (opcional)</span><input id="pNo" maxlength="200" value="${esc(P.nota)}" placeholder="Ej: entregar antes de las 10 a. m."></label>
       <details class="cdet" ${ver?"open":""} id="pV"><summary>👁️ Ver cómo queda el mensaje</summary><div class="card" style="padding:12px;white-space:pre-wrap;font-size:13.5px;line-height:1.45">${esc(textoPedido(P))}</div></details>
-      <button class="rxl" type="button" id="pGo" style="background:#1fa855">📲 Enviar pedido por WhatsApp</button>
+      <button class="rxl" type="button" id="pGo" style="background:#1fa855">📲 Enviar pedido${P.prov?" a "+esc(P.prov):""} por WhatsApp</button>
       <div class="acts"><button class="btn" data-x>Cancelar</button></div>`;
-    const keep=(id,f)=>{const el=s.querySelector(id);if(el)el.oninput=()=>{f(el.value);const pv=s.querySelector("#pV .card");if(pv)pv.textContent=textoPedido(P);};};
+    const prev=()=>{const pv=s.querySelector("#pV .card");if(pv)pv.textContent=textoPedido(P);};
+    const keep=(id,f)=>{const el=s.querySelector(id);if(el)el.oninput=()=>{f(el.value);prev();};};
     keep("#pvN",v=>P.prov=v.trim());keep("#pvW",v=>P.num=v.trim());keep("#pD",v=>P.dir=v.trim());keep("#pN",v=>P.nombre=v.trim());keep("#pNo",v=>P.nota=v.trim());
+    s.querySelector("#pvM").onclick=()=>provManager(()=>openSheet("",draw));
     s.querySelector("#pFe").onchange=e=>{if(e.target.value){P.fecha=e.target.value;draw(s);}};
     s.querySelector("#pF").onclick=e=>{const b=e.target.closest("[data-f]");if(b){P.fecha=addD(today(),+b.dataset.f);draw(s);}};
-    const pv=s.querySelector("#pvL");if(pv)pv.onclick=e=>{const b=e.target.closest("[data-pv]");if(!b)return;if(b.dataset.pv==="new"){P.prov="";P.num="";}else{const x=provs[+b.dataset.pv];P.prov=x.n;P.num=x.num||"";}draw(s);};
+    const pv=s.querySelector("#pvL");if(pv)pv.onclick=e=>{const b=e.target.closest("[data-pv]");if(!b)return;elegir(b.dataset.pv==="new"?null:provs[+b.dataset.pv]);draw(s);};
+    const ao=s.querySelector("[data-addotros]");if(ao)ao.onclick=()=>{for(const p of otros)P.items.push(itemDe(p));draw(s);};
     s.querySelector("#pV").ontoggle=e=>{ver=e.target.open;};
     const I=s.querySelector("#pI");
     I.onclick=e=>{const b=e.target.closest("button");if(!b)return;
@@ -2480,29 +2534,30 @@ function pedidoSheet(){
       else if(b.dataset.r!=null){P.items.splice(+b.dataset.r,1);}
       else return;draw(s);};
     I.onchange=e=>{const el=e.target;
-      if(el.dataset.u!=null){const it=P.items[+el.dataset.u];it.u=el.value;const d={canasta:30,sixpack:6,paca:12,docena:12,paquete:it.c||50,caja:it.c||24}[it.u];it.c=it.u==="und"||it.u==="botella"||it.u==="garrafa"?null:(d||it.c||null);draw(s);}};
-    I.oninput=e=>{const el=e.target;if(el.dataset.c!=null){const v=parseInt(el.value.replace(/\D/g,""),10);P.items[+el.dataset.c].c=v>0?Math.min(v,10000):null;const pvc=s.querySelector("#pV .card");if(pvc)pvc.textContent=textoPedido(P);}};
+      if(el.dataset.u!=null){const it=P.items[+el.dataset.u];it.u=el.value;const d={canasta:30,sixpack:6,paca:12,docena:12,paquete:it.c||50,caja:it.c||24}[it.u];it.c=["und","botella","garrafa"].includes(it.u)?null:(d||it.c||null);draw(s);}};
+    I.oninput=e=>{const el=e.target;if(el.dataset.c!=null){const v=parseInt(el.value.replace(/\D/g,""),10);P.items[+el.dataset.c].c=v>0?Math.min(v,10000):null;prev();}};
     I.querySelectorAll(".stepper b").forEach((b,i)=>{b.style.cursor="pointer";b.onclick=()=>{const it=P.items[i];const v=prompt("Cantidad de "+it.nombre,it.cant);const n=parseInt(v,10);if(n>0){it.cant=Math.min(n,100000);draw(s);}};});
     const pq=s.querySelector("#pQ");pq.oninput=()=>{q=pq.value;const pos=pq.selectionStart;draw(s);const n=s.querySelector("#pQ");n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}};
-    s.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const p=st.prods.get(b.dataset.add);if(!p)return;const pr=presOf(p);P.items.push({pid:p.id,nombre:p.nombre,u:pr.u,c:pr.c,cant:sugCant(p,pr)});q="";draw(s);});
+    s.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const p=st.prods.get(b.dataset.add);if(!p)return;P.items.push(itemDe(p));q="";draw(s);});
     s.querySelector("[data-x]").onclick=closeSheet;
     s.querySelector("#pGo").onclick=async()=>{
       if(!P.items.length){toast("Agrega al menos un producto");return;}
       let n=P.num.replace(/\D/g,"");if(n&&n.length===10)n="57"+n;if(n&&n.length<11){toast("Revisa el WhatsApp del proveedor (10 dígitos)");return;}
       const txt=textoPedido(P);
-      const c=pedCfg();if(P.prov){const k=c.proveedores.findIndex(x=>x.n.toLowerCase()===P.prov.toLowerCase());const o={n:P.prov,num:P.num};if(k>=0)c.proveedores.splice(k,1);c.proveedores.unshift(o);c.proveedores=c.proveedores.slice(0,10);}
+      const c=pedCfg();if(P.prov){const ki=c.proveedores.findIndex(x=>provKey(x.n)===provKey(P.prov));const o=Object.assign({},ki>=0?c.proveedores[ki]:{},{n:P.prov,num:P.num});if(ki>=0)c.proveedores[ki]=o;else c.proveedores.push(o);c.proveedores=c.proveedores.slice(0,30);}
       c.nombre=P.nombre;c.dir[sedeId]=P.dir;guardarPedCfg(c);
-      if(sb&&st.mode==="db"&&isDueno()){const ch=P.items.filter(it=>{const p=st.prods.get(it.pid);return p&&(p.pedido_unidad!==it.u||(p.pedido_contenido||null)!==(it.c||null));});
-        if(ch.length)Promise.all(ch.map(it=>sb.from("productos").update({pedido_unidad:it.u,pedido_contenido:it.c||null}).eq("empresa_id",st.empresa.id).eq("id",it.pid))).then(()=>{for(const it of ch){const p=st.prods.get(it.pid);if(p){p.pedido_unidad=it.u;p.pedido_contenido=it.c||null;}}}).catch(()=>{});}
+      const ch=P.items.filter(it=>{const p=st.prods.get(it.pid);return p&&(p.pedido_unidad!==it.u||(p.pedido_contenido||null)!==(it.c||null)||(P.prov&&provKey(p.pedido_proveedor)!==provKey(P.prov)));});
+      for(const it of ch){const p=st.prods.get(it.pid);if(p){p.pedido_unidad=it.u;p.pedido_contenido=it.c||null;if(P.prov)p.pedido_proveedor=P.prov;}}
+      if(sb&&st.mode==="db"&&isDueno()&&ch.length)Promise.all(ch.map(it=>{const d={pedido_unidad:it.u,pedido_contenido:it.c||null};if(P.prov)d.pedido_proveedor=P.prov;return sb.from("productos").update(d).eq("empresa_id",st.empresa.id).eq("id",it.pid);})).catch(()=>{});
       try{await navigator.clipboard.writeText(txt);}catch(_){}
       window.open("https://wa.me/"+n+"?text="+encodeURIComponent(txt),"_blank","noopener");
-      toast(n?"Abriendo WhatsApp de "+(P.prov||"tu proveedor"):"Elige el chat del proveedor en WhatsApp");
+      enviado=P.prov||"tu proveedor";draw(s);
     };
   };
   openSheet("",draw);
 }
 $("#invFilter").addEventListener("click",e=>{if(e.target.closest("[data-pedido]"))pedidoSheet();});
-$("#btnPedido").onclick=pedidoSheet;
+$("#btnPedido").onclick=()=>pedidoSheet();
 
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
