@@ -533,6 +533,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
       <button class="kpi kbtn kbad" type="button" data-kf="zero"><span>Agotados</span><b class="num" id="kZero">0</b><small>Toca para ver cuáles</small></button>
     </div>
     <div class="sec"><h2>Productos</h2><div class="secbtns dueno-only"><button class="btn sm" id="btnCats">Categorías</button><button class="btn sm dark" id="btnNewProd">+ Producto</button></div></div>
+    <button class="cierrebtn" type="button" id="btnPedido" style="margin:0 0 10px"><span class="ci">🛒</span><span><b>Hacer pedido al proveedor</b><small>Elige productos, cantidades y fecha · se envía por WhatsApp</small></span></button>
     <div id="invFilter"></div>
     <div class="srow" style="margin:0 0 10px"><input class="search" id="qi" placeholder="Buscar producto o código…" autocomplete="off"><button class="scanbtn" id="scanInv" type="button" aria-label="Escanear para buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg></button></div>
     <div class="card" id="invList"></div>
@@ -604,7 +605,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.2 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.3 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -833,6 +834,7 @@ async function refresh(){
   st.prods=new Map(pr.data.map(p=>[p.id,{...p,stock:stock.get(p.id)||0}]));
   st.movs=mv.data.map(rowToMov);
   if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}
+    const pc=aj.data.find(x=>x.clave==="pedido_cfg");try{st.pedidoCfg=pc?JSON.parse(pc.valor):null;}catch(e){st.pedidoCfg=null;}
     const av=aj.data.find(x=>x.clave==="cierre_aviso");try{const v=av&&JSON.parse(av.valor);st.aviso=v&&typeof v==="object"?v:{modo:"app",num:""};}catch(e){st.aviso={modo:"app",num:""};}}
   loadCierres();if(puede("fiado"))loadClientes();
   if(isDueno()){
@@ -1305,7 +1307,7 @@ function renderInv(){
   const FT={low:["⚠️","Stock bajo (en su mínimo o menos)"],zero:["⛔","Productos agotados"],noprice:["🏷️","Productos sin precio"]};
   const okF=p=>{const s=p.stock||0;return !f||(f==="low"?s>0&&s<=minOf(p):f==="zero"?s<=0:!(p.precio>0));};
   const nF=f?ps.filter(okF).length:0;
-  $("#invFilter").innerHTML=f?`<div class="fbar ${f}"><span>${FT[f][0]} ${FT[f][1]}: ${nF}</span>${(f==="low"||f==="zero")&&nF?`<button type="button" data-pedido>📲 Pedido</button>`:""}<button type="button" data-kfx>Ver todos</button></div>`:"";
+  $("#invFilter").innerHTML=f?`<div class="fbar ${f}"><span>${FT[f][0]} ${FT[f][1]}: ${nF}</span>${(f==="low"||f==="zero")&&nF?`<button type="button" data-pedido>🛒 Pedido</button>`:""}<button type="button" data-kfx>Ver todos</button></div>`:"";
   const q=st.qi.trim().toLowerCase();let h="",last="";
   const lst=ps.filter(p=>okF(p)&&matchQ(p,q));
   if(f==="low")lst.sort((a,b)=>(a.stock||0)-(b.stock||0));
@@ -2395,18 +2397,112 @@ function abonoSheet(c){
 }
 $("#btnFiado").onclick=fiadoSheet;
 
-/* ---------- lista de pedido (stock bajo / agotados) ---------- */
-$("#invFilter").addEventListener("click",e=>{
-  if(!e.target.closest("[data-pedido]"))return;
-  const L=prodsArr().filter(p=>(p.stock||0)<=minOf(p)).sort((a,b)=>(a.stock||0)-(b.stock||0));
-  if(!L.length){toast("No hay productos por pedir");return;}
-  const en=(st.empresa&&st.empresa.nombre)||st.negocio||"",sd=st.mode==="db"&&sedeActual()&&st.sedes.length>1?" · "+sedeActual().nombre:"";
-  let t=`*🛒 Pedido${en?" · "+en:""}${sd}*\n${nice(today())}\n\n`;
-  for(const p of L){const s=p.stock||0,m=minOf(p),sug=Math.max(m*2-s,1);t+=`• ${p.nombre}: ${s<=0?"agotado":"quedan "+s} → pedir ${sug}\n`;}
-  t+=`\nTotal: ${L.length} ${L.length===1?"producto":"productos"}`;
-  try{navigator.clipboard.writeText(t);}catch(_){}
-  window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank","noopener");
-});
+/* ---------- pedido a proveedor ---------- */
+const UNIDADES=[["und","Unidad","und","und"],["botella","Botella","botella","botellas"],["paquete","Paquete","paquete","paquetes"],["canasta","Canasta","canasta","canastas"],["sixpack","Sixpack","sixpack","sixpacks"],["paca","Paca","paca","pacas"],["caja","Caja","caja","cajas"],["bolsa","Bolsa","bolsa","bolsas"],["docena","Docena","docena","docenas"],["bulto","Bulto","bulto","bultos"],["garrafa","Garrafa","garrafa","garrafas"]];
+const UMAP=Object.fromEntries(UNIDADES.map(u=>[u[0],u]));
+function presOf(p){
+  if(p.pedido_unidad&&UMAP[p.pedido_unidad])return {u:p.pedido_unidad,c:p.pedido_contenido||null};
+  const t=((p.nombre||"")+" "+(p.cat||"")).toLowerCase();
+  if(/shot/.test(t))return {u:"botella",c:null};
+  if(/vaso/.test(t))return {u:"paquete",c:50};
+  if(/cervez|corona|[aá]guila|poker|club colombia|pilsen|budweiser|heineken|coste[ñn]a|stella|redd|tecate|miller/.test(t))return {u:"canasta",c:30};
+  if(/agua|gaseosa|coca|pepsi|postob|soda|jugo|hit\b|gatorade|electrolit|energ/.test(t))return {u:"paca",c:12};
+  if(/whisk|ron\b|aguardiente|tequila|vodka|ginebra|gin\b|licor|vino|brandy/.test(t))return {u:"botella",c:null};
+  return {u:"und",c:null};
+}
+const sugCant=(p,pr)=>{const need=Math.max(minOf(p)*2-(p.stock||0),1);if(pr.u==="botella"&&/shot/i.test(p.nombre))return 1;return pr.c&&pr.c>1?Math.max(1,Math.ceil(need/pr.c)):need;};
+function linea(it){
+  const U=UMAP[it.u]||UMAP.und,n=it.cant;
+  if(it.u==="und")return `• ${it.nombre}: ${n} und`;
+  return `• ${it.nombre}: ${n} ${n===1?U[2]:U[3]}${it.c&&it.c>1?` x${it.c} und`:""}`;
+}
+const PKEY=()=>"cp_pedido_"+((st.empresa&&st.empresa.id)||"local");
+function pedCfg(){let a={};try{a=JSON.parse(localStorage.getItem(PKEY())||"{}")||{};}catch(e){}const s=st.pedidoCfg||{};return {proveedores:s.proveedores||a.proveedores||[],nombre:s.nombre||a.nombre||"",dir:Object.assign({},a.dir||{},s.dir||{})};}
+async function guardarPedCfg(c){
+  try{localStorage.setItem(PKEY(),JSON.stringify(c));}catch(e){}
+  st.pedidoCfg=c;
+  if(sb&&st.mode==="db"&&isDueno())try{await sb.from("ajustes").upsert({empresa_id:st.empresa.id,clave:"pedido_cfg",valor:JSON.stringify(c),actualizado:new Date().toISOString()});}catch(e){}
+}
+const saludo=()=>{const hh=new Date().getHours();return hh<12?"Buenos días":hh<19?"Buenas tardes":"Buenas noches";};
+function textoPedido(P){
+  const en=(st.empresa&&st.empresa.nombre)||st.negocio||"";
+  const sd=st.mode==="db"&&sedeActual()?sedeActual().nombre:"";
+  let t=`${saludo()}${P.prov?" "+P.prov:""}, para realizar el siguiente pedido para${en?" *"+en+"*":""}${sd?" · "+sd:""}${P.dir?" ("+P.dir+")":""}${P.nombre?" a nombre de "+P.nombre:""}.\n`;
+  t+=`📅 Para el ${nice(P.fecha)}\n\n`;
+  for(const it of P.items)t+=linea(it)+"\n";
+  t+=`\nTotal: ${P.items.length} ${P.items.length===1?"producto":"productos"}`;
+  if(P.nota)t+=`\n📝 ${P.nota}`;
+  t+=`\n\nMuchas gracias, quedo pendiente. 🙏`;
+  return t;
+}
+function pedidoSheet(){
+  const C=pedCfg(),sedeId=st.sede||"local";
+  const P={prov:"",num:"",fecha:addD(today(),1),dir:C.dir[sedeId]||"",nombre:C.nombre||"",nota:"",items:[]};
+  if(C.proveedores[0]){P.prov=C.proveedores[0].n;P.num=C.proveedores[0].num||"";}
+  for(const p of prodsArr().filter(p=>(p.stock||0)<=minOf(p)).sort((a,b)=>(a.stock||0)-(b.stock||0))){const pr=presOf(p);P.items.push({pid:p.id,nombre:p.nombre,u:pr.u,c:pr.c,cant:sugCant(p,pr)});}
+  let q="",ver=false;
+  const draw=s=>{
+    const provs=pedCfg().proveedores,enP=new Set(P.items.map(x=>x.pid));
+    const ql=q.trim().toLowerCase(),busc=ql?prodsArr().filter(p=>!enP.has(p.id)&&matchQ(p,ql)).slice(0,6):[];
+    s.innerHTML=`<div class="grab"></div><h3>🛒 Pedido al proveedor</h3><p class="hint">Revisa productos, cantidades y presentación. Todo se puede cambiar.</p>
+      <div class="ctit">Proveedor</div>
+      ${provs.length?`<div class="rranges" id="pvL">${provs.map((x,i)=>`<button type="button" data-pv="${i}" class="${x.n===P.prov?"on":""}">${esc(x.n)}</button>`).join("")}<button type="button" data-pv="new" class="${!provs.some(x=>x.n===P.prov)?"on":""}">＋ Otro</button></div>`:""}
+      <div class="two"><label class="fld"><span>Nombre</span><input id="pvN" maxlength="40" value="${esc(P.prov)}" placeholder="Ej: Distribuidora Medellín"></label>
+      <label class="fld"><span>WhatsApp</span><input id="pvW" class="mono" inputmode="tel" maxlength="16" value="${esc(P.num)}" placeholder="3001234567"></label></div>
+      <div class="ctit">Entrega</div>
+      <div class="rranges" id="pF"><button type="button" data-f="0" class="${P.fecha===today()?"on":""}">Hoy</button><button type="button" data-f="1" class="${P.fecha===addD(today(),1)?"on":""}">Mañana</button><button type="button" data-f="2" class="${P.fecha===addD(today(),2)?"on":""}">Pasado mañana</button></div>
+      <label class="fld"><span>¿Para cuándo?</span><input id="pFe" type="date" value="${P.fecha}" min="${today()}"></label>
+      <label class="fld"><span>Dirección de entrega${st.mode==="db"&&sedeActual()?" · "+esc(sedeActual().nombre):""}</span><input id="pD" maxlength="120" value="${esc(P.dir)}" placeholder="Ej: Cra 100 #34-20, Comuna 13"></label>
+      <label class="fld"><span>A nombre de</span><input id="pN" maxlength="40" value="${esc(P.nombre)}" placeholder="Quién recibe el pedido"></label>
+      <div class="ctit">Productos (${P.items.length})</div>
+      <div class="card" id="pI">${P.items.map((it,i)=>{const pr=st.prods.get(it.pid)||{};return `<div class="rrow" style="flex-wrap:wrap;gap:8px">
+        <div class="grow" style="flex-basis:100%"><div class="t">${esc(it.nombre)}</div><div class="sub">${(pr.stock||0)<=0?"Agotado":"Quedan "+(pr.stock||0)} · mín ${minOf(pr)}</div></div>
+        <div class="stepper"><button type="button" data-m="${i}">−</button><b class="num">${it.cant}</b><button type="button" data-p="${i}">+</button></div>
+        <select data-u="${i}" style="flex:1;min-width:96px;padding:9px 8px;border-radius:11px">${UNIDADES.map(u=>`<option value="${u[0]}" ${u[0]===it.u?"selected":""}>${u[1]}</option>`).join("")}</select>
+        ${!["und","botella","garrafa"].includes(it.u)?`<label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);font-weight:700">x<input data-c="${i}" class="num" inputmode="numeric" value="${it.c||""}" placeholder="und" style="width:54px;padding:8px 6px;border-radius:10px"></label>`:""}
+        <button type="button" class="btn ghost sm" data-r="${i}" aria-label="Quitar" style="color:var(--bad)">✕</button></div>`;}).join("")||'<div class="empty">Agrega los productos que vas a pedir</div>'}</div>
+      <input class="search" id="pQ" placeholder="＋ Agregar otro producto…" value="${esc(q)}" autocomplete="off" style="margin:8px 0 0">
+      ${busc.length?`<div class="card" style="margin-top:6px">${busc.map(p=>`<button type="button" class="rrow" data-add="${esc(p.id)}" style="width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;text-align:left;cursor:pointer"><div class="grow"><div class="t">${esc(p.nombre)}</div><div class="sub">Quedan ${p.stock||0}</div></div><span style="color:var(--acc);font-weight:800">Agregar</span></button>`).join("")}</div>`:""}
+      <label class="fld" style="margin-top:10px"><span>Nota (opcional)</span><input id="pNo" maxlength="200" value="${esc(P.nota)}" placeholder="Ej: entregar antes de las 10 a. m."></label>
+      <details class="cdet" ${ver?"open":""} id="pV"><summary>👁️ Ver cómo queda el mensaje</summary><div class="card" style="padding:12px;white-space:pre-wrap;font-size:13.5px;line-height:1.45">${esc(textoPedido(P))}</div></details>
+      <button class="rxl" type="button" id="pGo" style="background:#1fa855">📲 Enviar pedido por WhatsApp</button>
+      <div class="acts"><button class="btn" data-x>Cancelar</button></div>`;
+    const keep=(id,f)=>{const el=s.querySelector(id);if(el)el.oninput=()=>{f(el.value);const pv=s.querySelector("#pV .card");if(pv)pv.textContent=textoPedido(P);};};
+    keep("#pvN",v=>P.prov=v.trim());keep("#pvW",v=>P.num=v.trim());keep("#pD",v=>P.dir=v.trim());keep("#pN",v=>P.nombre=v.trim());keep("#pNo",v=>P.nota=v.trim());
+    s.querySelector("#pFe").onchange=e=>{if(e.target.value){P.fecha=e.target.value;draw(s);}};
+    s.querySelector("#pF").onclick=e=>{const b=e.target.closest("[data-f]");if(b){P.fecha=addD(today(),+b.dataset.f);draw(s);}};
+    const pv=s.querySelector("#pvL");if(pv)pv.onclick=e=>{const b=e.target.closest("[data-pv]");if(!b)return;if(b.dataset.pv==="new"){P.prov="";P.num="";}else{const x=provs[+b.dataset.pv];P.prov=x.n;P.num=x.num||"";}draw(s);};
+    s.querySelector("#pV").ontoggle=e=>{ver=e.target.open;};
+    const I=s.querySelector("#pI");
+    I.onclick=e=>{const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.m!=null){const it=P.items[+b.dataset.m];it.cant=Math.max(1,it.cant-1);}
+      else if(b.dataset.p!=null){P.items[+b.dataset.p].cant++;}
+      else if(b.dataset.r!=null){P.items.splice(+b.dataset.r,1);}
+      else return;draw(s);};
+    I.onchange=e=>{const el=e.target;
+      if(el.dataset.u!=null){const it=P.items[+el.dataset.u];it.u=el.value;const d={canasta:30,sixpack:6,paca:12,docena:12,paquete:it.c||50,caja:it.c||24}[it.u];it.c=it.u==="und"||it.u==="botella"||it.u==="garrafa"?null:(d||it.c||null);draw(s);}};
+    I.oninput=e=>{const el=e.target;if(el.dataset.c!=null){const v=parseInt(el.value.replace(/\D/g,""),10);P.items[+el.dataset.c].c=v>0?Math.min(v,10000):null;const pvc=s.querySelector("#pV .card");if(pvc)pvc.textContent=textoPedido(P);}};
+    I.querySelectorAll(".stepper b").forEach((b,i)=>{b.style.cursor="pointer";b.onclick=()=>{const it=P.items[i];const v=prompt("Cantidad de "+it.nombre,it.cant);const n=parseInt(v,10);if(n>0){it.cant=Math.min(n,100000);draw(s);}};});
+    const pq=s.querySelector("#pQ");pq.oninput=()=>{q=pq.value;const pos=pq.selectionStart;draw(s);const n=s.querySelector("#pQ");n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}};
+    s.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const p=st.prods.get(b.dataset.add);if(!p)return;const pr=presOf(p);P.items.push({pid:p.id,nombre:p.nombre,u:pr.u,c:pr.c,cant:sugCant(p,pr)});q="";draw(s);});
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("#pGo").onclick=async()=>{
+      if(!P.items.length){toast("Agrega al menos un producto");return;}
+      let n=P.num.replace(/\D/g,"");if(n&&n.length===10)n="57"+n;if(n&&n.length<11){toast("Revisa el WhatsApp del proveedor (10 dígitos)");return;}
+      const txt=textoPedido(P);
+      const c=pedCfg();if(P.prov){const k=c.proveedores.findIndex(x=>x.n.toLowerCase()===P.prov.toLowerCase());const o={n:P.prov,num:P.num};if(k>=0)c.proveedores.splice(k,1);c.proveedores.unshift(o);c.proveedores=c.proveedores.slice(0,10);}
+      c.nombre=P.nombre;c.dir[sedeId]=P.dir;guardarPedCfg(c);
+      if(sb&&st.mode==="db"&&isDueno()){const ch=P.items.filter(it=>{const p=st.prods.get(it.pid);return p&&(p.pedido_unidad!==it.u||(p.pedido_contenido||null)!==(it.c||null));});
+        if(ch.length)Promise.all(ch.map(it=>sb.from("productos").update({pedido_unidad:it.u,pedido_contenido:it.c||null}).eq("empresa_id",st.empresa.id).eq("id",it.pid))).then(()=>{for(const it of ch){const p=st.prods.get(it.pid);if(p){p.pedido_unidad=it.u;p.pedido_contenido=it.c||null;}}}).catch(()=>{});}
+      try{await navigator.clipboard.writeText(txt);}catch(_){}
+      window.open("https://wa.me/"+n+"?text="+encodeURIComponent(txt),"_blank","noopener");
+      toast(n?"Abriendo WhatsApp de "+(P.prov||"tu proveedor"):"Elige el chat del proveedor en WhatsApp");
+    };
+  };
+  openSheet("",draw);
+}
+$("#invFilter").addEventListener("click",e=>{if(e.target.closest("[data-pedido]"))pedidoSheet();});
+$("#btnPedido").onclick=pedidoSheet;
 
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
@@ -2428,7 +2524,8 @@ function dueñoSteps(){
     {view:"inv",el:"#btnNewProd",t:"1. Agrega tus productos aquí",p:`Toca <b>+ Producto</b> y escribe el nombre, el precio de venta, la categoría y cuántas unidades tienes. ${nProd}`},
     {view:"inv",el:"#btnCats",t:"Tus categorías",p:"Crea, cambia o borra categorías (cervezas, licores, snacks…) para encontrar rápido tus productos."},
     {view:"inv",el:"#scanInv",t:"Escáner de código de barras",p:"Escanea el código del producto con la cámara para buscarlo o guardarlo sin escribir."+lockTxt("escaner","Pro")},
-    {view:"inv",el:".kpis",t:"Tu inventario de un vistazo",p:"Aquí ves cuántas unidades tienes, los productos con <b>stock bajo</b> y los <b>agotados</b>. Toca cada tarjeta para ver cuáles son y envía la <b>lista de pedido</b> a tu proveedor por WhatsApp."},
+    {view:"inv",el:".kpis",t:"Tu inventario de un vistazo",p:"Aquí ves cuántas unidades tienes, los productos con <b>stock bajo</b> y los <b>agotados</b>. Toca cada tarjeta para ver cuáles son."},
+    {view:"inv",el:"#btnPedido",t:"🛒 Pedido al proveedor",p:"Arma tu pedido: la app te sugiere lo que se está acabando, en canastas, pacas o botellas. Ajusta cantidades, elige para cuándo y envíalo por WhatsApp a tu proveedor."},
     {view:"inv",el:"#invList",t:"Entradas y ajustes",p:"Toca un producto para registrar la <b>mercancía que llega</b>, corregir el conteo físico o editar el precio y su <b>stock mínimo</b> (cuándo avisarte que se está acabando). El <b>precio de compra</b> solo lo ves tú."+lockTxt("costos","Pro")},
     {view:"vender",el:"#grid",t:"2. Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b>, elige efectivo o QR, y el stock se descuenta solo."},
     {view:"vender",el:"#q",t:"Busca rápido",p:"Escribe el nombre o el código para encontrar el producto. Con el botón de al lado puedes escanearlo."},
