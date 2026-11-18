@@ -1,5 +1,5 @@
 // DL CUADRA PRO · service worker (permite instalar la app y abrirla rápido)
-const CACHE = "cuadra-pro-v3.4.1";
+const CACHE = "cuadra-pro-v3.5";
 const SHELL = ["./", "index.html", "legal.html", "config.js", "manifest.json", "logo.svg", "dl-company.png",
   "icon-192.png", "icon-512.png", "icon-maskable-192.png", "icon-maskable-512.png", "apple-touch-icon.png"];
 
@@ -22,4 +22,22 @@ self.addEventListener("fetch", e => {
   } else {
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(n => { if (n.ok) { const c = n.clone(); caches.open(CACHE).then(k => k.put(req, c)); } return n; })));
   }
+});
+
+// Notificaciones push (cierres de caja) — llegan aunque la app esté cerrada
+self.addEventListener("push", e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { title: "DL CUADRA PRO", body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.title || "DL CUADRA PRO", {
+    body: d.body || "", icon: "icon-192.png", badge: "icon-192.png", tag: d.tag || "cuadra",
+    renotify: true, vibrate: [120, 60, 120], data: { url: d.url || "./" }
+  }));
+});
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || "./", self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(ws => {
+    for (const w of ws) { if (w.url.startsWith(self.registration.scope) && "focus" in w) { w.postMessage({ tipo: "abrir", url }); return w.focus(); } }
+    return self.clients.openWindow(url);
+  }));
 });

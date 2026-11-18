@@ -605,7 +605,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.4.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.5 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -836,7 +836,7 @@ async function refresh(){
   if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}
     const pc=aj.data.find(x=>x.clave==="pedido_cfg");try{st.pedidoCfg=pc?JSON.parse(pc.valor):null;}catch(e){st.pedidoCfg=null;}
     const av=aj.data.find(x=>x.clave==="cierre_aviso");try{const v=av&&JSON.parse(av.valor);st.aviso=v&&typeof v==="object"?v:{modo:"app",num:""};}catch(e){st.aviso={modo:"app",num:""};}}
-  loadCierres();if(puede("fiado"))loadClientes();
+  loadCierres();if(puede("fiado"))loadClientes();if(!pushSyncOk){pushSyncOk=true;syncPush();}
   if(isDueno()){
     const [co,vc]=await Promise.all([sb.from("costos").select("producto_id,costo"),sb.from("venta_costos").select("movimiento_id,costo,sin_costo").eq("sede_id",sede).gte("fecha",st.from)]);
     if(!co.error)st.costos=new Map(co.data.map(r=>[r.producto_id,r.costo]));
@@ -1108,7 +1108,7 @@ function sessionMenu(){
     const br=sh.querySelector('[data-m="rep"]');if(br)br.onclick=()=>{closeSheet();setTimeout(reportes,200);};
     sh.querySelector('[data-m="fiado"]').onclick=()=>{closeSheet();setTimeout(fiadoSheet,200);};
     sh.querySelector('[data-m="guia"]').onclick=()=>{closeSheet();setTimeout(()=>startTour(caj?"cajero":"dueno",true),250);};
-    sh.querySelector('[data-m="out"]').onclick=async()=>{closeSheet();const wasCaj=caj;st.perfil=null;await sb.auth.signOut();if(wasCaj){st.empOk=null;loginPanel("empForm");}};
+    sh.querySelector('[data-m="out"]').onclick=async()=>{await soltarPush();pushSyncOk=false;closeSheet();const wasCaj=caj;st.perfil=null;await sb.auth.signOut();if(wasCaj){st.empOk=null;loginPanel("empForm");}};
   });
 }
 function sedeMenu(){
@@ -1998,13 +1998,14 @@ window.addEventListener("popstate",()=>{
 
 /* ---------- cierres de caja guardados ---------- */
 const CSEL="id,sede_id,fecha,ts,cajero_id,por,ventas,total,efectivo,qr,gastos,caja,contado,diferencia,nota,visto";
-let cierresBusy=false;
+let cierresBusy=false,pushSyncOk=false;
 async function loadCierres(){
   if(!sb||st.mode!=="db"||!st.perfil||cierresBusy)return;cierresBusy=true;
   try{
     let q=sb.from("cierres").select(CSEL).order("ts",{ascending:false}).limit(80);
     if(!isDueno())q=q.eq("fecha",today());
-    const r=await q;if(!r.error){st.cierres=r.data||[];renderBell();renderCierreBtn();}
+    const r=await q;if(!r.error){st.cierres=r.data||[];renderBell();renderCierreBtn();
+      if(cierreAbrir&&isDueno()){const id=cierreAbrir;cierreAbrir=null;try{history.replaceState(history.state,"",location.pathname);}catch(e){}if(st.cierres.some(c=>c.id===id))setTimeout(()=>cierreDetalle(id),300);}}
   }finally{cierresBusy=false;}
 }
 let bellAviso=false;
@@ -2070,12 +2071,12 @@ $("#btnCierre").onclick=()=>{
 };
 function cierresSheet(){
   const L=st.cierres||[];
-  const permis="Notification" in window&&Notification.permission==="default"?`<button class="opt" data-perm><span class="ic c1">🔔</span><span><b>Activar avisos en este celular</b><small>Te avisa cuando un cajero cierre la caja</small></span></button>`:"";
+  const permis=`<div id="pushBox"></div>`;
   openSheet(`<h3>🔔 Cierres de caja</h3><p class="hint">Aquí llegan los cierres de tus cajeros. Toca uno para ver todo lo que pasó en el día.</p>${permis}
     <div class="card clist" style="margin:8px 0">${L.map(c=>`<div class="row ${c.visto?"":"new"}" data-cid="${esc(c.id)}">${c.visto?"":'<span class="dot"></span>'}<div class="grow"><div class="t">${c.cajero_id?"👤":"👑"} ${esc(c.por)} · ${esc(sedeNom(c.sede_id))}</div><div class="sub">${new Date(c.fecha+"T12:00").toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"})} · ${hhmm(new Date(c.ts).getTime())} · ${c.ventas} ventas${c.diferencia!=null&&c.diferencia!==0?" · "+(c.diferencia<0?"⚠️ faltó "+fmt(-c.diferencia):"➕ sobró "+fmt(c.diferencia)):""}</div></div><b class="num">${fmt(c.total)}</b></div>`).join("")||'<div class="empty">Aún no hay cierres. Cuando un cajero toque “Cerrar caja” en Cierre del día, te llegará aquí.</div>'}</div>
     <div class="acts">${L.some(c=>!c.visto)?'<button class="btn" data-all>Marcar todo como visto</button>':""}<button class="btn pri" data-x>Cerrar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
-    const pa=s.querySelector("[data-perm]");if(pa)pa.onclick=async()=>{try{const r=await Notification.requestPermission();toast(r==="granted"?"🔔 Avisos activados":"No se activaron los avisos");}catch(e){}cierresSheet();};
+    pintarPush(s.querySelector("#pushBox"));
     const al=s.querySelector("[data-all]");if(al)al.onclick=async()=>{await sb.rpc("marcar_cierres_vistos",{p_id:null});(st.cierres||[]).forEach(c=>c.visto=true);renderBell();cierresSheet();};
     s.querySelector(".clist").onclick=e=>{const r=e.target.closest("[data-cid]");if(r)cierreDetalle(r.dataset.cid);};
   });
@@ -2109,8 +2110,8 @@ async function cierreDetalle(id){
 $("#bellBtn").onclick=cierresSheet;
 $("#btnCierre").addEventListener("contextmenu",e=>e.preventDefault());
 function renderAviso(){
-  const el=$("#admAvisoC");if(!el)return;const a=st.aviso||{modo:"app"};
-  el.innerHTML=`<div class="row"><div class="grow"><div class="sub">Cómo recibes los cierres</div><div class="t" style="white-space:normal">${a.modo==="wa"?"🔔 En la app + 📲 WhatsApp":"🔔 Solo en la app (sin WhatsApp)"}</div></div></div>
+  const el=$("#admAvisoC");if(!el)return;setTimeout(()=>pintarPush($("#admPush")),0);const a=st.aviso||{modo:"app"};
+  el.innerHTML=`<div style="padding:10px 12px 0" id="admPush"></div><div class="row"><div class="grow"><div class="sub">Cómo recibes los cierres</div><div class="t" style="white-space:normal">${a.modo==="wa"?"🔔 En la app + 📲 WhatsApp":"🔔 Solo en la app (sin WhatsApp)"}</div></div></div>
     ${a.modo==="wa"?`<div class="row"><div class="grow"><div class="sub">WhatsApp del dueño</div><div class="t mono">${waNum()?"+"+esc(waNum()):"Sin número: el cajero elige el chat"}</div></div></div>`:""}`;
 }
 $("#admAviso").onclick=()=>{
@@ -2580,6 +2581,47 @@ function pedidoSheet(provIdx){
 $("#invFilter").addEventListener("click",e=>{if(e.target.closest("[data-pedido]"))pedidoSheet();});
 $("#btnPedido").onclick=()=>pedidoSheet();
 
+/* ---------- notificaciones push (llegan con la app cerrada) ---------- */
+const VAPID_PUB="BNMIHlUAXQFENegoZu-9q-LFiOhrm6bFQPRMySD4vK9ba3dhy44BRXFNifZ9vPB-r76W-mufEVZeD6X1s7wvgrc";
+const b64u=s=>{const p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0));};
+const esIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const instalada=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+async function pushSub(){try{const r=await navigator.serviceWorker.getRegistration();return r?await r.pushManager.getSubscription():null;}catch(e){return null;}}
+async function pushEstado(){
+  if(!sb||st.mode!=="db")return "no";
+  if(esIOS()&&!instalada())return "ios";
+  if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))return "no";
+  if(Notification.permission==="denied")return "denied";
+  const s=await pushSub();return s&&Notification.permission==="granted"?"on":"off";
+}
+async function activarPush(){
+  const reg=await navigator.serviceWorker.register("sw.js");await navigator.serviceWorker.ready;
+  const perm=await Notification.requestPermission();if(perm!=="granted")throw new Error(perm==="denied"?"BLOQUEADO":"No diste permiso para los avisos");
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+  const j=sub.toJSON();chk(await sb.rpc("guardar_push",{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_ua:navigator.userAgent}));
+  try{await sb.functions.invoke("push-cierre",{body:{test:true}});}catch(e){}
+}
+async function desactivarPush(){const s=await pushSub();if(s){try{await sb.rpc("borrar_push",{p_endpoint:s.endpoint});}catch(e){}try{await s.unsubscribe();}catch(e){}}}
+async function syncPush(){if(!isDueno())return;try{if(await pushEstado()!=="on")return;const j=(await pushSub()).toJSON();await sb.rpc("guardar_push",{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_ua:navigator.userAgent});}catch(e){}}
+async function soltarPush(){try{const s=await pushSub();if(s&&sb)await sb.rpc("borrar_push",{p_endpoint:s.endpoint});}catch(e){}}
+async function pintarPush(box){
+  if(!box)return;const e=await pushEstado();
+  const T={
+    on:`<div class="cdiff ok" style="display:flex;align-items:center;gap:10px"><span style="flex:1">🔔 Avisos activados en este celular. Te llegan aunque la app esté cerrada.</span><button class="btn sm" data-pt>Probar</button><button class="btn sm ghost" data-poff>Apagar</button></div>`,
+    off:`<button class="opt" data-pon><span class="ic c1">🔔</span><span><b>Activar avisos en este celular</b><small>Te llega una notificación cuando un cajero cierre la caja, aunque la app esté cerrada</small></span></button>`,
+    denied:`<div class="cdiff warn">🔕 Bloqueaste los avisos de esta página. Para activarlos: toca el candado 🔒 junto a la dirección → <b>Permisos</b> → <b>Notificaciones</b> → Permitir.</div>`,
+    ios:`<div class="cdiff warn">📲 En iPhone, primero instala la app: toca <b>Compartir</b> → <b>Agregar a pantalla de inicio</b>. Ábrela desde el ícono y activa los avisos aquí.</div>`,
+    no:`<div class="cdiff warn">Este navegador no recibe avisos. Usa Chrome en Android o instala la app.</div>`};
+  box.innerHTML=T[e]||"";
+  const on=box.querySelector("[data-pon]");if(on)on.onclick=async()=>{on.disabled=true;try{await activarPush();toast("🔔 Avisos activados. Te enviamos uno de prueba");}catch(err){toast(err.message==="BLOQUEADO"?"Bloqueaste los avisos. Actívalos en los permisos del navegador":"No se pudieron activar: "+(err.message||err));}pintarPush(box);};
+  const off=box.querySelector("[data-poff]");if(off)off.onclick=async()=>{await desactivarPush();toast("Avisos apagados en este celular");pintarPush(box);};
+  const pt=box.querySelector("[data-pt]");if(pt)pt.onclick=async()=>{try{const r=await sb.functions.invoke("push-cierre",{body:{test:true}});toast(r.data&&r.data.sent?"Aviso de prueba enviado":"No se pudo enviar la prueba");}catch(err){toast("No se pudo enviar la prueba");}};
+}
+// abrir el cierre al tocar la notificación
+let cierreAbrir=new URLSearchParams(location.search).get("cierre");
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",ev=>{const d=ev.data||{};if(d.tipo==="abrir"){try{const c=new URL(d.url).searchParams.get("cierre");if(c){cierreAbrir=c;loadCierres();}}catch(e){}}});
+
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
 const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
@@ -2611,7 +2653,7 @@ function dueñoSteps(){
     {view:"dia",el:"#btnFiado",t:"📒 Fiado",p:"Anota lo que se llevan fiado tus clientes: al cobrar elige <b>📒 Fiado</b> y el cliente. Aquí ves quién te debe, registras abonos y le cobras por WhatsApp."+(LIM().clientes!=null?` Tu plan permite <b>${LIM().clientes} clientes</b>.`:"")},
     {view:"dia",el:"#btnCierre",t:"Cierra la caja",p:"Al final del día toca aquí: el cierre queda <b>guardado</b> con las ventas, los gastos y el inventario. Puedes anotar cuánto efectivo contaste y la app te dice si cuadra."},
     {view:"dia",el:"#btnCopy",t:"Comparte por WhatsApp",p:"Si quieres, envía el resumen del día por WhatsApp al socio o al contador."},
-    {el:"#bellBtn",t:"🔔 Tus cierres",p:"Cuando un cajero cierra la caja te llega el aviso aquí. Tócala para ver todo lo que pasó en el día, sin llenar tu WhatsApp de mensajes."},
+    {el:"#bellBtn",t:"🔔 Tus cierres",p:"Cuando un cajero cierra la caja te llega el aviso aquí. Tócala para ver todo lo que pasó en el día, sin llenar tu WhatsApp. Ahí mismo activa los <b>avisos en el celular</b> para que te lleguen aunque la app esté cerrada."},
     {el:"#tabAdmin",t:"4. Administración",p:(L.cajeros===0?"Aquí editas tu negocio y ves tu plan. Con el plan <b>Pro</b> puedes crear <b>cajeros con PIN</b> para que vendan sin ver tu ganancia.":"Aquí creas tus <b>cajeros</b> (la app les da un PIN de 4 números)"+(L.sedes===1?" y ves tu plan.":" y tus <b>sedes</b>."))},
     {el:"#planChip",t:"Tu plan",p:"Tócalo para ver qué incluye cada plan y mejorar el tuyo cuando lo necesites.",skipIfHidden:true},
     {el:"#roleChip",t:"Tu menú",p:"Desde aquí cambias de sede, descargas la app, vuelves a ver esta guía o cierras sesión."},
