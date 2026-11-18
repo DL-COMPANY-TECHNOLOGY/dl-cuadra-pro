@@ -424,6 +424,31 @@ html[data-theme="light"] .prec{color:#6d28d9}
 .glock b{display:block;font-size:17px;margin:4px 0 2px}
 .glock small{color:var(--acc);font-weight:800;font-size:12.5px}
 
+
+/* ---------- cierres de caja ---------- */
+.brand>div{min-width:0}.brand .bt{overflow:hidden;text-overflow:ellipsis}
+@media(max-width:520px){body.hasbell .status{font-size:0;padding:0;width:12px;height:12px;min-width:12px;border-radius:50%;background:var(--ok);border:0;box-shadow:0 0 10px var(--ok);letter-spacing:0}
+  body.hasbell .status.off{background:var(--warn);box-shadow:0 0 10px var(--warn)}}
+.bellbtn{position:relative;width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--acc);cursor:pointer}
+.bellbtn svg{width:19px;height:19px}
+.bellbtn i{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font:800 11px/19px system-ui;font-style:normal;text-align:center;box-shadow:0 0 12px rgba(255,92,122,.6)}
+.bellbtn.ring svg{animation:bring 1s ease 2}
+@keyframes bring{0%,100%{transform:rotate(0)}20%{transform:rotate(16deg)}40%{transform:rotate(-14deg)}60%{transform:rotate(8deg)}80%{transform:rotate(-5deg)}}
+html[data-theme="light"] .bellbtn{background:#fff;color:var(--gold)}
+.cierrebtn{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 10px;padding:14px 16px;border-radius:16px;border:1px solid rgba(34,228,255,.45);background:linear-gradient(135deg,rgba(34,228,255,.16),rgba(168,85,247,.16));color:var(--ink);text-align:left;cursor:pointer}
+.cierrebtn .ci{font-size:26px}.cierrebtn b{display:block;font-size:16px}.cierrebtn small{color:var(--muted);font-weight:600;font-size:12.5px}
+.cierrebtn.done{border-color:rgba(46,242,160,.45);background:rgba(46,242,160,.08)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.cgrid div{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:9px 11px}
+.cgrid span{display:block;font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.cgrid b{font-size:17px}
+.cdiff{border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;margin:0 0 10px}
+.cdiff.ok{background:rgba(46,242,160,.12);color:var(--ok)}.cdiff.bad{background:rgba(255,92,122,.12);color:var(--bad)}.cdiff.warn{background:rgba(255,181,71,.12);color:var(--warn)}
+.clist .row{cursor:pointer}.clist .row.new{background:rgba(34,228,255,.07)}
+.clist .dot{width:9px;height:9px;border-radius:9px;background:var(--acc);flex:none;box-shadow:0 0 8px var(--acc)}
+.ctit{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px}
+.cinv .row .num.z{color:var(--bad)}.cinv .row .num.l{color:var(--warn)}
+details.cdet summary{cursor:pointer;font-weight:800;color:var(--acc);padding:6px 0}
 /* ---------- guía interactiva ---------- */
 .tour{position:fixed;inset:0;z-index:58;display:none}
 .tour.on{display:block}
@@ -461,6 +486,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
   <div class="brand"><img src="logo.svg" alt="DL CUADRA PRO">
     <div><div class="bt">DL <em>CUADRA PRO</em></div><button class="biz empty" id="bizBtn" type="button" aria-label="Editar nombre del negocio"><span id="bizName">Pon el nombre de tu negocio aquí</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div></div>
   <span class="status off" id="status">Conectando…</span>
+  <button class="bellbtn" id="bellBtn" type="button" aria-label="Cierres de caja" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><i id="bellN" hidden>0</i></button>
   <button class="themebtn" id="themeBtn" type="button" aria-label="Cambiar a modo día" title="Modo día / noche">
     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
@@ -513,8 +539,9 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <div class="card gan dueno-only" id="dGanW" style="margin-bottom:10px"></div>
     <div class="card" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center">
       <div><div style="font-size:12px;font-weight:800;color:var(--muted)">EFECTIVO EN CAJA (efectivo − gastos)</div><b class="num" style="font-size:22px" id="dCaja">$0</b></div>
-      <button class="btn sm" id="btnCopy">Copiar resumen</button>
+      <button class="btn sm" id="btnCopy">📲 WhatsApp</button>
     </div>
+    <button class="cierrebtn" type="button" id="btnCierre"><span class="ci">🔒</span><span><b id="cbTit">Cerrar caja y guardar</b><small id="cbSub">El dueño recibe el aviso al instante en su app</small></span></button>
 
     <div id="dPorWrap" hidden><div class="sec"><h2>Ventas por cajero</h2></div><div class="card" id="dPor"></div></div>
 
@@ -535,6 +562,8 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <div class="card" id="admPlan"></div>
     <div class="sec"><h2>Empresa</h2><button class="btn sm" id="admEmpEdit">Editar</button></div>
     <div class="card" id="admEmp"></div>
+    <div class="sec"><h2>Cierres de caja</h2><button class="btn sm" id="admAviso">Configurar</button></div>
+    <div class="card" id="admAvisoC"></div>
     <div class="sec"><h2>Sedes</h2><button class="btn sm dark" id="admSedeNew">+ Sede</button></div>
     <div class="card" id="admSedes"></div>
     <div class="sec"><h2>Cajeros</h2><button class="btn sm dark" id="admCajNew">+ Cajero</button></div>
@@ -555,7 +584,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.8 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.9 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -781,7 +810,9 @@ async function refresh(){
   const stock=new Map(inv.data.map(r=>[r.producto_id,r.stock]));
   st.prods=new Map(pr.data.map(p=>[p.id,{...p,stock:stock.get(p.id)||0}]));
   st.movs=mv.data.map(rowToMov);
-  if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}}
+  if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}
+    const av=aj.data.find(x=>x.clave==="cierre_aviso");try{const v=av&&JSON.parse(av.valor);st.aviso=v&&typeof v==="object"?v:{modo:"app",num:""};}catch(e){st.aviso={modo:"app",num:""};}}
+  loadCierres();
   if(isDueno()){
     const [co,vc]=await Promise.all([sb.from("costos").select("producto_id,costo"),sb.from("venta_costos").select("movimiento_id,costo,sin_costo").eq("sede_id",sede).gte("fecha",st.from)]);
     if(!co.error)st.costos=new Map(co.data.map(r=>[r.producto_id,r.costo]));
@@ -1068,10 +1099,11 @@ function startData(){
   channel=sb.channel("cambios");
   for(const t of ["productos","movimientos","ajustes","inventario"])channel.on("postgres_changes",{event:"*",schema:"public",table:t},refreshSoon);
   for(const t of ["sedes","empresas"])channel.on("postgres_changes",{event:"*",schema:"public",table:t},ctxSoon);
+  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"cierres"},nuevoCierre);
   channel.subscribe();
 }
 let ctxT=null;const ctxSoon=()=>{clearTimeout(ctxT);ctxT=setTimeout(async()=>{if(!st.user||!st.perfil)return;try{const r=await loadContext();if(!r.ok)return boot(true);if(!st.sede)return showSedePicker();render();if($("#v-admin").classList.contains("on"))loadAdmin();}catch(e){}},300);};
-function stopData(){if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
+function stopData(){st.cierres=[];bellAviso=false;renderBell();if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
 
 async function init(){
   render();
@@ -1257,7 +1289,16 @@ function renderInv(){
   }
   $("#invList").innerHTML=h||`<div class="empty">${f&&!q?(f==="zero"?"No tienes productos agotados ✓":f==="low"?"No tienes productos con stock bajo ✓":"Todos tus productos tienen precio ✓"):st.prods.size?"Sin resultados":"Sin productos todavía"}</div>`;
 }
+function renderCierreBtn(){
+  const b=$("#btnCierre");if(!b)return;
+  const show=st.mode==="db"&&!!sb&&!!st.perfil&&st.day===today();b.hidden=!show;if(!show)return;
+  const mios=(st.cierres||[]).filter(c=>c.fecha===today()&&c.sede_id===st.sede&&(isDueno()||c.cajero_id===st.perfil.cajero_id));
+  const u=mios[0];b.classList.toggle("done",!!u);
+  $("#cbTit").textContent=u?"✅ Caja cerrada a las "+hhmm(new Date(u.ts).getTime())+(mios.length>1?" ("+mios.length+" cierres)":""):"Cerrar caja y guardar";
+  $("#cbSub").textContent=u?(isDueno()?"Toca para ver el cierre o cerrar de nuevo":"El dueño ya recibió el aviso · toca si necesitas cerrar de nuevo"):(isDueno()?"Queda guardado en tus cierres (🔔)":"El dueño recibe el aviso al instante en su app");
+}
 function renderDia(){
+  renderCierreBtn();
   const day=st.day;$("#dDate").value=day;$("#dNext").disabled=day>=today();
   const r=dayStats(day);
   $("#dTot").textContent=fmt(r.tot);$("#dEf").textContent=fmt(r.ef);$("#dQr").textContent=fmt(r.qr);$("#dGa").textContent=fmt(r.ga);
@@ -1610,8 +1651,13 @@ $("#btnCopy").onclick=async()=>{
   const r=dayStats(st.day);const en=(st.empresa&&st.empresa.nombre)||st.negocio,sd=st.mode==="db"&&sedeActual()?sedeActual().nombre:"";let txt=`*${en?en+" · ":""}${sd?sd+" · ":""}Cierre ${nice(st.day)}*\n`;
   for(const p of prodsArr()){const x=r.per[p.id];if(x&&x.vend)txt+=`• ${p.nombre}: ${x.vend} → ${fmt(x.dinero)}\n`;}
   txt+=`\nEfectivo: ${fmt(r.ef)}\nQR banco: ${fmt(r.qr)}\nGastos: ${fmt(r.ga)}${r.gastos.length?" ("+r.gastos.map(g=>g.desc).join(", ")+")":""}\n*Total ventas: ${fmt(r.tot)}*${isDueno()?`\nGanancia: ${fmt(r.gan)}${r.sinCosto?" (aprox.)":""}`:""}\nEfectivo en caja: ${fmt(r.ef-r.ga)}`;
-  try{await navigator.clipboard.writeText(txt);toast("Resumen copiado · pégalo en WhatsApp");}catch(e){toast("No se pudo copiar");}
+  enviarWA(txt);
 };
+function waNum(){const n=String((st.aviso&&st.aviso.num)||"").replace(/\D/g,"");return n.length>=10?(n.length===10?"57"+n:n):"";}
+async function enviarWA(txt){
+  try{await navigator.clipboard.writeText(txt);}catch(e){}
+  const n=waNum();window.open("https://wa.me/"+n+"?text="+encodeURIComponent(txt),"_blank","noopener");
+}
 
 /* ---------- modo día / noche ---------- */
 function applyTheme(t){
@@ -1665,7 +1711,7 @@ function renderPlanCard(){
 $("#admPlanes").onclick=()=>showPlanes();
 $("#planChip").onclick=()=>showPlanes();
 function renderAdmin(){
-  renderPlanCard();
+  renderPlanCard();renderAviso();
   if(st.mode!=="db"||!isDueno()||!st.empresa)return;
   const e=st.empresa;
   $("#admWarn").innerHTML=nitOk(e.nit)?"":`<div class="banner">⚠️ Pon el NIT real de la empresa. Sin él, tus cajeros no pueden ingresar.</div>`;
@@ -1902,6 +1948,142 @@ window.addEventListener("popstate",()=>{
   exitToLogin();
 });
 
+/* ---------- cierres de caja guardados ---------- */
+const CSEL="id,sede_id,fecha,ts,cajero_id,por,ventas,total,efectivo,qr,gastos,caja,contado,diferencia,nota,visto";
+let cierresBusy=false;
+async function loadCierres(){
+  if(!sb||st.mode!=="db"||!st.perfil||cierresBusy)return;cierresBusy=true;
+  try{
+    let q=sb.from("cierres").select(CSEL).order("ts",{ascending:false}).limit(80);
+    if(!isDueno())q=q.eq("fecha",today());
+    const r=await q;if(!r.error){st.cierres=r.data||[];renderBell();renderCierreBtn();}
+  }finally{cierresBusy=false;}
+}
+let bellAviso=false;
+function renderBell(){
+  if(!bellAviso&&isDueno()&&st.cierres&&st.cierres.length){bellAviso=true;const n=st.cierres.filter(c=>!c.visto).length;if(n)setTimeout(()=>{if(!tourOn())toast("🔔 Tienes "+n+(n===1?" cierre de caja nuevo":" cierres de caja nuevos"));},1500);}
+  const b=$("#bellBtn");if(!b)return;
+  const on=st.mode==="db"&&!!st.perfil&&isDueno();b.hidden=!on;document.body.classList.toggle("hasbell",on);if(!on)return;
+  const n=(st.cierres||[]).filter(c=>!c.visto).length;const i=$("#bellN");i.hidden=!n;i.textContent=n>9?"9+":n;
+}
+const sedeNom=id=>(st.sedes.find(s=>s.id===id)||{}).nombre||"Sede";
+const diffTxt=d=>d==null?"":d===0?"✅ Cuadró exacto":d<0?"⚠️ Faltaron "+fmt(-d):"➕ Sobraron "+fmt(d);
+const diffCls=d=>d==null?"":d===0?"ok":d<0?"bad":"warn";
+async function nuevoCierre(ev){
+  const c=ev&&ev.new;await loadCierres();
+  if(!isDueno()||!c||c.visto)return;
+  const msg="🔒 "+(c.por||"Un cajero")+" cerró la caja · "+sedeNom(c.sede_id)+" · "+fmt(c.total);
+  toast(msg);const b=$("#bellBtn");b.classList.remove("ring");void b.offsetWidth;b.classList.add("ring");
+  try{navigator.vibrate&&navigator.vibrate([120,60,120]);}catch(e){}
+  try{if("Notification" in window&&Notification.permission==="granted"&&document.hidden){const reg=await navigator.serviceWorker.getRegistration();
+    const body=sedeNom(c.sede_id)+" · Ventas "+fmt(c.total)+(c.diferencia!=null&&c.diferencia!==0?" · "+diffTxt(c.diferencia).replace(/^\S+ /,""):"");
+    if(reg)reg.showNotification("Caja cerrada por "+(c.por||"cajero"),{body,icon:"icon-192.png",badge:"icon-192.png",tag:"cierre-"+c.id});}}catch(e){}
+}
+function textoCierre(c,d){
+  const en=(st.empresa&&st.empresa.nombre)||"";let t=`*🔒 Cierre de caja${en?" · "+en:""}*\n📍 ${d.sede||sedeNom(c.sede_id)} · ${nice(c.fecha)}\n👤 ${c.por} · ${hhmm(new Date(c.ts).getTime())}\n\n`;
+  for(const v of d.vendidos||[])t+=`• ${v.n}: ${v.cant} → ${fmt(v.dinero)}\n`;
+  t+=`\nVentas (${c.ventas}): *${fmt(c.total)}*\nEfectivo: ${fmt(c.efectivo)}\nQR banco: ${fmt(c.qr)}\nGastos: ${fmt(c.gastos)}${(d.gastos||[]).length?" ("+d.gastos.map(g=>g.d).join(", ")+")":""}\nEfectivo en caja: ${fmt(c.caja)}`;
+  if(c.contado!=null)t+=`\nEfectivo contado: ${fmt(c.contado)} · ${diffTxt(c.diferencia)}`;
+  if(c.nota)t+=`\n📝 ${c.nota}`;
+  const bajos=(d.inventario||[]).filter(x=>x.s<=3);if(bajos.length)t+=`\n\n⚠️ Stock bajo/agotado: ${bajos.map(x=>x.n+" ("+x.s+")").join(", ")}`;
+  return t;
+}
+$("#btnCierre").onclick=()=>{
+  if(!sb||st.mode!=="db")return;
+  if(st.queue&&st.queue.length){toast("Hay ventas sin enviar. Espera a que vuelva el internet para cerrar la caja.");return;}
+  const r=dayStats(today()),caja=r.ef-r.ga,av=st.aviso||{modo:"app"};
+  const waOpt=isDueno()?"":av.modo==="wa"?`<label class="lrow" style="justify-content:flex-start;margin:4px 0 12px"><input type="checkbox" id="cWa" checked> <span style="font-weight:700">Enviar también por WhatsApp al dueño</span></label>`
+    :`<label class="lrow" style="justify-content:flex-start;margin:4px 0 12px"><input type="checkbox" id="cWa"> <span style="font-weight:700;color:var(--muted)">Enviar también por WhatsApp (opcional)</span></label>`;
+  openSheet(`<h3>🔒 Cerrar caja</h3><p class="hint">📍 ${esc(sedeNom(st.sede))} · ${nice(today())}</p>
+    <div class="cgrid"><div><span>Ventas (${r.ventas.length})</span><b class="num">${fmt(r.tot)}</b></div><div><span>Efectivo</span><b class="num">${fmt(r.ef)}</b></div><div><span>QR banco</span><b class="num">${fmt(r.qr)}</b></div><div><span>Gastos</span><b class="num">${fmt(r.ga)}</b></div></div>
+    <div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">💵 Debe haber en caja: <span class="num">${fmt(caja)}</span></div>
+    <label class="fld"><span>¿Cuánto efectivo contaste? (opcional)</span><input id="cCont" class="num" inputmode="numeric" placeholder="Ej: ${Math.max(0,caja)}"></label>
+    <div id="cDiff"></div>
+    <label class="fld"><span>Nota (opcional)</span><input id="cNota" maxlength="300" placeholder="Ej: se pagó el hielo con plata de la caja"></label>
+    ${waOpt}
+    <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar cierre</button></div>`,s=>{
+    const ci=s.querySelector("#cCont"),cd=s.querySelector("#cDiff");
+    const val=()=>{const v=ci.value.replace(/\D/g,"");return v===""?null:+v;};
+    ci.oninput=()=>{const v=val();ci.value=v==null?"":v.toLocaleString("es-CO");const d=v==null?null:v-caja;cd.innerHTML=d==null?"":`<div class="cdiff ${diffCls(d)}">${diffTxt(d)}</div>`;};
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-ok]").onclick=async e=>{
+      const b=e.currentTarget;b.disabled=true;b.textContent="Guardando…";
+      try{
+        const res=await sb.rpc("cerrar_caja",{p_sede:st.sede,p_contado:val(),p_nota:s.querySelector("#cNota").value.trim()||null});
+        if(res.error)throw res.error;
+        const wa=s.querySelector("#cWa"),mandar=wa&&wa.checked;
+        closeSheet();await loadCierres();
+        toast(isDueno()?"✅ Cierre guardado":"✅ Caja cerrada. El dueño ya recibió el aviso");
+        if(mandar){const c=(st.cierres||[]).find(x=>x.id===res.data);const d=await sb.from("cierres").select("detalle").eq("id",res.data).maybeSingle();
+          if(c&&d.data)enviarWA(textoCierre(c,d.data.detalle||{}));}
+      }catch(err){b.disabled=false;b.textContent="Guardar cierre";if(isNetErr(err))toast("Sin internet. Intenta de nuevo cuando vuelva la señal.");else toast("No se pudo guardar: "+(err.message||err));}
+    };
+  });
+};
+function cierresSheet(){
+  const L=st.cierres||[];
+  const permis="Notification" in window&&Notification.permission==="default"?`<button class="opt" data-perm><span class="ic c1">🔔</span><span><b>Activar avisos en este celular</b><small>Te avisa cuando un cajero cierre la caja</small></span></button>`:"";
+  openSheet(`<h3>🔔 Cierres de caja</h3><p class="hint">Aquí llegan los cierres de tus cajeros. Toca uno para ver todo lo que pasó en el día.</p>${permis}
+    <div class="card clist" style="margin:8px 0">${L.map(c=>`<div class="row ${c.visto?"":"new"}" data-cid="${esc(c.id)}">${c.visto?"":'<span class="dot"></span>'}<div class="grow"><div class="t">${c.cajero_id?"👤":"👑"} ${esc(c.por)} · ${esc(sedeNom(c.sede_id))}</div><div class="sub">${new Date(c.fecha+"T12:00").toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"})} · ${hhmm(new Date(c.ts).getTime())} · ${c.ventas} ventas${c.diferencia!=null&&c.diferencia!==0?" · "+(c.diferencia<0?"⚠️ faltó "+fmt(-c.diferencia):"➕ sobró "+fmt(c.diferencia)):""}</div></div><b class="num">${fmt(c.total)}</b></div>`).join("")||'<div class="empty">Aún no hay cierres. Cuando un cajero toque “Cerrar caja” en Cierre del día, te llegará aquí.</div>'}</div>
+    <div class="acts">${L.some(c=>!c.visto)?'<button class="btn" data-all>Marcar todo como visto</button>':""}<button class="btn pri" data-x>Cerrar</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    const pa=s.querySelector("[data-perm]");if(pa)pa.onclick=async()=>{try{const r=await Notification.requestPermission();toast(r==="granted"?"🔔 Avisos activados":"No se activaron los avisos");}catch(e){}cierresSheet();};
+    const al=s.querySelector("[data-all]");if(al)al.onclick=async()=>{await sb.rpc("marcar_cierres_vistos",{p_id:null});(st.cierres||[]).forEach(c=>c.visto=true);renderBell();cierresSheet();};
+    s.querySelector(".clist").onclick=e=>{const r=e.target.closest("[data-cid]");if(r)cierreDetalle(r.dataset.cid);};
+  });
+}
+async function cierreDetalle(id){
+  const c=(st.cierres||[]).find(x=>x.id===id);if(!c)return;
+  const r=await sb.from("cierres").select("detalle").eq("id",id).maybeSingle();
+  if(r.error||!r.data){toast("No se pudo abrir el cierre");return;}
+  const d=r.data.detalle||{};
+  if(isDueno()&&!c.visto){c.visto=true;renderBell();sb.rpc("marcar_cierres_vistos",{p_id:id});}
+  const rows=(a,f)=>a.length?a.map(f).join(""):'<div class="empty">Nada</div>';
+  const inv=d.inventario||[],bajos=inv.filter(x=>x.s<=3).length;
+  openSheet(`<h3>🔒 Cierre de ${esc(c.por)}</h3><p class="hint">📍 ${esc(d.sede||sedeNom(c.sede_id))} · ${nice(c.fecha)} · ${hhmm(new Date(c.ts).getTime())}</p>
+    <div class="cgrid"><div><span>Ventas (${c.ventas})</span><b class="num">${fmt(c.total)}</b></div><div><span>Efectivo</span><b class="num">${fmt(c.efectivo)}</b></div><div><span>QR banco</span><b class="num">${fmt(c.qr)}</b></div><div><span>Gastos</span><b class="num">${fmt(c.gastos)}</b></div></div>
+    <div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">💵 Debía haber en caja: <span class="num">${fmt(c.caja)}</span>${c.contado!=null?`<br>Contó: <span class="num">${fmt(c.contado)}</span>`:""}</div>
+    ${c.contado!=null?`<div class="cdiff ${diffCls(c.diferencia)}">${diffTxt(c.diferencia)}</div>`:""}
+    ${c.nota?`<div class="cdiff warn">📝 ${esc(c.nota)}</div>`:""}
+    <div class="ctit">Lo que se vendió</div><div class="card">${rows(d.vendidos||[],v=>`<div class="row"><div class="grow"><div class="t">${esc(v.n)}</div><div class="sub">${v.cant} ${v.cant===1?"unidad":"unidades"}</div></div><b class="num">${fmt(v.dinero)}</b></div>`)}</div>
+    ${(d.cajeros||[]).length>1?`<div class="ctit">Por cajero</div><div class="card">${d.cajeros.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.por)}</div><div class="sub">${x.n} ventas</div></div><b class="num">${fmt(x.t)}</b></div>`).join("")}</div>`:""}
+    <div class="ctit">Gastos</div><div class="card">${rows(d.gastos||[],g=>`<div class="row"><div class="grow"><div class="t">${esc(g.d||"Gasto")}</div><div class="sub">${esc(g.por||"")}</div></div><b class="num">${fmt(g.v)}</b></div>`)}</div>
+    ${(d.entradas||[]).length?`<div class="ctit">Mercancía que entró</div><div class="card">${d.entradas.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n||"")}</div></div><b class="num">+${x.cant}</b></div>`).join("")}</div>`:""}
+    <details class="cdet"><summary>📦 Inventario al cerrar (${inv.length} productos${bajos?" · "+bajos+" bajos o agotados":""})</summary><div class="card cinv">${rows(inv,x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">${esc(x.cat||"")}</div></div><b class="num ${x.s<=0?"z":x.s<=3?"l":""}">${x.s}</b></div>`)}</div></details>
+    <div class="acts"><button class="btn" data-wa>📲 WhatsApp</button>${c.sede_id===st.sede&&isDueno()?'<button class="btn" data-dia>Ver el día</button>':""}<button class="btn pri" data-x>Listo</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-wa]").onclick=()=>enviarWA(textoCierre(c,d));
+    const dd=s.querySelector("[data-dia]");if(dd)dd.onclick=()=>{closeSheet();st.day=c.fecha;subscribeMovs();goView("dia");render();};
+  });
+}
+$("#bellBtn").onclick=cierresSheet;
+$("#btnCierre").addEventListener("contextmenu",e=>e.preventDefault());
+function renderAviso(){
+  const el=$("#admAvisoC");if(!el)return;const a=st.aviso||{modo:"app"};
+  el.innerHTML=`<div class="row"><div class="grow"><div class="sub">Cómo recibes los cierres</div><div class="t" style="white-space:normal">${a.modo==="wa"?"🔔 En la app + 📲 WhatsApp":"🔔 Solo en la app (sin WhatsApp)"}</div></div></div>
+    ${a.modo==="wa"?`<div class="row"><div class="grow"><div class="sub">WhatsApp del dueño</div><div class="t mono">${waNum()?"+"+esc(waNum()):"Sin número: el cajero elige el chat"}</div></div></div>`:""}`;
+}
+$("#admAviso").onclick=()=>{
+  const a=st.aviso||{modo:"app",num:""};
+  openSheet(`<h3>Cierres de caja</h3><p class="hint">Cuando un cajero cierra la caja, el cierre queda guardado y te llega el aviso a la campana 🔔. Elige si además quieres recibirlo por WhatsApp.</p>
+    <div class="seg" id="avM" style="margin:0 0 12px"><button type="button" data-m="app" class="${a.modo!=="wa"?"on":""}">🔔 Solo en la app</button><button type="button" data-m="wa" class="${a.modo==="wa"?"on":""}">📲 App + WhatsApp</button></div>
+    <label class="fld" id="avNumW" ${a.modo==="wa"?"":"hidden"}><span>Tu número de WhatsApp</span><input id="avNum" class="mono" inputmode="tel" maxlength="16" placeholder="3001234567" value="${esc(a.num||"")}"></label>
+    <p class="hint" id="avHint">${a.modo==="wa"?"El cajero tendrá marcada la opción de enviarte el cierre a este WhatsApp.":"Tus cajeros no tendrán la opción marcada de enviarte el cierre por WhatsApp. Lo verás todo en la app."}</p>
+    <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
+    let m=a.modo==="wa"?"wa":"app";
+    s.querySelector("#avM").onclick=e=>{const b=e.target.closest("[data-m]");if(!b)return;m=b.dataset.m;s.querySelectorAll("#avM button").forEach(x=>x.classList.toggle("on",x===b));
+      s.querySelector("#avNumW").hidden=m!=="wa";s.querySelector("#avHint").textContent=m==="wa"?"El cajero tendrá marcada la opción de enviarte el cierre a este WhatsApp.":"Tus cajeros no tendrán la opción marcada de enviarte el cierre por WhatsApp. Lo verás todo en la app.";};
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-ok]").onclick=async()=>{
+      const num=s.querySelector("#avNum").value.replace(/\D/g,"");
+      if(m==="wa"&&num&&num.length<10){toast("Escribe el número completo (10 dígitos)");return;}
+      const v={modo:m,num};
+      try{chk(await sb.from("ajustes").upsert({empresa_id:st.empresa.id,clave:"cierre_aviso",valor:JSON.stringify(v),actualizado:new Date().toISOString()}));st.aviso=v;closeSheet();renderAviso();toast("Guardado");}
+      catch(err){toast("No se pudo guardar: "+(err.message||err));}
+    };
+  });
+};
+
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
 const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
@@ -1928,7 +2110,9 @@ function dueñoSteps(){
     {view:"vender",el:"#q",t:"Busca rápido",p:"Escribe el nombre o el código para encontrar el producto. Con el botón de al lado puedes escanearlo."},
     {view:"dia",el:"#dTot",t:"3. Cierre del día",p:"Aquí ves cuánto vendiste hoy: efectivo, QR, gastos y lo que debe haber en caja. Cuadra tu caja todos los días."},
     {view:"dia",el:"#dGanW",t:"💰 Tu ganancia",p:"La app calcula cuánto ganaste con el precio de compra de tus productos. Tus cajeros nunca la ven."+lockTxt("costos","Pro"),skipIfHidden:true},
-    {view:"dia",el:"#btnCopy",t:"Comparte el cierre",p:"Copia el resumen del día y envíalo por WhatsApp al dueño o al contador."},
+    {view:"dia",el:"#btnCierre",t:"Cierra la caja",p:"Al final del día toca aquí: el cierre queda <b>guardado</b> con las ventas, los gastos y el inventario. Puedes anotar cuánto efectivo contaste y la app te dice si cuadra."},
+    {view:"dia",el:"#btnCopy",t:"Comparte por WhatsApp",p:"Si quieres, envía el resumen del día por WhatsApp al socio o al contador."},
+    {el:"#bellBtn",t:"🔔 Tus cierres",p:"Cuando un cajero cierra la caja te llega el aviso aquí. Tócala para ver todo lo que pasó en el día, sin llenar tu WhatsApp de mensajes."},
     {el:"#tabAdmin",t:"4. Administración",p:(L.cajeros===0?"Aquí editas tu negocio y ves tu plan. Con el plan <b>Pro</b> puedes crear <b>cajeros con PIN</b> para que vendan sin ver tu ganancia.":"Aquí creas tus <b>cajeros</b> (la app les da un PIN de 4 números)"+(L.sedes===1?" y ves tu plan.":" y tus <b>sedes</b>."))},
     {el:"#planChip",t:"Tu plan",p:"Tócalo para ver qué incluye cada plan y mejorar el tuyo cuando lo necesites.",skipIfHidden:true},
     {el:"#roleChip",t:"Tu menú",p:"Desde aquí cambias de sede, descargas la app, vuelves a ver esta guía o cierras sesión."},
@@ -1942,7 +2126,8 @@ function cajeroSteps(){
     {view:"vender",el:"#grid",t:"Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b> y elige efectivo o QR."},
     {view:"vender",el:"#q",t:"Busca o escanea",p:"Escribe el nombre o el código del producto, o usa el botón del escáner para leer el código de barras."},
     {view:"inv",el:".kpis",t:"Revisa el stock",p:"Mira qué productos están bajos o agotados para avisarle al dueño."},
-    {view:"dia",el:"#dTot",t:"Tu cierre del día",p:"Aquí ves lo que has vendido en tu turno: efectivo, QR y gastos. Úsalo para cuadrar la caja."},
+    {view:"dia",el:"#dTot",t:"Tu cierre del día",p:"Aquí ves lo que has vendido en tu turno: efectivo, QR y gastos."},
+    {view:"dia",el:"#btnCierre",t:"🔒 Cierra la caja",p:"Al terminar tu turno toca <b>Cerrar caja</b>, escribe cuánto efectivo contaste y guarda. El dueño recibe el aviso al instante. Si quieres, también se lo envías por WhatsApp."},
     {el:"#roleChip",t:"Terminar turno",p:"Al final del día toca aquí y elige <b>Terminar turno y salir</b>. Para volver a entrar necesitas tu PIN."},
     {t:"¡Listo! 💪",big:"✅",p:"Ya puedes empezar a vender. Si no hay internet, sigue vendiendo: las ventas se guardan y se envían solas.",fin:"Empezar a vender",finAct:()=>goView("vender")}
   ];
