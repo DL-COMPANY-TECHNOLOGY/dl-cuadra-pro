@@ -529,14 +529,14 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <div class="kpis">
       <div class="kpi"><span>Unidades en stock</span><b class="num" id="kUnits">0</b></div>
       <button class="kpi kbtn" type="button" data-kf="noprice"><span>Productos</span><b class="num" id="kProd">0</b><small id="kNoPrice"></small></button>
-      <button class="kpi kbtn kwarn" type="button" data-kf="low"><span>Stock bajo (≤3)</span><b class="num" id="kLow">0</b><small>Toca para ver cuáles</small></button>
+      <button class="kpi kbtn kwarn" type="button" data-kf="low"><span>Stock bajo</span><b class="num" id="kLow">0</b><small>Toca para ver cuáles</small></button>
       <button class="kpi kbtn kbad" type="button" data-kf="zero"><span>Agotados</span><b class="num" id="kZero">0</b><small>Toca para ver cuáles</small></button>
     </div>
     <div class="sec"><h2>Productos</h2><div class="secbtns dueno-only"><button class="btn sm" id="btnCats">Categorías</button><button class="btn sm dark" id="btnNewProd">+ Producto</button></div></div>
     <div id="invFilter"></div>
     <div class="srow" style="margin:0 0 10px"><input class="search" id="qi" placeholder="Buscar producto o código…" autocomplete="off"><button class="scanbtn" id="scanInv" type="button" aria-label="Escanear para buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg></button></div>
     <div class="card" id="invList"></div>
-    <p class="hint dueno-only" style="color:var(--muted);font-size:12.5px;font-weight:600;margin:10px 2px 0">Toca un producto para registrar entrada de mercancía, ajustar el conteo físico o editar precio, categoría y código de barras.</p>
+    <p class="hint dueno-only" style="color:var(--muted);font-size:12.5px;font-weight:600;margin:10px 2px 0">Toca un producto para registrar entrada de mercancía, ajustar el conteo físico o editar precio, stock mínimo, categoría y código de barras.</p>
   </section>
 
   <!-- DÍA -->
@@ -604,7 +604,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.2 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1272,7 +1272,8 @@ function renderHeader(){
   document.title=(n?n+" · ":"")+"DL CUADRA PRO";
 }
 function render(){renderHeader();renderVender();renderInv();renderDia();renderCart();if($("#v-admin").classList.contains("on"))renderAdmin();}
-function stockCls(s){return s<=0?"zero":s<=3?"low":"";}
+const minOf=p=>p&&p.stock_min!=null&&p.stock_min!==""?+p.stock_min:3;
+function stockCls(s,m){m=m==null?3:m;return s<=0?"zero":s<=m?"low":"";}
 function renderVender(){
   const ps=prodsArr();const cats=["Todos",...catList().filter(c=>ps.some(p=>p.cat===c))];
   if(!cats.includes(st.cat))st.cat="Todos";
@@ -1285,7 +1286,7 @@ function renderVender(){
     return `<button class="prod ${inCart?"sel":""}" data-pid="${esc(p.id)}">
       ${inCart?`<span class="q">${inCart}</span>`:""}
       <span class="n">${esc(p.nombre)}</span>
-      <span class="s ${stockCls(s)}">${s<=0?"Agotado":"Quedan "+s}</span>
+      <span class="s ${stockCls(s,minOf(p))}">${s<=0?"Agotado":"Quedan "+s}</span>
       ${p.precio>0?`<span class="p num">${fmt(p.precio)}</span>`:`<span class="p none">${isCajero()?"Sin precio":"Toca para poner precio"}</span>`}
     </button>`;}).join("")||`<div class="empty" style="grid-column:1/-1">Sin resultados</div>`;
 }
@@ -1296,25 +1297,25 @@ function renderCart(){
 }
 function renderInv(){
   const ps=prodsArr();let u=0,np=0,low=0,z=0;
-  for(const p of ps){const s=p.stock||0;u+=Math.max(0,s);if(!(p.precio>0))np++;if(s<=0)z++;else if(s<=3)low++;}
+  for(const p of ps){const s=p.stock||0;u+=Math.max(0,s);if(!(p.precio>0))np++;if(s<=0)z++;else if(s<=minOf(p))low++;}
   $("#kUnits").textContent=u.toLocaleString("es-CO");$("#kProd").textContent=ps.length;$("#kLow").textContent=low;$("#kZero").textContent=z;
   const kn=$("#kNoPrice");kn.textContent=!ps.length?"":np?np+" sin precio · toca para ver":"Todos con precio ✓";kn.className=np?"":"okc";
   const f=st.invF||"";
   document.querySelectorAll("[data-kf]").forEach(b=>b.classList.toggle("on",b.dataset.kf===f));
-  const FT={low:["⚠️","Stock bajo (3 o menos)"],zero:["⛔","Productos agotados"],noprice:["🏷️","Productos sin precio"]};
-  const okF=p=>{const s=p.stock||0;return !f||(f==="low"?s>0&&s<=3:f==="zero"?s<=0:!(p.precio>0));};
+  const FT={low:["⚠️","Stock bajo (en su mínimo o menos)"],zero:["⛔","Productos agotados"],noprice:["🏷️","Productos sin precio"]};
+  const okF=p=>{const s=p.stock||0;return !f||(f==="low"?s>0&&s<=minOf(p):f==="zero"?s<=0:!(p.precio>0));};
   const nF=f?ps.filter(okF).length:0;
-  $("#invFilter").innerHTML=f?`<div class="fbar ${f}"><span>${FT[f][0]} ${FT[f][1]}: ${nF}</span><button type="button" data-kfx>Ver todos</button></div>`:"";
+  $("#invFilter").innerHTML=f?`<div class="fbar ${f}"><span>${FT[f][0]} ${FT[f][1]}: ${nF}</span>${(f==="low"||f==="zero")&&nF?`<button type="button" data-pedido>📲 Pedido</button>`:""}<button type="button" data-kfx>Ver todos</button></div>`:"";
   const q=st.qi.trim().toLowerCase();let h="",last="";
   const lst=ps.filter(p=>okF(p)&&matchQ(p,q));
   if(f==="low")lst.sort((a,b)=>(a.stock||0)-(b.stock||0));
   for(const p of lst){
     if(p.cat!==last){h+=`<div class="catH">${esc(p.cat)}</div>`;last=p.cat;}
-    const s=p.stock||0,c=stockCls(s);
+    const s=p.stock||0,c=stockCls(s,minOf(p));
     h+=`<div class="row" data-inv="${esc(p.id)}" style="cursor:pointer">
       <div class="grow"><div class="t">${esc(p.nombre)}</div><div class="sub num">${p.precio>0?fmt(p.precio):"Sin precio"}${p.codigo?` · <span class="mono">${esc(p.codigo)}</span>`:""}</div></div>
       ${c?`<span class="pill ${c}">${c==="zero"?"Agotado":"Bajo"}</span>`:""}
-      <span class="stk num">${s}</span></div>`;
+      <span class="stk num">${s}${f==="low"?`<small style="display:block;font-size:10.5px;color:var(--muted);font-weight:700">mín ${minOf(p)}</small>`:""}</span></div>`;
   }
   $("#invList").innerHTML=h||`<div class="empty">${f&&!q?(f==="zero"?"No tienes productos agotados ✓":f==="low"?"No tienes productos con stock bajo ✓":"Todos tus productos tienen precio ✓"):st.prods.size?"Sin resultados":"Sin productos todavía"}</div>`;
 }
@@ -1453,11 +1454,11 @@ $("#btnNewProd").onclick=()=>{if(topeAlcanzado("productos"))return;addProductMen
 $("#btnCats").onclick=catManager;
 function invMenu(p){
   if(!p)return;
-  openSheet(`<h3>${esc(p.nombre)}</h3><p class="hint num">📍 ${esc((sedeActual()||{}).nombre||"")} · Stock actual: <b style="color:var(--ink)">${p.stock||0}</b> · Precio: ${p.precio>0?fmt(p.precio):"sin precio"}<br>${isDueno()&&(st.costos.get(p.id)||p.costo)?`Costo: ${fmt(st.costos.get(p.id)||p.costo)} · Ganas ${fmt(p.precio-(st.costos.get(p.id)||p.costo))} por unidad<br>`:isDueno()?"Sin precio de compra<br>":""}Categoría: ${esc(p.cat)} · Código: ${p.codigo?`<span class="mono">${esc(p.codigo)}</span>`:"sin código"}</p>
+  openSheet(`<h3>${esc(p.nombre)}</h3><p class="hint num">📍 ${esc((sedeActual()||{}).nombre||"")} · Stock actual: <b style="color:var(--ink)">${p.stock||0}</b> · Mínimo: ${minOf(p)} · Precio: ${p.precio>0?fmt(p.precio):"sin precio"}<br>${isDueno()&&(st.costos.get(p.id)||p.costo)?`Costo: ${fmt(st.costos.get(p.id)||p.costo)} · Ganas ${fmt(p.precio-(st.costos.get(p.id)||p.costo))} por unidad<br>`:isDueno()?"Sin precio de compra<br>":""}Categoría: ${esc(p.cat)} · Código: ${p.codigo?`<span class="mono">${esc(p.codigo)}</span>`:"sin código"}</p>
     <div style="display:grid;gap:8px">
       <button class="btn dark wide" data-a="ent">📦 Registrar entrada de mercancía</button>
       ${isDueno()?`<button class="btn wide" data-a="aj">🔢 Ajustar conteo físico</button>
-      <button class="btn wide" data-a="ed">✏️ Editar nombre, precio, categoría o código</button>`:`<p class="hint" style="margin:4px 0 0">Para cambiar precio, datos o conteo, habla con el dueño.</p>`}
+      <button class="btn wide" data-a="ed">✏️ Editar precio, stock mínimo y datos</button>`:`<p class="hint" style="margin:4px 0 0">Para cambiar precio, datos o conteo, habla con el dueño.</p>`}
       <button class="btn ghost wide" data-x>Cerrar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     s.querySelector('[data-a="ent"]').onclick=()=>entrada(p);
@@ -1495,7 +1496,9 @@ function editProd(p,opts){
     <div class="two" style="grid-template-columns:1fr"><label class="fld"><span>Categoría</span><select id="ca">${cl.map(c=>`<option ${c===p.cat?"selected":""}>${esc(c)}</option>`).join("")}<option value="__new">➕ Nueva categoría…</option></select></label></div>
     <label class="fld" id="caNewW" hidden><span>Nombre de la nueva categoría</span><input id="caNew" maxlength="24" placeholder="Ej: Snacks"></label>
     <label class="fld"><span>Código de barras (opcional)</span><div class="inrow"><input id="cb" class="mono" inputmode="numeric" autocomplete="off" value="${esc(p.codigo||"")}" placeholder="Escanéalo o escríbelo"><button type="button" class="btn sm dark" id="cbScan">📷 Escanear</button></div></label>
-    ${isNew?`<label class="fld"><span>Stock inicial</span><input id="sk" inputmode="numeric" class="num" placeholder="0"></label>`:""}
+    <div class="two">${isNew?`<label class="fld"><span>Stock inicial</span><input id="sk" inputmode="numeric" class="num" placeholder="0"></label>`:""}
+    <label class="fld"><span>Avisar stock bajo con</span><input id="sm" inputmode="numeric" class="num" value="${p.stock_min!=null?p.stock_min:""}" placeholder="3 unidades"></label></div>
+    <p class="hint" style="margin:-4px 0 12px">Stock mínimo: cuando queden esas unidades o menos, sale en <b>Stock bajo</b>. Vacío = 3.</p>
     <div class="acts">${isNew?"":`<button class="btn ghost" data-del style="color:var(--bad);flex:0 0 auto">Eliminar</button>`}<button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     if(opts.priceFocus)setTimeout(()=>s.querySelector("#pr").focus(),50);
@@ -1513,6 +1516,7 @@ function editProd(p,opts){
       let cat=ca.value;const codigo=s.querySelector("#cb").value.trim();
       const costo=puede("costos")?(parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0):(st.costos.get(p.id)||p.costo||0);
       if(!nombre){toast("Escribe el nombre");return;}
+      const smV=s.querySelector("#sm").value.replace(/\D/g,""),stock_min=smV===""?null:Math.min(100000,+smV);
       if(cat==="__new"){cat=s.querySelector("#caNew").value.trim().replace(/\s+/g," ");if(!cat){toast("Escribe el nombre de la categoría");return;}
         const ex=catList().find(c=>c.toLowerCase()===cat.toLowerCase());if(ex)cat=ex;}
       const other=codigo&&findByCode(codigo);if(other&&other.id!==p.id){toast("Ese código ya es de "+other.nombre);return;}
@@ -1520,10 +1524,10 @@ function editProd(p,opts){
         if(!catList().includes(cat))await store.setCats([...catList(),cat]);
         if(isNew){let id=slug(nombre);while(st.prods.has(id))id+="-"+Math.random().toString(36).slice(2,4);
           const sk=parseInt(s.querySelector("#sk").value,10)||0;
-          const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;
+          const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;if(stock_min!=null)data.stock_min=stock_min;
           await store.newProd(id,data,sk);
           if(costo&&puede("costos"))await store.setCosto(id,costo);
-        }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;await store.updProd(p.id,data);
+        }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;if((p.stock_min??null)!==stock_min)data.stock_min=stock_min;await store.updProd(p.id,data);
           if(puede("costos")&&costo!==(st.costos.get(p.id)||p.costo||0))await store.setCosto(p.id,costo);}
         closeSheet();toast("Guardado");
       }catch(e){fail(e);}
@@ -1869,9 +1873,9 @@ function cajeroSheet(c){
 
 /* ---------- planes ---------- */
 const PLANES={
-  gratis:{n:"Gratis",p:0,ico:"🆓",f:["1 sede, solo el dueño","Hasta 15 productos","Historial de 3 días","Sin escáner, ganancia ni ventas sin internet"]},
-  pro:{n:"Pro",p:19900,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Fiado: clientes que te deben y abonos","Historial de 90 días"]},
-  premium:{n:"Premium",p:39900,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
+  gratis:{n:"Gratis",p:0,ico:"🆓",f:["1 sede, solo el dueño","Hasta 15 productos","Historial de 3 días","Fiado hasta 3 clientes","Sin escáner, ganancia ni ventas sin internet"]},
+  pro:{n:"Pro",p:19900,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Fiado hasta 10 clientes","Historial de 90 días"]},
+  premium:{n:"Premium",p:39900,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Fiado con clientes ilimitados","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
   empresarial:{n:"Premium Empresarial",p:79900,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Reportes de todas las sedes juntas","Panel del dueño para todas las sedes (próximamente)"]}
 };
 const ORDEN=["gratis","pro","premium","empresarial"];
@@ -1880,7 +1884,7 @@ const LIM=()=>(st.plan&&st.plan.limites)||{productos:null,cajeros:null,sedes:nul
 const puede=k=>st.mode!=="db"||!!LIM()[k];
 async function loadPlan(){if(!sb)return;const r=await sb.rpc("mi_plan");if(!r.error&&r.data)st.plan=r.data;}
 const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:()=>"Tu plan incluye una sola sede.",
-  costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado (clientes que te deben y sus abonos) está desde el plan Pro.",historial:l=>`Tu plan muestra los últimos ${l} días.`};
+  costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado no está disponible en tu plan.",clientes:l=>`Tu plan permite hasta ${l} clientes de fiado. Archiva uno que esté al día o mejora tu plan.`,historial:l=>`Tu plan muestra los últimos ${l} días.`};
 function showPlanes(motivo){
   const cur=planActual(),e=st.empresa||{};
   const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ($${PLANES[k].p.toLocaleString("es-CO")}/mes).${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
@@ -2027,7 +2031,7 @@ function textoCierre(c,d){
   t+=`\nVentas (${c.ventas}): *${fmt(c.total)}*\nEfectivo: ${fmt(c.efectivo)}\nQR banco: ${fmt(c.qr)}${d.fiado?`\nFiado: ${fmt(d.fiado)}`:""}${(d.abonos||[]).length?`\nAbonos: ${fmt((d.abono_ef||0)+(d.abono_qr||0))}`:""}\nGastos: ${fmt(c.gastos)}${(d.gastos||[]).length?" ("+d.gastos.map(g=>g.d).join(", ")+")":""}\nEfectivo en caja: ${fmt(c.caja)}`;
   if(c.contado!=null)t+=`\nEfectivo contado: ${fmt(c.contado)} · ${diffTxt(c.diferencia)}`;
   if(c.nota)t+=`\n📝 ${c.nota}`;
-  const bajos=(d.inventario||[]).filter(x=>x.s<=3);if(bajos.length)t+=`\n\n⚠️ Stock bajo/agotado: ${bajos.map(x=>x.n+" ("+x.s+")").join(", ")}`;
+  const bajos=(d.inventario||[]).filter(x=>x.s<=(x.m??3));if(bajos.length)t+=`\n\n⚠️ Stock bajo/agotado: ${bajos.map(x=>x.n+" ("+x.s+")").join(", ")}`;
   return t;
 }
 $("#btnCierre").onclick=()=>{
@@ -2081,7 +2085,7 @@ async function cierreDetalle(id){
   const d=r.data.detalle||{};
   if(isDueno()&&!c.visto){c.visto=true;renderBell();sb.rpc("marcar_cierres_vistos",{p_id:id});}
   const rows=(a,f)=>a.length?a.map(f).join(""):'<div class="empty">Nada</div>';
-  const inv=d.inventario||[],bajos=inv.filter(x=>x.s<=3).length;
+  const inv=d.inventario||[],bajos=inv.filter(x=>x.s<=(x.m??3)).length;
   openSheet(`<h3>🔒 Cierre de ${esc(c.por)}</h3><p class="hint">📍 ${esc(d.sede||sedeNom(c.sede_id))} · ${nice(c.fecha)} · ${hhmm(new Date(c.ts).getTime())}</p>
     <div class="cgrid"><div><span>Ventas (${c.ventas})</span><b class="num">${fmt(c.total)}</b></div><div><span>Efectivo</span><b class="num">${fmt(c.efectivo)}</b></div><div><span>QR banco</span><b class="num">${fmt(c.qr)}</b></div><div><span>Gastos</span><b class="num">${fmt(c.gastos)}</b></div></div>
     <div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">💵 Debía haber en caja: <span class="num">${fmt(c.caja)}</span>${c.contado!=null?`<br>Contó: <span class="num">${fmt(c.contado)}</span>`:""}</div>
@@ -2093,7 +2097,7 @@ async function cierreDetalle(id){
     ${(d.abonos||[]).length?`<div class="ctit">💵 Abonos recibidos</div><div class="card">${d.abonos.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.c||"")}</div><div class="sub">${x.m==="qr"?"QR":"Efectivo"} · ${esc(x.por||"")}</div></div><b class="num">${fmt(x.v)}</b></div>`).join("")}</div>`:""}
     <div class="ctit">Gastos</div><div class="card">${rows(d.gastos||[],g=>`<div class="row"><div class="grow"><div class="t">${esc(g.d||"Gasto")}</div><div class="sub">${esc(g.por||"")}</div></div><b class="num">${fmt(g.v)}</b></div>`)}</div>
     ${(d.entradas||[]).length?`<div class="ctit">Mercancía que entró</div><div class="card">${d.entradas.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n||"")}</div></div><b class="num">+${x.cant}</b></div>`).join("")}</div>`:""}
-    <details class="cdet"><summary>📦 Inventario al cerrar (${inv.length} productos${bajos?" · "+bajos+" bajos o agotados":""})</summary><div class="card cinv">${rows(inv,x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">${esc(x.cat||"")}</div></div><b class="num ${x.s<=0?"z":x.s<=3?"l":""}">${x.s}</b></div>`)}</div></details>
+    <details class="cdet"><summary>📦 Inventario al cerrar (${inv.length} productos${bajos?" · "+bajos+" bajos o agotados":""})</summary><div class="card cinv">${rows(inv,x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">${esc(x.cat||"")}</div></div><b class="num ${x.s<=0?"z":x.s<=(x.m??3)?"l":""}">${x.s}</b></div>`)}</div></details>
     <div class="acts"><button class="btn" data-wa>📲 WhatsApp</button>${c.sede_id===st.sede&&isDueno()?'<button class="btn" data-dia>Ver el día</button>':""}<button class="btn pri" data-x>Listo</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     s.querySelector("[data-wa]").onclick=()=>enviarWA(textoCierre(c,d));
@@ -2270,6 +2274,7 @@ $("#btnRep").onclick=reportes;
 
 /* ---------- fiado (cuentas por cobrar) ---------- */
 let cliBusy=null;
+function topeClientes(){const l=LIM().clientes;if(l==null)return false;const n=(st.clientes||[]).filter(c=>c.activo).length;if(n>=l){upsell("clientes",l);return true;}return false;}
 function loadClientes(){
   if(!sb||st.mode!=="db"||!st.perfil||!puede("fiado"))return Promise.resolve();
   if(cliBusy)return cliBusy;
@@ -2281,7 +2286,8 @@ function renderFiadoBtn(){
   if(!puede("fiado")){$("#fbTit").textContent="📒 Fiado 🔒";$("#fbSub").textContent="Anota lo que te deben tus clientes · desde el plan Pro";return;}
   const L=(st.clientes||[]).filter(c=>c.saldo>0),tot=L.reduce((s,c)=>s+c.saldo,0);
   $("#fbTit").textContent=L.length?"Fiado · "+fmt(tot)+" por cobrar":"Fiado · cuentas por cobrar";
-  $("#fbSub").textContent=L.length?L.length+(L.length===1?" cliente te debe":" clientes te deben")+" · toca para ver y registrar abonos":"Anota lo que te deben tus clientes y sus abonos";
+  const lc=LIM().clientes,nc=(st.clientes||[]).filter(c=>c.activo).length;
+  $("#fbSub").textContent=(L.length?L.length+(L.length===1?" cliente te debe":" clientes te deben")+" · toca para ver y registrar abonos":"Anota lo que te deben tus clientes y sus abonos")+(lc!=null?` · ${nc} de ${lc} clientes`:"");
 }
 const cupoTxt=c=>c.cupo==null?"Sin cupo límite":"Cupo "+fmt(c.cupo)+" · disponible "+fmt(Math.max(0,c.cupo-c.saldo));
 function fiadoPicker(fcli,fq,t){
@@ -2297,6 +2303,7 @@ function fiadoPicker(fcli,fq,t){
 }
 function clienteSheet(c,nombre,onSaved){
   const nuevo=!c,dueno=isDueno();
+  if(nuevo&&topeClientes())return;
   openSheet(`<h3>${nuevo?"＋ Nuevo cliente":"✏️ Editar cliente"}</h3><p class="hint">${nuevo?"Para anotarle lo que se lleva fiado.":"Datos del cliente de fiado."}</p>
     <label class="fld"><span>Nombre</span><input id="cN" maxlength="60" value="${esc(c?c.nombre:(nombre||"").trim())}" placeholder="Ej: Don Pedro (la tienda de la esquina)"></label>
     <label class="fld"><span>Celular (para cobrarle por WhatsApp)</span><input id="cT" class="mono" inputmode="tel" maxlength="16" value="${esc(c&&c.telefono||"")}" placeholder="3001234567"></label>
@@ -2312,7 +2319,7 @@ function clienteSheet(c,nombre,onSaved){
       try{
         const ar=s.querySelector("#cA");
         const r=await sb.rpc("guardar_cliente",{p_id:c?c.id:null,p_nombre:nom,p_telefono:s.querySelector("#cT").value.trim()||null,p_cupo:dueno?(cupoV?+cupoV:null):(c?c.cupo:null),p_nota:s.querySelector("#cO").value.trim()||null,p_activo:ar?!ar.checked:true});
-        if(r.error)throw r.error;await loadClientes();toast(nuevo?"Cliente creado":"Cliente guardado");
+        if(r.error)throw r.error;await loadClientes();loadPlan();toast(nuevo?"Cliente creado":"Cliente guardado");
         if(onSaved)onSaved(r.data);else clienteDetalle(r.data);
       }catch(err){b.disabled=false;const m=String(err.message||err);if(/LIMITE_PLAN/.test(m))return fail(err);toast(isNetErr(err)?"Sin internet":m);}
     };
@@ -2327,12 +2334,14 @@ function fiadoSheet(){
     const ql=q.trim().toLowerCase();
     const L=C.filter(c=>(ver==="todos"?c.activo:ver==="arch"?!c.activo:c.saldo>0)&&(!ql||c.nombre.toLowerCase().includes(ql)||(c.telefono||"").includes(ql)));
     s.innerHTML=`<div class="grab"></div><h3>📒 Fiado</h3>
+      ${LIM().clientes!=null?`<p class="hint" style="margin:0 0 8px">Tu plan: ${C.filter(c=>c.activo).length} de ${LIM().clientes} clientes de fiado. <a style="color:var(--acc);cursor:pointer" data-upc>Más clientes</a></p>`:""}
       <div class="cdiff warn" style="font-size:15px">Te deben en total: <span class="num">${fmt(tot)}</span>${deben?` · ${deben} ${deben===1?"cliente":"clientes"}`:""}</div>
       <div class="seg" id="fV" style="margin:0 0 10px"><button type="button" data-v="deben" class="${ver==="deben"?"on":""}">Deben</button><button type="button" data-v="todos" class="${ver==="todos"?"on":""}">Todos</button>${isDueno()?`<button type="button" data-v="arch" class="${ver==="arch"?"on":""}">Archivados</button>`:""}</div>
       <div class="srow" style="margin:0 0 10px"><input class="search" id="fS" placeholder="Buscar cliente…" value="${esc(q)}" autocomplete="off"><button class="btn dark" type="button" id="fNew" style="flex:none">＋ Cliente</button></div>
       <div class="card clist">${!st.clientes?'<div class="empty">Cargando…</div>':L.map(c=>`<div class="row" data-cl="${esc(c.id)}"><div class="grow"><div class="t">${esc(c.nombre)}</div><div class="sub">${c.ultimo?"Último movimiento "+new Date(c.ultimo).toLocaleDateString("es-CO",{day:"numeric",month:"short"}):"Sin movimientos"}${c.telefono?" · "+esc(c.telefono):""}</div></div><b class="num" style="color:${c.saldo>0?"var(--warn)":"var(--ok)"}">${c.saldo>0?fmt(c.saldo):"Al día"}</b></div>`).join("")||`<div class="empty">${ver==="deben"?"Nadie te debe 🎉":"Sin clientes"}. Para fiar, en <b>Cobrar</b> elige <b>📒 Fiado</b>.</div>`}</div>
       <div class="acts"><button class="btn pri" data-x>Cerrar</button></div>`;
     s.querySelector("[data-x]").onclick=closeSheet;
+    const upc=s.querySelector("[data-upc]");if(upc)upc.onclick=()=>showPlanes("Más clientes de fiado: Pro 10 · Premium ilimitados.");
     s.querySelector("#fV").onclick=e=>{const b=e.target.closest("[data-v]");if(b){ver=b.dataset.v;draw(s);}};
     const fs=s.querySelector("#fS");fs.oninput=()=>{q=fs.value;const pos=fs.selectionStart;draw(s);const n=s.querySelector("#fS");n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}};
     s.querySelector("#fNew").onclick=()=>clienteSheet(null,q,id=>{if(id)clienteDetalle(id);else fiadoSheet();});
@@ -2386,6 +2395,19 @@ function abonoSheet(c){
 }
 $("#btnFiado").onclick=fiadoSheet;
 
+/* ---------- lista de pedido (stock bajo / agotados) ---------- */
+$("#invFilter").addEventListener("click",e=>{
+  if(!e.target.closest("[data-pedido]"))return;
+  const L=prodsArr().filter(p=>(p.stock||0)<=minOf(p)).sort((a,b)=>(a.stock||0)-(b.stock||0));
+  if(!L.length){toast("No hay productos por pedir");return;}
+  const en=(st.empresa&&st.empresa.nombre)||st.negocio||"",sd=st.mode==="db"&&sedeActual()&&st.sedes.length>1?" · "+sedeActual().nombre:"";
+  let t=`*🛒 Pedido${en?" · "+en:""}${sd}*\n${nice(today())}\n\n`;
+  for(const p of L){const s=p.stock||0,m=minOf(p),sug=Math.max(m*2-s,1);t+=`• ${p.nombre}: ${s<=0?"agotado":"quedan "+s} → pedir ${sug}\n`;}
+  t+=`\nTotal: ${L.length} ${L.length===1?"producto":"productos"}`;
+  try{navigator.clipboard.writeText(t);}catch(_){}
+  window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank","noopener");
+});
+
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
 const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
@@ -2406,14 +2428,14 @@ function dueñoSteps(){
     {view:"inv",el:"#btnNewProd",t:"1. Agrega tus productos aquí",p:`Toca <b>+ Producto</b> y escribe el nombre, el precio de venta, la categoría y cuántas unidades tienes. ${nProd}`},
     {view:"inv",el:"#btnCats",t:"Tus categorías",p:"Crea, cambia o borra categorías (cervezas, licores, snacks…) para encontrar rápido tus productos."},
     {view:"inv",el:"#scanInv",t:"Escáner de código de barras",p:"Escanea el código del producto con la cámara para buscarlo o guardarlo sin escribir."+lockTxt("escaner","Pro")},
-    {view:"inv",el:".kpis",t:"Tu inventario de un vistazo",p:"Aquí ves cuántas unidades tienes, los productos con <b>stock bajo</b> y los <b>agotados</b>. Toca cada tarjeta para ver cuáles son."},
-    {view:"inv",el:"#invList",t:"Entradas y ajustes",p:"Toca un producto para registrar la <b>mercancía que llega</b>, corregir el conteo físico o editar el precio. El <b>precio de compra</b> solo lo ves tú."+lockTxt("costos","Pro")},
+    {view:"inv",el:".kpis",t:"Tu inventario de un vistazo",p:"Aquí ves cuántas unidades tienes, los productos con <b>stock bajo</b> y los <b>agotados</b>. Toca cada tarjeta para ver cuáles son y envía la <b>lista de pedido</b> a tu proveedor por WhatsApp."},
+    {view:"inv",el:"#invList",t:"Entradas y ajustes",p:"Toca un producto para registrar la <b>mercancía que llega</b>, corregir el conteo físico o editar el precio y su <b>stock mínimo</b> (cuándo avisarte que se está acabando). El <b>precio de compra</b> solo lo ves tú."+lockTxt("costos","Pro")},
     {view:"vender",el:"#grid",t:"2. Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b>, elige efectivo o QR, y el stock se descuenta solo."},
     {view:"vender",el:"#q",t:"Busca rápido",p:"Escribe el nombre o el código para encontrar el producto. Con el botón de al lado puedes escanearlo."},
     {view:"dia",el:"#btnRep",t:"📊 Reportes",p:"Mira cómo te fue en la semana o el mes: productos más vendidos, ventas por día, por cajero y por categoría. Descárgalo en Excel."+lockTxt("costos","Pro").replace("Disponible","Excel disponible")},
     {view:"dia",el:"#dTot",t:"3. Cierre del día",p:"Aquí ves cuánto vendiste hoy: efectivo, QR, gastos y lo que debe haber en caja. Cuadra tu caja todos los días."},
     {view:"dia",el:"#dGanW",t:"💰 Tu ganancia",p:"La app calcula cuánto ganaste con el precio de compra de tus productos. Tus cajeros nunca la ven."+lockTxt("costos","Pro"),skipIfHidden:true},
-    {view:"dia",el:"#btnFiado",t:"📒 Fiado",p:"Anota lo que se llevan fiado tus clientes: al cobrar elige <b>📒 Fiado</b> y el cliente. Aquí ves quién te debe, registras abonos y le cobras por WhatsApp."+lockTxt("fiado","Pro")},
+    {view:"dia",el:"#btnFiado",t:"📒 Fiado",p:"Anota lo que se llevan fiado tus clientes: al cobrar elige <b>📒 Fiado</b> y el cliente. Aquí ves quién te debe, registras abonos y le cobras por WhatsApp."+(LIM().clientes!=null?` Tu plan permite <b>${LIM().clientes} clientes</b>.`:"")},
     {view:"dia",el:"#btnCierre",t:"Cierra la caja",p:"Al final del día toca aquí: el cierre queda <b>guardado</b> con las ventas, los gastos y el inventario. Puedes anotar cuánto efectivo contaste y la app te dice si cuadra."},
     {view:"dia",el:"#btnCopy",t:"Comparte por WhatsApp",p:"Si quieres, envía el resumen del día por WhatsApp al socio o al contador."},
     {el:"#bellBtn",t:"🔔 Tus cierres",p:"Cuando un cajero cierra la caja te llega el aviso aquí. Tócala para ver todo lo que pasó en el día, sin llenar tu WhatsApp de mensajes."},
@@ -2445,11 +2467,11 @@ function planSteps(de,a){
     S.push({view:"inv",el:"#scanInv",t:"Escáner activado",p:"Ya puedes escanear códigos de barras para buscar, vender y guardar productos."});
     S.push({view:"inv",el:"#invList",t:"Precio de compra",p:"Toca cada producto → <b>Editar</b> → pon el <b>precio de compra</b>. Con eso la app calcula tu ganancia."});
     S.push({view:"dia",el:"#dGanW",t:"💰 Ganancia del día",p:"Aquí ves cuánto ganaste cada día. Solo tú la ves.",skipIfHidden:true});
-    S.push({view:"dia",el:"#btnFiado",t:"📒 Fiado activado",p:"Ya puedes fiar: al cobrar elige <b>📒 Fiado</b> y el cliente. Aquí ves quién te debe y registras sus abonos."});
+    S.push({view:"dia",el:"#btnFiado",t:"📒 Más clientes de fiado",p:"Ahora puedes fiarle hasta a <b>10 clientes</b>, con cupo máximo para cada uno."});
     S.push({view:"vender",el:"#grid",t:"Ventas sin internet",p:"Si se cae el internet, sigue vendiendo: las ventas se guardan en el celular y se envían solas al volver la conexión."});
   }
   if(r0<2&&r1>=2){
-    S.push({view:"inv",el:"#btnNewProd",t:"Productos ilimitados",p:"Agrega todos los productos y cajeros que necesites, y consulta todo tu historial de ventas."});
+    S.push({view:"inv",el:"#btnNewProd",t:"Todo ilimitado",p:"Agrega todos los productos, cajeros y <b>clientes de fiado</b> que necesites, y consulta todo tu historial de ventas."});
     S.push({el:"#roleChip",t:"Soporte prioritario",p:"Tienes soporte y sugerencias de mejora con DL COMPANY por WhatsApp. Escríbenos cuando lo necesites."});
   }
   if(r0<3&&r1>=3){
