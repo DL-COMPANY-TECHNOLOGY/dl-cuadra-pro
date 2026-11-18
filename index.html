@@ -423,6 +423,37 @@ html[data-theme="light"] .prec{color:#6d28d9}
 .glock span{display:block;font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .glock b{display:block;font-size:17px;margin:4px 0 2px}
 .glock small{color:var(--acc);font-weight:800;font-size:12.5px}
+
+/* ---------- guía interactiva ---------- */
+.tour{position:fixed;inset:0;z-index:58;display:none}
+.tour.on{display:block}
+.tblock{position:absolute;inset:0;background:transparent}
+.tspot{position:fixed;border-radius:16px;border:2px solid var(--acc);box-shadow:0 0 0 9999px rgba(2,4,10,.74),0 0 26px rgba(34,228,255,.55);transition:all .28s ease;pointer-events:none}
+.tspot.none{left:50%!important;top:45%!important;width:0!important;height:0!important;border:0;box-shadow:0 0 0 9999px rgba(2,4,10,.78)}
+.tspot::after{content:"";position:absolute;inset:-7px;border-radius:20px;border:2px solid var(--acc);opacity:.0;animation:tpulse 1.6s ease-out infinite}
+.tspot.none::after{display:none}
+@keyframes tpulse{0%{opacity:.7;transform:scale(.97)}100%{opacity:0;transform:scale(1.08)}}
+.ttip{position:fixed;width:min(340px,calc(100vw - 24px));background:linear-gradient(180deg,#111c35,#0a1224);border:1px solid rgba(34,228,255,.45);border-radius:18px;padding:15px 16px 13px;color:var(--ink);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 30px rgba(34,228,255,.18);transition:top .28s ease,left .28s ease}
+.ttip .tstep{font:800 11px/1 ui-monospace,monospace;letter-spacing:.12em;color:var(--acc);text-transform:uppercase;margin:0 0 7px}
+.ttip h4{margin:0 0 6px;font-size:17px;font-weight:800;line-height:1.25}
+.ttip p{margin:0;color:var(--muted);font-size:14px;line-height:1.45;font-weight:600}
+.ttip p b{color:var(--ink)}
+.ttip .tlock{display:block;margin-top:8px;color:var(--warn);font-size:12.5px;font-weight:800}
+.ttip .tacts{display:flex;align-items:center;gap:8px;margin-top:13px}
+.ttip .tacts .tskip{background:none;border:0;color:var(--muted);font-weight:700;font-size:13px;padding:8px 4px;cursor:pointer;margin-right:auto}
+.ttip .tacts button.tb{border:1px solid var(--line2);background:transparent;color:var(--ink);font-weight:800;font-size:14px;padding:9px 14px;border-radius:12px;cursor:pointer}
+.ttip .tacts button.tn{background:linear-gradient(135deg,var(--acc),var(--acc2));border:0;color:#04121a}
+.ttip .tdots{display:flex;gap:4px;margin-top:11px;justify-content:center}
+.ttip .tdots i{width:6px;height:6px;border-radius:9px;background:var(--line2)}
+.ttip .tdots i.on{width:16px;background:var(--acc)}
+.ttip.center{left:50%!important;top:50%!important;transform:translate(-50%,-50%);text-align:center}
+.ttip.center .tacts{justify-content:center}.ttip.center .tacts .tskip{margin-right:0}
+.ttip .tbig{font-size:40px;line-height:1;margin:2px 0 8px}
+html[data-theme="light"] .ttip{background:linear-gradient(180deg,#fff,#fbf8ee);border-color:var(--gold);box-shadow:0 18px 50px rgba(15,23,42,.28)}
+html[data-theme="light"] .tspot{box-shadow:0 0 0 9999px rgba(15,23,42,.62),0 0 22px rgba(201,162,39,.6);border-color:var(--gold)}
+html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
+.nthint{margin:-6px 0 14px;color:var(--muted);font-size:12.5px;font-weight:600;line-height:1.4}
+.lhelp{display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;background:none;border:1px dashed var(--line2);color:var(--acc);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -524,7 +555,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v2.7.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v2.8 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -587,6 +618,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
     <form id="newForm" hidden autocomplete="on">
       <p class="hint" style="margin:0 0 12px;color:var(--muted);font-weight:600;font-size:13.5px">Empieza <b style="color:var(--ink)">gratis</b>, sin tarjeta. Mejora tu plan cuando lo necesites.</p>
       <div class="seg" id="nTipo" style="margin:0 0 14px"><button type="button" class="on" data-nt="negocio">🏪 Negocio</button><button type="button" data-nt="empresa">🏢 Empresa</button></div>
+      <p class="nthint" id="nTipoHint">🏪 <b>Negocio:</b> un solo local (tienda, licorera, cafetería). Solo necesitas tu correo y una contraseña.</p>
       <label class="fld"><span id="nNomL">Nombre del negocio</span><input id="nNom" maxlength="60" autocomplete="organization" placeholder="Ej: Licorera La 13" required></label>
       <label class="fld"><span id="nNitL">NIT o cédula (opcional)</span><input id="nNit" class="mono" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="900123456-7"></label>
       <label class="fld"><span>Correo electrónico</span><input id="nMail" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required></label>
@@ -609,6 +641,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
       <button class="lgo" type="submit">Solicitar por WhatsApp ›</button>
     </form>
 
+    <p style="text-align:center;margin:0"><button type="button" class="lhelp" id="lHelp">❔ ¿Cómo ingreso?</button></p>
     <p class="lalt" id="lAltNew">¿Tu negocio aún no tiene cuenta? <a id="lReq">Créala gratis aquí</a></p>
     <a class="lplan" id="lPlans">Ver planes y precios →</a>
     <p class="llegal">Al ingresar aceptas los <a href="legal.html#terminos" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="legal.html#privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</p>
@@ -627,6 +660,7 @@ html[data-theme="light"] .prec{color:#6d28d9}
   <button class="btn pri wide" type="button" id="scDone">Listo</button>
 </div>
 
+<div class="tour" id="tour"><div class="tblock"></div><div class="tspot"></div><div class="ttip" role="dialog" aria-live="polite"></div></div>
 <div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -758,6 +792,7 @@ async function refresh(){
   overlayQueue();saveCache();
   setStatus("● En línea");render();renderStatus();
   if(st.queue.length&&!st.flushing)setTimeout(flushQueue,300);
+  clearTimeout(tourT);tourT=setTimeout(maybeTour,900);
 }
 const refreshSoon=()=>{clearTimeout(refreshT);refreshT=setTimeout(refresh,250);};
 function subscribeMovs(){
@@ -795,6 +830,7 @@ $("#nTipo").onclick=e=>{const b=e.target.closest("[data-nt]");if(!b)return;nTipo
   $("#nTipo").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
   $("#nNomL").textContent=nTipo==="empresa"?"Nombre de la empresa":"Nombre del negocio";
   $("#nNitL").textContent=nTipo==="empresa"?"NIT de la empresa":"NIT o cédula (opcional)";
+  $("#nTipoHint").innerHTML=nTipo==="empresa"?"🏢 <b>Empresa:</b> tiene NIT y puede manejar varias sedes y cajeros. Tus cajeros entrarán con el nombre de la empresa y el NIT.":"🏪 <b>Negocio:</b> un solo local (tienda, licorera, cafetería). Solo necesitas tu correo y una contraseña.";
   $("#nNom").placeholder=nTipo==="empresa"?"Ej: Distribuidora La 13 S.A.S.":"Ej: Licorera La 13";$("#newErr").textContent="";};
 $("#nEye").onclick=()=>{const i=$("#nPass");i.type=i.type==="password"?"text":"password";};
 $("#newForm").addEventListener("submit",async e=>{
@@ -1003,12 +1039,14 @@ function sessionMenu(){
   openSheet(`<h3>${caj?"👤 "+esc(st.usuario):"👑 Dueño"}</h3><p class="hint">${esc(st.empresa?st.empresa.nombre:"")}${s?" · 📍 "+esc(s.nombre):""}${!caj&&st.user.email?"<br>"+esc(st.user.email):""}</p>
     ${st.sedes.length>1?`<button class="opt" data-m="sede"><span class="ic c1">📍</span><span><b>Cambiar de sede</b><small>Estás en ${esc(s?s.nombre:"-")}</small></span></button>`:""}
     ${!caj?`<button class="opt" data-m="adm"><span class="ic c3">⚙️</span><span><b>Administración</b><small>Empresa, sedes y cajeros</small></span></button>`:""}
+    <button class="opt" data-m="guia"><span class="ic c3">🧭</span><span><b>Ver guía de la app</b><small>Te muestro paso a paso cómo se usa</small></span></button>
     <button class="opt dl-only" data-install><span class="ic c1">📲</span><span><b>Descargar app</b><small>Instálala en este celular o computador</small></span></button>
     <button class="opt" data-m="out"><span class="ic c2">🚪</span><span><b>${caj?"Terminar turno y salir":"Cerrar sesión"}</b><small>${caj?"Para entrar de nuevo necesitas tu PIN":"Saldrás de este dispositivo"}</small></span></button>
     <button class="btn ghost wide" data-x>Cerrar</button>`,sh=>{
     sh.querySelector("[data-x]").onclick=closeSheet;
     const bs=sh.querySelector('[data-m="sede"]');if(bs)bs.onclick=sedeMenu;
     const ba=sh.querySelector('[data-m="adm"]');if(ba)ba.onclick=()=>{closeSheet();document.querySelector('nav.tabs button[data-v="admin"]').click();};
+    sh.querySelector('[data-m="guia"]').onclick=()=>{closeSheet();setTimeout(()=>startTour(caj?"cajero":"dueno",true),250);};
     sh.querySelector('[data-m="out"]').onclick=async()=>{closeSheet();const wasCaj=caj;st.perfil=null;await sb.auth.signOut();if(wasCaj){st.empOk=null;loginPanel("empForm");}};
   });
 }
@@ -1850,6 +1888,7 @@ function exitToLogin(){
 window.addEventListener("popstate",()=>{
   // volver a poner una entrada propia encima: el siguiente "atrás" vuelve a caer aquí
   try{const d=(history.state&&history.state.d)||0;history.pushState({cp:"app",d:d+1},"",location.href);}catch(e){}
+  if(tourOn()){endTour(true);return;}
   if($("#scanner").classList.contains("on")){closeScanner();scanOpts=null;render();return;}
   if($("#scrim").classList.contains("on")){closeSheet();return;}
   if($("#login").classList.contains("on")){
@@ -1862,6 +1901,153 @@ window.addEventListener("popstate",()=>{
   if(st.invF){st.invF="";renderInv();return;}
   exitToLogin();
 });
+
+/* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
+let tourT=null,TOUR=null;
+const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
+const tkey=k=>"cp_tour_"+k+"_"+((st.user&&st.user.id)||"local");
+const tget=k=>{try{return localStorage.getItem(tkey(k));}catch(e){return null;}};
+const tset=(k,v)=>{try{localStorage.setItem(tkey(k),v);}catch(e){}};
+const tourOn=()=>$("#tour").classList.contains("on");
+const goView=v=>{const b=document.querySelector('nav.tabs button[data-v="'+v+'"]');if(b&&!b.hidden&&!b.classList.contains("on"))b.click();};
+const visible=el=>{if(!el)return false;const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=="hidden";};
+const lockTxt=(k,plan)=>puede(k)?"":`<span class="tlock">🔒 Disponible desde el plan ${plan}</span>`;
+
+function dueñoSteps(){
+  const k=planActual(),P=PLANES[k]||PLANES.gratis,L=LIM();
+  const nProd=L.productos?`Tu plan ${P.n} permite hasta <b>${L.productos} productos</b>.`:"Puedes agregar <b>todos los productos</b> que quieras.";
+  return [
+    {t:`${P.ico} ¡Bienvenido a DL CUADRA PRO!`,big:"👋",p:`Tu cuenta <b>${P.n}</b> está lista. Te muestro en 1 minuto cómo se usa la app. Puedes saltar la guía cuando quieras.`},
+    {el:"#bizBtn",t:"El nombre de tu negocio",p:"Tócalo para escribir o cambiar el nombre. Así sale en tus cierres y reportes."},
+    {view:"inv",el:"#btnNewProd",t:"1. Agrega tus productos aquí",p:`Toca <b>+ Producto</b> y escribe el nombre, el precio de venta, la categoría y cuántas unidades tienes. ${nProd}`},
+    {view:"inv",el:"#btnCats",t:"Tus categorías",p:"Crea, cambia o borra categorías (cervezas, licores, snacks…) para encontrar rápido tus productos."},
+    {view:"inv",el:"#scanInv",t:"Escáner de código de barras",p:"Escanea el código del producto con la cámara para buscarlo o guardarlo sin escribir."+lockTxt("escaner","Pro")},
+    {view:"inv",el:".kpis",t:"Tu inventario de un vistazo",p:"Aquí ves cuántas unidades tienes, los productos con <b>stock bajo</b> y los <b>agotados</b>. Toca cada tarjeta para ver cuáles son."},
+    {view:"inv",el:"#invList",t:"Entradas y ajustes",p:"Toca un producto para registrar la <b>mercancía que llega</b>, corregir el conteo físico o editar el precio. El <b>precio de compra</b> solo lo ves tú."+lockTxt("costos","Pro")},
+    {view:"vender",el:"#grid",t:"2. Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b>, elige efectivo o QR, y el stock se descuenta solo."},
+    {view:"vender",el:"#q",t:"Busca rápido",p:"Escribe el nombre o el código para encontrar el producto. Con el botón de al lado puedes escanearlo."},
+    {view:"dia",el:"#dTot",t:"3. Cierre del día",p:"Aquí ves cuánto vendiste hoy: efectivo, QR, gastos y lo que debe haber en caja. Cuadra tu caja todos los días."},
+    {view:"dia",el:"#dGanW",t:"💰 Tu ganancia",p:"La app calcula cuánto ganaste con el precio de compra de tus productos. Tus cajeros nunca la ven."+lockTxt("costos","Pro"),skipIfHidden:true},
+    {view:"dia",el:"#btnCopy",t:"Comparte el cierre",p:"Copia el resumen del día y envíalo por WhatsApp al dueño o al contador."},
+    {el:"#tabAdmin",t:"4. Administración",p:(L.cajeros===0?"Aquí editas tu negocio y ves tu plan. Con el plan <b>Pro</b> puedes crear <b>cajeros con PIN</b> para que vendan sin ver tu ganancia.":"Aquí creas tus <b>cajeros</b> (la app les da un PIN de 4 números)"+(L.sedes===1?" y ves tu plan.":" y tus <b>sedes</b>."))},
+    {el:"#planChip",t:"Tu plan",p:"Tócalo para ver qué incluye cada plan y mejorar el tuyo cuando lo necesites.",skipIfHidden:true},
+    {el:"#roleChip",t:"Tu menú",p:"Desde aquí cambias de sede, descargas la app, vuelves a ver esta guía o cierras sesión."},
+    {el:"#themeBtn",t:"Modo día y noche",p:"Cambia entre el modo oscuro y el modo día con bordes dorados."},
+    {t:"¡Listo para empezar! 🚀",big:"✅",p:"Empieza agregando tu primer producto. Si necesitas ayuda, escríbenos por WhatsApp desde el menú.",fin:"Agregar mi primer producto",finAct:()=>{goView("inv");setTimeout(()=>{const b=$("#btnNewProd");b&&b.click();},250);}}
+  ];
+}
+function cajeroSteps(){
+  return [
+    {t:"👋 ¡Hola, "+esc(st.usuario||"cajero")+"!",big:"🧾",p:"Te muestro rápido cómo vender con DL CUADRA PRO."},
+    {view:"vender",el:"#grid",t:"Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b> y elige efectivo o QR."},
+    {view:"vender",el:"#q",t:"Busca o escanea",p:"Escribe el nombre o el código del producto, o usa el botón del escáner para leer el código de barras."},
+    {view:"inv",el:".kpis",t:"Revisa el stock",p:"Mira qué productos están bajos o agotados para avisarle al dueño."},
+    {view:"dia",el:"#dTot",t:"Tu cierre del día",p:"Aquí ves lo que has vendido en tu turno: efectivo, QR y gastos. Úsalo para cuadrar la caja."},
+    {el:"#roleChip",t:"Terminar turno",p:"Al final del día toca aquí y elige <b>Terminar turno y salir</b>. Para volver a entrar necesitas tu PIN."},
+    {t:"¡Listo! 💪",big:"✅",p:"Ya puedes empezar a vender. Si no hay internet, sigue vendiendo: las ventas se guardan y se envían solas.",fin:"Empezar a vender",finAct:()=>goView("vender")}
+  ];
+}
+function planSteps(de,a){
+  const S=[],r0=PRANK[de]||0,r1=PRANK[a]||0,P=PLANES[a];
+  S.push({t:`${P.ico} ¡Ahora tienes el plan ${P.n}!`,big:"🎉",p:"Se desbloquearon nuevas funciones. Te muestro dónde están."});
+  if(r0<1&&r1>=1){
+    S.push({el:"#tabAdmin",t:"Crea tus cajeros",p:"En <b>Admin</b> crea a tus cajeros. La app les genera un PIN de 4 números para entrar con el nombre de la empresa y el NIT.",go:"admin"});
+    S.push({view:"admin",el:"#admCajNew",t:"Nuevo cajero",p:"Toca aquí, escribe el nombre del cajero y comparte su PIN. Él no verá tu ganancia ni tus costos.",skipIfHidden:true});
+    S.push({view:"inv",el:"#scanInv",t:"Escáner activado",p:"Ya puedes escanear códigos de barras para buscar, vender y guardar productos."});
+    S.push({view:"inv",el:"#invList",t:"Precio de compra",p:"Toca cada producto → <b>Editar</b> → pon el <b>precio de compra</b>. Con eso la app calcula tu ganancia."});
+    S.push({view:"dia",el:"#dGanW",t:"💰 Ganancia del día",p:"Aquí ves cuánto ganaste cada día. Solo tú la ves.",skipIfHidden:true});
+    S.push({view:"vender",el:"#grid",t:"Ventas sin internet",p:"Si se cae el internet, sigue vendiendo: las ventas se guardan en el celular y se envían solas al volver la conexión."});
+  }
+  if(r0<2&&r1>=2){
+    S.push({view:"inv",el:"#btnNewProd",t:"Productos ilimitados",p:"Agrega todos los productos y cajeros que necesites, y consulta todo tu historial de ventas."});
+    S.push({el:"#roleChip",t:"Soporte prioritario",p:"Tienes soporte y sugerencias de mejora con DL COMPANY por WhatsApp. Escríbenos cuando lo necesites."});
+  }
+  if(r0<3&&r1>=3){
+    S.push({view:"admin",el:"#admSedeNew",t:"Crea tus sedes",p:"Agrega cada local de tu empresa. Cada sede tiene su propio inventario y sus cajeros; los productos y precios se comparten.",skipIfHidden:true});
+    S.push({el:"#sedeBtn",t:"Cambia de sede",p:"Toca aquí para ver las ventas, el inventario y el cierre de cada sede.",skipIfHidden:true});
+  }
+  S.push({t:"¡A aprovecharlo! 🚀",big:"✅",p:"Puedes volver a ver la guía cuando quieras desde tu menú.",fin:"Entendido",finAct:()=>goView("vender")});
+  return S;
+}
+function loginSteps(){
+  return [
+    {el:'#lTabs [data-lt="in"]',t:"👑 Dueño",p:"Si ya tienes cuenta, ingresa aquí con tu <b>correo y contraseña</b>.",panel:"loginForm"},
+    {el:'#lTabs [data-lt="emp"]',t:"🏢 Acceso empresa (cajeros)",p:"Los cajeros entran aquí con el <b>nombre de la empresa y el NIT</b>, y luego su usuario y PIN de 4 números.",panel:"empForm"},
+    {el:'#lTabs [data-lt="new"]',t:"✨ ¿Eres nuevo? Crea tu cuenta aquí",p:"Regístrate gratis como <b>Negocio</b> (solo correo y contraseña) o como <b>Empresa</b> (con NIT y varias sedes). Sin tarjeta.",panel:"newForm"},
+    {el:"#nTipo",t:"Negocio o Empresa",p:"Elige <b>Negocio</b> si tienes un solo local. Elige <b>Empresa</b> si tienes NIT o varias sedes.",panel:"newForm",fin:"Crear mi cuenta"}
+  ];
+}
+
+function startTour(kind,force,extra){
+  if(tourOn())return;
+  let steps,key=kind;
+  if(kind==="dueno")steps=dueñoSteps();
+  else if(kind==="cajero")steps=cajeroSteps();
+  else if(kind==="plan"){steps=planSteps(extra.de,extra.a);}
+  else if(kind==="login")steps=loginSteps();
+  if(!steps||!steps.length)return;
+  TOUR={steps,i:0,kind,key,prevView:(document.querySelector("nav.tabs button.on")||{}).dataset?.v};
+  if(kind==="login"){try{localStorage.setItem("cp_tour_login","1");}catch(e){}}
+  else if(kind!=="plan")tset(key,"1");
+  $("#tour").classList.add("on");showStep(0,1);
+}
+function endTour(skip){
+  if(!TOUR)return;const s=TOUR.steps[TOUR.i],t=TOUR;TOUR=null;
+  $("#tour").classList.remove("on");
+  if(!skip&&s&&s.finAct)s.finAct();
+  else if(t.kind==="login"){if(skip)loginPanel("loginForm");}
+  else goView("vender");
+}
+async function showStep(i,dir){
+  if(!TOUR)return;const steps=TOUR.steps;
+  if(i<0)i=0;if(i>=steps.length){endTour(false);return;}
+  const s=steps[i];TOUR.i=i;
+  if(s.panel)loginPanel(s.panel);
+  if(s.view)goView(s.view);
+  await new Promise(r=>setTimeout(r,s.view||s.panel?160:20));
+  let el=s.el?document.querySelector(s.el):null;
+  if(s.el&&!visible(el)){return showStep(i+(dir||1),dir||1);}  // si no existe en este plan o rol, se salta
+  if(el){el.scrollIntoView({block:"center",behavior:"smooth"});await new Promise(r=>setTimeout(r,330));}
+  if(!TOUR||TOUR.i!==i)return;
+  const spot=$("#tour .tspot"),tip=$("#tour .ttip");
+  const n=steps.length,last=i===n-1;
+  tip.className="ttip"+(el?"":" center");tip.style.transform="";
+  tip.innerHTML=`<div class="tstep">Guía · ${i+1} de ${n}</div>${s.big?`<div class="tbig">${s.big}</div>`:""}<h4>${s.t}</h4><p>${s.p}</p>
+    <div class="tacts">${last?"":`<button class="tskip" type="button" data-ts>Saltar guía</button>`}${i>0?`<button class="tb" type="button" data-tp>‹</button>`:""}<button class="tb tn" type="button" data-tn>${last?(s.fin||"Terminar"):(i===0?"Empezar ›":"Siguiente ›")}</button></div>
+    <div class="tdots">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>`;
+  tip.querySelector("[data-tn]").onclick=()=>last?endTour(false):showStep(i+1,1);
+  const tp=tip.querySelector("[data-tp]");if(tp)tp.onclick=()=>showStep(i-1,-1);
+  const ts=tip.querySelector("[data-ts]");if(ts)ts.onclick=()=>endTour(true);
+  place(el);
+}
+function place(el){
+  const spot=$("#tour .tspot"),tip=$("#tour .ttip");
+  if(!el){spot.classList.add("none");tip.style.left="";tip.style.top="";return;}
+  spot.classList.remove("none");
+  const r=el.getBoundingClientRect(),pad=6,vw=innerWidth,vh=innerHeight;
+  const top=Math.max(4,r.top-pad),h=Math.min(r.height+pad*2,vh*.6);
+  spot.style.left=(r.left-pad)+"px";spot.style.top=top+"px";spot.style.width=(r.width+pad*2)+"px";spot.style.height=h+"px";
+  const tw=tip.offsetWidth,th=tip.offsetHeight;
+  let tt=top+h+12;if(tt+th>vh-8)tt=top-th-12;if(tt<8)tt=Math.max(8,Math.min(vh-th-8,top+h+12));
+  let tl=r.left+r.width/2-tw/2;tl=Math.max(12,Math.min(vw-tw-12,tl));
+  tip.style.left=tl+"px";tip.style.top=tt+"px";
+}
+addEventListener("resize",()=>{if(TOUR){const s=TOUR.steps[TOUR.i];place(s&&s.el?document.querySelector(s.el):null);}});
+addEventListener("scroll",()=>{if(TOUR){const s=TOUR.steps[TOUR.i];if(s&&s.el)place(document.querySelector(s.el));}},{passive:true});
+
+function maybeTour(){
+  if(tourOn()||!st.user||!st.perfil||$("#login").classList.contains("on"))return;
+  if($("#scrim").classList.contains("on")||$("#scanner").classList.contains("on")){clearTimeout(tourT);tourT=setTimeout(maybeTour,4000);return;}
+  if(isCajero()){if(!tget("cajero"))startTour("cajero");return;}
+  if(!isDueno())return;
+  const k=planActual(),prev=tget("plan");
+  if(!tget("dueno")){tset("plan",k);startTour("dueno");return;}
+  if(prev&&prev!==k){tset("plan",k);if((PRANK[k]||0)>(PRANK[prev]||0))startTour("plan",true,{de:prev,a:k});return;}
+  if(!prev)tset("plan",k);
+}
+$("#lHelp").onclick=()=>startTour("login",true);
+setTimeout(()=>{let seen=null;try{seen=localStorage.getItem("cp_tour_login");}catch(e){}
+  if(!seen&&$("#login").classList.contains("on")&&!$("#loginForm").hidden&&!tourOn())startTour("login");},1400);
 
 init();
 })();
