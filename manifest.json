@@ -1,7 +1,7 @@
 {
   "id": "./",
   "name": "DL CUADRA PRO",
-  "short_name": "Cuadra Pro",
+  "short_name": "DL CUADRA PRO",
   "description": "Cuadra tu caja, todos los días. Inventario + ventas = resultados. Desarrollado por DL COMPANY -TECHNOLOGY-.",
   "start_url": "./?app=1",
   "scope": "./",
