@@ -491,6 +491,11 @@ details.cdet summary{cursor:pointer;font-weight:800;color:var(--acc);padding:6px
 .ttip.center{left:50%!important;top:50%!important;transform:translate(-50%,-50%);text-align:center}
 .ttip.center .tacts{justify-content:center}.ttip.center .tacts .tskip{margin-right:0}
 .ttip .tbig{font-size:40px;line-height:1;margin:2px 0 8px}
+.ttip .tvoz{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:11px;border:1px solid var(--line2);background:transparent;color:var(--ink);font-size:16px;cursor:pointer;display:grid;place-items:center}
+.ttip .tvoz.hab{border-color:var(--acc);box-shadow:0 0 12px rgba(34,228,255,.45);animation:tvz 1.2s ease-in-out infinite}
+@keyframes tvz{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.ttip .tbar{height:3px;border-radius:9px;background:var(--line);margin-top:10px;overflow:hidden}.ttip .tbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.ttip.center .tvoz{top:10px;right:10px}
 html[data-theme="light"] .ttip{background:linear-gradient(180deg,#fff,#fbf8ee);border-color:var(--gold);box-shadow:0 18px 50px rgba(15,23,42,.28)}
 html[data-theme="light"] .tspot{box-shadow:0 0 0 9999px rgba(15,23,42,.62),0 0 22px rgba(201,162,39,.6);border-color:var(--gold)}
 html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
@@ -605,7 +610,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.5 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.6 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2622,6 +2627,34 @@ async function pintarPush(box){
 let cierreAbrir=new URLSearchParams(location.search).get("cierre");
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",ev=>{const d=ev.data||{};if(d.tipo==="abrir"){try{const c=new URL(d.url).searchParams.get("cierre");if(c){cierreAbrir=c;loadCierres();}}catch(e){}}});
 
+/* ---------- voz de la guía: lee cada paso y avanza sola al terminar ---------- */
+const VOZ={ok:"speechSynthesis" in window&&"SpeechSynthesisUtterance" in window,on:true,voz:null,tok:0,t:null,bar:null};
+try{VOZ.on=localStorage.getItem("cp_tour_voz")!=="0";}catch(e){}
+function elegirVoz(){if(!VOZ.ok)return;const L=speechSynthesis.getVoices()||[];const pref=["es-CO","es-US","es-419","es-MX","es-ES","es"];
+  for(const p of pref){const v=L.find(x=>(x.lang||"").replace("_","-").toLowerCase().startsWith(p.toLowerCase()));if(v){VOZ.voz=v;return;}}}
+if(VOZ.ok){elegirVoz();try{speechSynthesis.addEventListener("voiceschanged",elegirVoz);}catch(e){speechSynthesis.onvoiceschanged=elegirVoz;}}
+const limpioVoz=s=>String(s||"").replace(/<[^>]+>/g," ").replace(/&nbsp;/g," ").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,"").replace(/[›‹·•]/g,", ").replace(/\s+/g," ").replace(/\s+([,.;:])/g,"$1").trim();
+function callar(){VOZ.tok++;clearTimeout(VOZ.t);if(VOZ.bar)VOZ.bar.style.transition="none";if(VOZ.ok)try{speechSynthesis.cancel();}catch(e){}const b=document.querySelector("#tour .tvoz");if(b)b.classList.remove("hab");}
+function leer(s,i,last){
+  if(!VOZ.ok||!VOZ.on||!TOUR)return;
+  callar();const tok=VOZ.tok;
+  const tt=limpioVoz(s.t),texto=tt+(/[.!?¡¿:]$/.test(tt)?" ":". ")+limpioVoz(s.p);
+  const u=new SpeechSynthesisUtterance(texto);
+  u.lang=VOZ.voz?VOZ.voz.lang:"es-CO";if(VOZ.voz)u.voice=VOZ.voz;u.rate=1;u.pitch=1;
+  const est=Math.max(2500,texto.split(/\s+/).length*400+1200);   // duración estimada
+  const btn=document.querySelector("#tour .tvoz"),bar=VOZ.bar=document.querySelector("#tour .tbar i");
+  let empezo=false;
+  const avanzar=()=>{if(tok!==VOZ.tok||!TOUR||TOUR.i!==i)return;if(btn)btn.classList.remove("hab");if(!last)VOZ.t=setTimeout(()=>{if(tok===VOZ.tok&&TOUR&&TOUR.i===i)showStep(i+1,1);},900);};
+  u.onstart=()=>{if(tok!==VOZ.tok)return;empezo=true;if(btn)btn.classList.add("hab");
+    if(bar){bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;bar.style.transition=`width ${est}ms linear`;bar.style.width="100%";}
+    clearTimeout(VOZ.t);VOZ.t=setTimeout(()=>{if(tok===VOZ.tok){try{if(!speechSynthesis.speaking)avanzar();}catch(e){}}},est+4000);};
+  u.onend=()=>{if(empezo)avanzar();};
+  u.onerror=e=>{if(btn)btn.classList.remove("hab");if(e&&e.error==="not-allowed"&&bar)bar.parentNode.remove();};
+  try{speechSynthesis.speak(u);}catch(e){return;}
+  // si el navegador no deja hablar (falta un toque del usuario), no avanza sola
+  setTimeout(()=>{if(tok===VOZ.tok&&!empezo){const b=document.querySelector("#tour .tbar");if(b)b.remove();}},1800);
+}
+
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
 const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
@@ -2637,7 +2670,7 @@ function dueñoSteps(){
   const k=planActual(),P=PLANES[k]||PLANES.gratis,L=LIM();
   const nProd=L.productos?`Tu plan ${P.n} permite hasta <b>${L.productos} productos</b>.`:"Puedes agregar <b>todos los productos</b> que quieras.";
   return [
-    {t:`${P.ico} ¡Bienvenido a DL CUADRA PRO!`,big:"👋",p:`Tu cuenta <b>${P.n}</b> está lista. Te muestro en 1 minuto cómo se usa la app. Puedes saltar la guía cuando quieras.`},
+    {t:`${P.ico} ¡Bienvenido a DL CUADRA PRO!`,big:"👋",p:`Tu cuenta <b>${P.n}</b> está lista. Te muestro en 1 minuto cómo se usa la app: la guía habla y avanza sola, o usa los botones. Toca el parlante 🔊 para silenciarla.`},
     {el:"#bizBtn",t:"El nombre de tu negocio",p:"Tócalo para escribir o cambiar el nombre. Así sale en tus cierres y reportes."},
     {view:"inv",el:"#btnNewProd",t:"1. Agrega tus productos aquí",p:`Toca <b>+ Producto</b> y escribe el nombre, el precio de venta, la categoría y cuántas unidades tienes. ${nProd}`},
     {view:"inv",el:"#btnCats",t:"Tus categorías",p:"Crea, cambia o borra categorías (cervezas, licores, snacks…) para encontrar rápido tus productos."},
@@ -2719,6 +2752,7 @@ function startTour(kind,force,extra){
   $("#tour").classList.add("on");showStep(0,1);
 }
 function endTour(skip){
+  callar();
   if(!TOUR)return;const s=TOUR.steps[TOUR.i],t=TOUR;TOUR=null;
   $("#tour").classList.remove("on");
   if(!skip&&s&&s.finAct)s.finAct();
@@ -2739,13 +2773,15 @@ async function showStep(i,dir){
   const spot=$("#tour .tspot"),tip=$("#tour .ttip");
   const n=steps.length,last=i===n-1;
   tip.className="ttip"+(el?"":" center");tip.style.transform="";
-  tip.innerHTML=`<div class="tstep">Guía · ${i+1} de ${n}</div>${s.big?`<div class="tbig">${s.big}</div>`:""}<h4>${s.t}</h4><p>${s.p}</p>
+  tip.innerHTML=`${VOZ.ok?`<button class="tvoz" type="button" data-tv aria-label="${VOZ.on?"Silenciar la guía":"Activar la voz"}">${VOZ.on?"🔊":"🔇"}</button>`:""}<div class="tstep">Guía · ${i+1} de ${n}</div>${s.big?`<div class="tbig">${s.big}</div>`:""}<h4>${s.t}</h4><p>${s.p}</p>
     <div class="tacts">${last?"":`<button class="tskip" type="button" data-ts>Saltar guía</button>`}${i>0?`<button class="tb" type="button" data-tp>‹</button>`:""}<button class="tb tn" type="button" data-tn>${last?(s.fin||"Terminar"):(i===0?"Empezar ›":"Siguiente ›")}</button></div>
-    <div class="tdots">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>`;
-  tip.querySelector("[data-tn]").onclick=()=>last?endTour(false):showStep(i+1,1);
-  const tp=tip.querySelector("[data-tp]");if(tp)tp.onclick=()=>showStep(i-1,-1);
+    <div class="tdots">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>${VOZ.ok&&VOZ.on&&!last?`<div class="tbar"><i></i></div>`:""}`;
+  tip.querySelector("[data-tn]").onclick=()=>{callar();last?endTour(false):showStep(i+1,1);};
+  const tp=tip.querySelector("[data-tp]");if(tp)tp.onclick=()=>{callar();showStep(i-1,-1);};
   const ts=tip.querySelector("[data-ts]");if(ts)ts.onclick=()=>endTour(true);
+  const tv=tip.querySelector("[data-tv]");if(tv)tv.onclick=()=>{VOZ.on=!VOZ.on;try{localStorage.setItem("cp_tour_voz",VOZ.on?"1":"0");}catch(e){}if(!VOZ.on)callar();showStep(i,1);};
   place(el);
+  leer(s,i,last);
 }
 function place(el){
   const spot=$("#tour .tspot"),tip=$("#tour .ttip");
