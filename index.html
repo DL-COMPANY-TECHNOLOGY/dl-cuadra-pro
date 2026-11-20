@@ -610,7 +610,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.6 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.7 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -841,7 +841,7 @@ async function refresh(){
   if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}
     const pc=aj.data.find(x=>x.clave==="pedido_cfg");try{st.pedidoCfg=pc?JSON.parse(pc.valor):null;}catch(e){st.pedidoCfg=null;}
     const av=aj.data.find(x=>x.clave==="cierre_aviso");try{const v=av&&JSON.parse(av.valor);st.aviso=v&&typeof v==="object"?v:{modo:"app",num:""};}catch(e){st.aviso={modo:"app",num:""};}}
-  loadCierres();if(puede("fiado"))loadClientes();if(!pushSyncOk){pushSyncOk=true;syncPush();}
+  loadCierres();if(puede("fiado"))loadClientes();if(st.superadmin==null&&isDueno())sb.rpc("soy_superadmin").then(r=>{st.superadmin=!r.error&&r.data===true;},()=>{});if(!pushSyncOk){pushSyncOk=true;syncPush();}
   if(isDueno()){
     const [co,vc]=await Promise.all([sb.from("costos").select("producto_id,costo"),sb.from("venta_costos").select("movimiento_id,costo,sin_costo").eq("sede_id",sede).gte("fecha",st.from)]);
     if(!co.error)st.costos=new Map(co.data.map(r=>[r.producto_id,r.costo]));
@@ -1103,6 +1103,7 @@ function sessionMenu(){
     ${!caj?`<button class="opt" data-m="adm"><span class="ic c3">⚙️</span><span><b>Administración</b><small>Empresa, sedes y cajeros</small></span></button>`:""}
     ${!caj?`<button class="opt" data-m="rep"><span class="ic c1">📊</span><span><b>Reportes y Excel</b><small>Semana, mes o las fechas que quieras</small></span></button>`:""}
     <button class="opt" data-m="fiado"><span class="ic c3">📒</span><span><b>Fiado</b><small>Clientes que deben y abonos</small></span></button>
+    ${st.superadmin?`<button class="opt" data-m="dladm"><span class="ic c1">🛠️</span><span><b>Panel DL COMPANY</b><small>Códigos de activación y empresas</small></span></button>`:""}
     <button class="opt" data-m="guia"><span class="ic c3">🧭</span><span><b>Ver guía de la app</b><small>Te muestro paso a paso cómo se usa</small></span></button>
     <button class="opt dl-only" data-install><span class="ic c1">📲</span><span><b>Descargar app</b><small>Instálala en este celular o computador</small></span></button>
     <button class="opt" data-m="out"><span class="ic c2">🚪</span><span><b>${caj?"Terminar turno y salir":"Cerrar sesión"}</b><small>${caj?"Para entrar de nuevo necesitas tu PIN":"Saldrás de este dispositivo"}</small></span></button>
@@ -1112,6 +1113,7 @@ function sessionMenu(){
     const ba=sh.querySelector('[data-m="adm"]');if(ba)ba.onclick=()=>{closeSheet();document.querySelector('nav.tabs button[data-v="admin"]').click();};
     const br=sh.querySelector('[data-m="rep"]');if(br)br.onclick=()=>{closeSheet();setTimeout(reportes,200);};
     sh.querySelector('[data-m="fiado"]').onclick=()=>{closeSheet();setTimeout(fiadoSheet,200);};
+    const dla=sh.querySelector('[data-m="dladm"]');if(dla)dla.onclick=()=>{closeSheet();setTimeout(()=>panelDL("gen"),200);};
     sh.querySelector('[data-m="guia"]').onclick=()=>{closeSheet();setTimeout(()=>startTour(caj?"cajero":"dueno",true),250);};
     sh.querySelector('[data-m="out"]').onclick=async()=>{await soltarPush();pushSyncOk=false;closeSheet();const wasCaj=caj;st.perfil=null;await sb.auth.signOut();if(wasCaj){st.empOk=null;loginPanel("empForm");}};
   });
@@ -1138,7 +1140,7 @@ function startData(){
   channel.subscribe();
 }
 let ctxT=null;const ctxSoon=()=>{clearTimeout(ctxT);ctxT=setTimeout(async()=>{if(!st.user||!st.perfil)return;try{const r=await loadContext();if(!r.ok)return boot(true);if(!st.sede)return showSedePicker();render();if($("#v-admin").classList.contains("on"))loadAdmin();}catch(e){}},300);};
-function stopData(){st.cierres=[];bellAviso=false;renderBell();if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
+function stopData(){st.superadmin=null;st.cierres=[];bellAviso=false;renderBell();if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
 
 async function init(){
   render();
@@ -1889,21 +1891,40 @@ const ORDEN=["gratis","pro","premium","empresarial"];
 const planActual=()=>(st.mode!=="db"?"empresarial":(st.plan&&st.plan.plan)||"gratis");
 const LIM=()=>(st.plan&&st.plan.limites)||{productos:null,cajeros:null,sedes:null,historial:null,costos:true,escaner:true,offline:true};
 const puede=k=>st.mode!=="db"||!!LIM()[k];
-async function loadPlan(){if(!sb)return;const r=await sb.rpc("mi_plan");if(!r.error&&r.data)st.plan=r.data;}
+async function loadPlan(){if(!sb)return;const r=await sb.rpc("mi_plan");if(!r.error&&r.data){st.plan=r.data;avisoVence();}}
+function avisoVence(){
+  try{const pl=st.plan;if(!pl||!isDueno()||!pl.vence||pl.plan==="gratis")return;
+    const d=Math.round((new Date(pl.vence+"T12:00")-new Date(today()+"T12:00"))/864e5);if(d>5||d<0)return;
+    const k="cp_vence_"+((st.empresa&&st.empresa.id)||"")+"_"+today();if(localStorage.getItem(k))return;localStorage.setItem(k,"1");
+    setTimeout(()=>toast(`⏳ Tu plan ${PLANES[pl.plan].n} ${d===0?"vence hoy":"vence en "+d+(d===1?" día":" días")}. Renuévalo en Planes para no perder funciones.`),2500);}catch(e){}
+}
 const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:()=>"Tu plan incluye una sola sede.",
   costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado no está disponible en tu plan.",clientes:l=>`Tu plan permite hasta ${l} clientes de fiado. Archiva uno que esté al día o mejora tu plan.`,historial:l=>`Tu plan muestra los últimos ${l} días.`};
 function showPlanes(motivo){
   const cur=planActual(),e=st.empresa||{};
-  const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ($${PLANES[k].p.toLocaleString("es-CO")}/mes).${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
+  const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ($${PLANES[k].p.toLocaleString("es-CO")}/mes). ¿Cómo hago el pago para recibir mi código de activación?${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
   const venc=st.plan&&st.plan.vence&&cur!=="gratis"?` · vence ${new Date(st.plan.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"})}`:"";
   openSheet(`<h3>${motivo?"🔒 Mejora tu plan":"Planes DL CUADRA PRO"}</h3>
     <p class="hint">${motivo?esc(motivo)+" ":""}${st.perfil?`Tu plan actual: <b>${PLANES[cur].n}</b>${venc}.`:"Empieza gratis y mejora cuando lo necesites."}</p>
+    ${st.perfil&&st.mode==="db"?(isDueno()?`<div class="card" style="padding:12px;margin:0 0 12px;border-color:rgba(46,242,160,.45)"><div style="font-weight:800;margin:0 0 6px">🔑 ¿Ya pagaste? Activa tu código</div>
+      <div style="display:flex;gap:8px"><input id="cdIn" class="mono" maxlength="30" autocomplete="off" autocapitalize="characters" placeholder="DLC-PRO-30D-XXXX-XXXX" style="flex:1;min-width:0;text-transform:uppercase;background:rgba(127,127,127,.08);border:1px solid var(--line2);border-radius:12px;padding:11px 12px;color:var(--ink);font-size:14px"><button class="btn pri" type="button" id="cdGo" style="flex:none">Activar</button></div>
+      <p class="hint" style="margin:6px 0 0">El plan se activa al instante. Si renuevas el mismo plan, los días se suman a los que te quedan.</p></div>`:`<div class="cdiff warn" style="margin:0 0 12px">Para cambiar de plan, habla con el dueño del negocio.</div>`):""}
     ${ORDEN.map(k=>{const P=PLANES[k],isCur=k===cur&&!!st.perfil,up=ORDEN.indexOf(k)>ORDEN.indexOf(cur);
       return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}</span><span class="num">${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}</span></h4>
         <ul>${P.f.map(x=>`<li>${x}</li>`).join("")}</ul>
         ${P.p&&(up||!st.perfil)?`<a class="btn ${k==="premium"?"pri":"dark"} wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Quiero ${P.n} por WhatsApp</a>`:isCur&&P.p?`<a class="btn wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Renovar ${P.n}</a>`:""}</div>`;}).join("")}
-    <p class="hint" style="text-align:center">Pagos y activación por WhatsApp. Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos.<br>Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
-    <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;});
+    <p class="hint" style="text-align:center"><b>¿Cómo pagar?</b> Escríbenos por WhatsApp con el plan que quieres, paga por Nequi o transferencia y te enviamos tu <b>código de activación</b>. Lo ingresas aquí arriba y listo.<br>Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos. Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
+    <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;
+      const go=s.querySelector("#cdGo");if(go)go.onclick=async()=>{
+        const inp=s.querySelector("#cdIn"),cod=inp.value.trim().toUpperCase().replace(/\s+/g,"");
+        if(cod.length<10){toast("Escribe el código completo");inp.focus();return;}
+        go.disabled=true;go.textContent="…";
+        try{const r=await sb.rpc("canjear_codigo",{p_codigo:cod});if(r.error)throw r.error;
+          await loadPlan();await loadContext().catch(()=>{});render();closeSheet();
+          const P=PLANES[r.data.plan];toast(`🎉 ¡Plan ${P.n} activado${r.data.vence?" hasta el "+new Date(r.data.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"}):""}!`);
+          clearTimeout(tourT);tourT=setTimeout(maybeTour,1200);}
+        catch(err){go.disabled=false;go.textContent="Activar";toast(isNetErr(err)?"Sin internet. Intenta de nuevo.":String(err.message||err).replace(/^.*?:\s*(?=[A-ZÁÉÍÓÚ¡])/,""));}
+      };});
 }
 function upsell(k,l){if(isCajero()){toast(MOTIVO[k]?MOTIVO[k](l)+" Habla con el dueño.":"Función no incluida en el plan.");return;}showPlanes(MOTIVO[k]?MOTIVO[k](l):"");}
 // límite alcanzado (antes de intentar)
@@ -2653,6 +2674,78 @@ function leer(s,i,last){
   try{speechSynthesis.speak(u);}catch(e){return;}
   // si el navegador no deja hablar (falta un toque del usuario), no avanza sola
   setTimeout(()=>{if(tok===VOZ.tok&&!empezo){const b=document.querySelector("#tour .tbar");if(b)b.remove();}},1800);
+}
+
+/* ---------- panel DL COMPANY (solo superadmin): códigos y empresas ---------- */
+const DIAS=[[30,"1 mes"],[90,"3 meses"],[180,"6 meses"],[365,"1 año"]];
+const durTxt=d=>{const x=DIAS.find(y=>y[0]===d);return x?x[1]:d+" días";};
+const fechaC=s=>s?new Date(String(s).length<=10?s+"T12:00":s).toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"}):"";
+function msgCodigo(c,plan,dias){const P=PLANES[plan];return `¡Hola! 👋 Gracias por tu pago.\n\nTu código de activación de *DL CUADRA PRO* es:\n\n*${c}*\n\nPlan ${P.ico} *${P.n}* por ${durTxt(dias)}.\n\nCómo activarlo:\n1. Abre la app y entra con tu cuenta de dueño.\n2. Toca tu plan (o Menú → Planes).\n3. Pega el código en "Activa tu código" y toca *Activar*.\n\nCualquier duda, aquí estamos. — DL COMPANY -TECHNOLOGY-`;}
+async function panelDL(tab){
+  if(!st.superadmin)return;
+  let gen={plan:"pro",dias:30,cant:1,nota:"",res:null},cods=null,emps=null,q="";
+  const draw=async s=>{
+    const T=`<div class="grab"></div><h3>🛠️ Panel DL COMPANY</h3>
+      <div class="seg" id="dlT" style="margin:0 0 12px"><button type="button" data-t="gen" class="${tab==="gen"?"on":""}">🔑 Generar</button><button type="button" data-t="cod" class="${tab==="cod"?"on":""}">📋 Códigos</button><button type="button" data-t="emp" class="${tab==="emp"?"on":""}">🏢 Empresas</button></div>`;
+    let B="";
+    if(tab==="gen"){
+      B=`<div class="ctit">Plan</div><div class="rranges" id="gP">${["pro","premium","empresarial"].map(k=>`<button type="button" data-p="${k}" class="${gen.plan===k?"on":""}">${PLANES[k].ico} ${PLANES[k].n}</button>`).join("")}</div>
+        <div class="ctit">Duración</div><div class="rranges" id="gD">${DIAS.map(([d,l])=>`<button type="button" data-d="${d}" class="${gen.dias===d?"on":""}">${l}</button>`).join("")}</div>
+        <div class="two"><label class="fld"><span>Cantidad</span><input id="gC" class="num" inputmode="numeric" value="${gen.cant}" maxlength="2"></label>
+        <label class="fld"><span>Cliente o nota</span><input id="gN" maxlength="120" value="${esc(gen.nota)}" placeholder="Ej: Licorera La 13 · Nequi"></label></div>
+        <p class="hint">Valor: <b>$${(PLANES[gen.plan].p*Math.round(gen.dias/30)).toLocaleString("es-CO")}</b> por código (${PLANES[gen.plan].n} × ${Math.round(gen.dias/30)} ${Math.round(gen.dias/30)===1?"mes":"meses"}).</p>
+        <button class="btn pri wide" type="button" id="gGo">Generar ${gen.cant>1?gen.cant+" códigos":"código"}</button>
+        ${gen.res?`<div class="ctit" style="margin-top:14px">✅ Listos para enviar</div><div class="card">${gen.res.map(c=>`<div class="rrow"><div class="grow"><div class="t mono" style="font-size:14px">${c}</div><div class="sub">${PLANES[gen.plan].n} · ${durTxt(gen.dias)}</div></div><button class="btn sm" data-cp="${c}">Copiar</button><button class="btn sm pri" data-wa="${c}">📲</button></div>`).join("")}</div>`:""}`;
+    }else if(tab==="cod"){
+      if(!cods){const r=await sb.rpc("listar_codigos",{p_limite:300});cods=r.data||[];}
+      const ql=q.toLowerCase(),L=cods.filter(c=>!ql||c.codigo.toLowerCase().includes(ql)||(c.nota||"").toLowerCase().includes(ql)||(c.usado_nombre||"").toLowerCase().includes(ql));
+      const libres=cods.filter(c=>!c.usado_por&&!c.anulado).length;
+      B=`<p class="hint">${cods.length} códigos · <b>${libres} sin usar</b></p><input class="search" id="cQ" placeholder="Buscar código, cliente o empresa…" value="${esc(q)}" autocomplete="off" style="margin:0 0 8px">
+        <div class="card">${L.map(c=>{const est=c.anulado?'<span style="color:var(--bad)">Anulado</span>':c.usado_por?`<span style="color:var(--ok)">Usado por ${esc(c.usado_nombre||"")} · ${fechaC(c.usado_en)}</span>`:'<span style="color:var(--acc)">Disponible</span>';
+          return `<div class="rrow" style="flex-wrap:wrap"><div class="grow"><div class="t mono" style="font-size:13px">${c.codigo}</div><div class="sub">${PLANES[c.plan].n} · ${durTxt(c.dias)} · ${fechaC(c.creado)}${c.nota?" · "+esc(c.nota):""}</div><div class="sub">${est}</div></div>
+          ${!c.usado_por&&!c.anulado?`<button class="btn sm" data-cp="${c.codigo}">Copiar</button><button class="btn sm" data-wa="${c.codigo}" data-pl="${c.plan}" data-di="${c.dias}">📲</button><button class="btn sm ghost" data-an="${c.codigo}" style="color:var(--bad)">Anular</button>`:""}</div>`;}).join("")||'<div class="empty">Sin códigos</div>'}</div>`;
+    }else{
+      if(!emps){const r=await sb.rpc("empresas_admin");emps=r.data||[];}
+      const ql=q.toLowerCase(),L=emps.filter(e=>!ql||(e.nombre||"").toLowerCase().includes(ql)||(e.correo||"").toLowerCase().includes(ql)||(e.nit||"").includes(ql));
+      const cnt=k=>emps.filter(e=>e.activo===k).length;
+      B=`<p class="hint">${emps.length} cuentas · Gratis ${cnt("gratis")} · Pro ${cnt("pro")} · Premium ${cnt("premium")} · Empresarial ${cnt("empresarial")}</p>
+        <input class="search" id="cQ" placeholder="Buscar empresa, correo o NIT…" value="${esc(q)}" autocomplete="off" style="margin:0 0 8px">
+        <div class="card">${L.map(e=>`<div class="rrow" style="flex-wrap:wrap"><div class="grow"><div class="t">${e.tipo==="empresa"?"🏢":"🏪"} ${esc(e.nombre)}</div>
+          <div class="sub">${esc(e.correo||"")}${e.nit?" · NIT "+esc(e.nit):""}</div>
+          <div class="sub">${PLANES[e.activo].ico} <b>${PLANES[e.activo].n}</b>${e.vence&&e.activo!=="gratis"?" hasta "+fechaC(e.vence):e.plan!==e.activo?` (venció ${PLANES[e.plan].n})`:""} · ${e.productos} prod · ${e.sedes} sedes · ${e.cajeros} cajeros · ${e.ventas30} ventas/30d · desde ${fechaC(e.creado)}</div></div>
+          <button class="btn sm" data-ep="${e.id}">Plan</button></div>`).join("")||'<div class="empty">Sin empresas</div>'}</div>`;
+    }
+    s.innerHTML=T+B+`<div class="acts"><button class="btn pri" data-x>Cerrar</button></div>`;
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("#dlT").onclick=e=>{const b=e.target.closest("[data-t]");if(b){tab=b.dataset.t;q="";draw(s);}};
+    const cq=s.querySelector("#cQ");if(cq)cq.oninput=()=>{q=cq.value;const pos=cq.selectionStart;draw(s).then(()=>{const n=s.querySelector("#cQ");if(n){n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}}});};
+    s.querySelectorAll("[data-cp]").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.cp);toast("Código copiado");}catch(e){toast(b.dataset.cp);}});
+    s.querySelectorAll("[data-wa]").forEach(b=>b.onclick=()=>{const pl=b.dataset.pl||gen.plan,di=+(b.dataset.di||gen.dias);window.open("https://wa.me/?text="+encodeURIComponent(msgCodigo(b.dataset.wa,pl,di)),"_blank","noopener");});
+    s.querySelectorAll("[data-an]").forEach(b=>b.onclick=()=>confirmSheet("Anular código",`El código ${b.dataset.an} dejará de servir.`,"Anular",async()=>{chk(await sb.rpc("anular_codigo",{p_codigo:b.dataset.an}));cods=null;toast("Código anulado");panelDL("cod");}));
+    s.querySelectorAll("[data-ep]").forEach(b=>b.onclick=()=>planEmpresaSheet(emps.find(x=>x.id===b.dataset.ep)));
+    if(tab==="gen"){
+      s.querySelector("#gP").onclick=e=>{const b=e.target.closest("[data-p]");if(b){gen.plan=b.dataset.p;gen.res=null;draw(s);}};
+      s.querySelector("#gD").onclick=e=>{const b=e.target.closest("[data-d]");if(b){gen.dias=+b.dataset.d;gen.res=null;draw(s);}};
+      s.querySelector("#gC").oninput=e=>{gen.cant=Math.max(1,Math.min(50,parseInt(e.target.value.replace(/\D/g,""),10)||1));};
+      s.querySelector("#gN").oninput=e=>{gen.nota=e.target.value;};
+      s.querySelector("#gGo").onclick=async e=>{e.currentTarget.disabled=true;
+        try{const r=await sb.rpc("generar_codigos",{p_plan:gen.plan,p_dias:gen.dias,p_cant:gen.cant,p_nota:gen.nota.trim()||null});if(r.error)throw r.error;gen.res=r.data;cods=null;draw(s);toast("✅ "+r.data.length+(r.data.length===1?" código generado":" códigos generados"));}
+        catch(err){toast("No se pudo generar: "+(err.message||err));draw(s);}};
+    }
+  };
+  openSheet("",s=>{draw(s);});
+}
+function planEmpresaSheet(e){
+  if(!e)return;let plan=e.activo,dias=30;
+  openSheet(`<h3>Plan de ${esc(e.nombre)}</h3><p class="hint">Actual: ${PLANES[e.activo].n}${e.vence&&e.activo!=="gratis"?" hasta "+fechaC(e.vence):""}. Úsalo para cortesías o correcciones; lo normal es enviar un código.</p>
+    <div class="rranges" id="pp">${ORDEN.map(k=>`<button type="button" data-p="${k}" class="${k===plan?"on":""}">${PLANES[k].n}</button>`).join("")}</div>
+    <div class="rranges" id="pd">${DIAS.map(([d,l])=>`<button type="button" data-d="${d}" class="${d===dias?"on":""}">${l}</button>`).join("")}<button type="button" data-d="0">Sin vencimiento</button></div>
+    <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
+    s.querySelector("#pp").onclick=ev=>{const b=ev.target.closest("[data-p]");if(!b)return;plan=b.dataset.p;s.querySelectorAll("#pp button").forEach(x=>x.classList.toggle("on",x===b));};
+    s.querySelector("#pd").onclick=ev=>{const b=ev.target.closest("[data-d]");if(!b)return;dias=+b.dataset.d;s.querySelectorAll("#pd button").forEach(x=>x.classList.toggle("on",x===b));};
+    s.querySelector("[data-x]").onclick=()=>panelDL("emp");
+    s.querySelector("[data-ok]").onclick=async()=>{try{chk(await sb.rpc("cambiar_plan_admin",{p_emp:e.id,p_plan:plan,p_dias:plan==="gratis"||!dias?null:dias}));toast("Plan actualizado");if(st.empresa&&st.empresa.id===e.id)await loadPlan();panelDL("emp");}catch(err){toast(err.message||err);}};
+  });
 }
 
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
