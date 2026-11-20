@@ -33,6 +33,7 @@ supabase/seed.sql     Productos iniciales (del Excel) + ejemplo del 3 de julio 2
 1. Crea una cuenta en [supabase.com](https://supabase.com) → **New project** (región: *South America (São Paulo)*). Guarda la contraseña de la base de datos.
 2. **SQL Editor → New query** → pega todo `supabase/schema.sql` → **Run**.
 3. Nueva query → pega `supabase/seed.sql` → **Run** (carga los productos).
+   - Luego, en orden: `v4-empresas.sql` (empresas, sedes y cajeros) y `v5-catalogo.sql` (catálogo común por código de barras).
 4. **Authentication → Users → Add user → Create new user**: correo + contraseña, marca *Auto Confirm User*. Ese es el usuario para entrar a la app (crea uno por cada persona que venda).
 5. **Authentication → Sign In / Providers** → desactiva **Allow new users to sign up** (así nadie más puede crear cuentas).
 6. **Project Settings → API**: copia *Project URL* y la *anon public key* y pégalas en `config.js`.

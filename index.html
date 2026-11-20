@@ -505,6 +505,9 @@ html[data-theme="light"] .tspot{box-shadow:0 0 0 9999px rgba(15,23,42,.62),0 0 2
 html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
 .nthint{margin:-6px 0 14px;color:var(--muted);font-size:12.5px;font-weight:600;line-height:1.4}
 .lhelp{display:inline-flex;align-items:center;gap:6px;margin:10px auto 0;background:none;border:1px dashed var(--line2);color:var(--acc);font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer}
+.lk-status{margin:-4px 0 12px;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:10px;border:1px solid var(--line,#2a3442);background:rgba(127,127,127,.08)}
+.lk-status.hit{border-color:rgba(16,185,129,.55);background:rgba(16,185,129,.12)}
+.lk-status.miss{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.1)}
 </style>
 </head>
 <body>
@@ -614,7 +617,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.8.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.9.0 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1509,6 +1512,7 @@ function editProd(p,opts){
     <div class="two" style="grid-template-columns:1fr"><label class="fld"><span>Categoría</span><select id="ca">${cl.map(c=>`<option ${c===p.cat?"selected":""}>${esc(c)}</option>`).join("")}<option value="__new">➕ Nueva categoría…</option></select></label></div>
     <label class="fld" id="caNewW" hidden><span>Nombre de la nueva categoría</span><input id="caNew" maxlength="24" placeholder="Ej: Snacks"></label>
     <label class="fld"><span>Código de barras (opcional)</span><div class="inrow"><input id="cb" class="mono" inputmode="numeric" autocomplete="off" value="${esc(p.codigo||"")}" placeholder="Escanéalo o escríbelo"><button type="button" class="btn sm dark" id="cbScan">📷 Escanear</button></div></label>
+    ${isNew?'<p class="lk-status" id="lk" hidden></p>':""}
     <div class="two">${isNew?`<label class="fld"><span>Stock inicial</span><input id="sk" inputmode="numeric" class="num" placeholder="0"></label>`:""}
     <label class="fld"><span>Avisar stock bajo con</span><input id="sm" inputmode="numeric" class="num" value="${p.stock_min!=null?p.stock_min:""}" placeholder="3 unidades"></label></div>
     <p class="hint" style="margin:-4px 0 12px">Stock mínimo: cuando queden esas unidades o menos, sale en <b>Stock bajo</b>. Vacío = 3.</p>
@@ -1522,7 +1526,8 @@ function editProd(p,opts){
       s.querySelector("#mgn").innerHTML=pv&&cv?`Ganas <b style="color:${pv-cv<0?"var(--bad)":"var(--ok)"}">${fmt(pv-cv)}</b> por unidad (${Math.round((pv-cv)*100/pv)}%)`:"El precio de compra solo lo ves tú, para calcular tu ganancia.";};
     s.querySelector("#pr").oninput=mg;s.querySelector("#co").oninput=mg;mg();
     if(!puede("costos")){s.querySelector("#co").onclick=()=>upsell("costos");s.querySelector("#mgn").innerHTML='🔒 Precio de compra y ganancia: <a style="color:var(--acc);cursor:pointer" data-up>disponible desde el plan Pro</a>';s.querySelector("[data-up]").onclick=()=>upsell("costos");}
-    s.querySelector("#cbScan").onclick=()=>!puede("escaner")?upsell("escaner"):openScanner({title:"Código del producto",onCode:code=>{s.querySelector("#cb").value=code;const o=findByCode(code);if(o&&o.id!==p.id)toast("Ojo: ese código ya es de "+o.nombre);}});
+    s.querySelector("#cbScan").onclick=()=>!puede("escaner")?upsell("escaner"):openScanner({title:"Código del producto",onCode:code=>{s.querySelector("#cb").value=code;const o=findByCode(code);if(o&&o.id!==p.id)toast("Ojo: ese código ya es de "+o.nombre);else if(isNew)lookupFill(s,code);}});
+    if(isNew){s.querySelector("#cb").onchange=e=>lookupFill(s,e.target.value);if(opts.codigo)lookupFill(s,opts.codigo);}
     const del=s.querySelector("[data-del]");if(del)del.onclick=()=>confirmSheet("Eliminar "+p.nombre,"Dejará de aparecer en ventas e inventario. Las ventas pasadas se conservan.","Eliminar",()=>store.updProd(p.id,p.codigo?{activo:false,codigo:null}:{activo:false}));
     s.querySelector("[data-ok]").onclick=async()=>{
       const nombre=s.querySelector("#n").value.trim().replace(/\s+/g," "),precio=parseInt(s.querySelector("#pr").value.replace(/\D/g,""),10)||0;
@@ -1539,6 +1544,7 @@ function editProd(p,opts){
           const sk=parseInt(s.querySelector("#sk").value,10)||0;
           const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;if(stock_min!=null)data.stock_min=stock_min;
           await store.newProd(id,data,sk);
+          if(codigo)aportarCatalogo(codigo,nombre,cat);
           if(costo&&puede("costos"))await store.setCosto(id,costo);
         }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;if((p.stock_min??null)!==stock_min)data.stock_min=stock_min;await store.updProd(p.id,data);
           if(puede("costos")&&costo!==(st.costos.get(p.id)||p.costo||0))await store.setCosto(p.id,costo);}
@@ -1546,6 +1552,57 @@ function editProd(p,opts){
       }catch(e){fail(e);}
     };
   });
+}
+
+/* ---------- búsqueda automática por código de barras ----------
+   1) Catálogo DL (tabla catalogo: lo que otros negocios ya registraron)
+   2) Open Food Facts, Open Beauty Facts y Open Products Facts (bases públicas, gratis) */
+const LK_SOURCES=[["https://world.openfoodfacts.org","Open Food Facts"],["https://world.openbeautyfacts.org","Open Beauty Facts"],["https://world.openproductsfacts.org","Open Products Facts"]];
+const lkCache={};let lkSeq=0;
+const lkTimeout=(pr,ms)=>Promise.race([pr,new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),ms))]);
+const lkCode=c=>{c=String(c||"").replace(/\D/g,"");return c.length>=8&&c.length<=14?c:"";};
+const lkNorm=t=>String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+function lkName(p){
+  let n=String(p.product_name_es||p.product_name||p.generic_name_es||p.generic_name||"").trim();if(!n)return "";
+  const brand=String(p.brands||"").split(",")[0].trim(),qty=String(p.quantity||"").trim(),nn=lkNorm(n);
+  if(brand&&!nn.includes(lkNorm(brand)))n+=" "+brand;
+  if(qty&&!nn.replace(/\s/g,"").includes(lkNorm(qty).replace(/\s/g,"")))n+=" "+qty;
+  n=n.replace(/\s+/g," ").trim();return (n.charAt(0).toUpperCase()+n.slice(1)).slice(0,120);
+}
+async function lkCatalogo(code){
+  if(!sb||st.mode!=="db")return null;
+  try{const {data}=await lkTimeout(sb.from("catalogo").select("nombre,cat").eq("codigo",code).maybeSingle(),4000);
+    if(data&&data.nombre)return {nombre:data.nombre,cat:data.cat||"",fuente:"catálogo DL"};}catch(e){}
+  return null;
+}
+async function lkOpenFacts(code){
+  const tries=LK_SOURCES.map(([host,label])=>lkTimeout(fetch(`${host}/api/v2/product/${code}.json?fields=product_name,product_name_es,generic_name,generic_name_es,brands,quantity`).then(r=>r.ok?r.json():null),6000)
+    .then(d=>{const n=d&&d.status===1&&d.product?lkName(d.product):"";if(!n)throw new Error("no");return {nombre:n,cat:"",fuente:label};}));
+  try{return await Promise.any(tries);}catch(e){return null;}
+}
+async function lookupCodigo(code){
+  if(code in lkCache)return lkCache[code];
+  const r=(await lkCatalogo(code))||(navigator.onLine===false?null:await lkOpenFacts(code));
+  lkCache[code]=r;return r;
+}
+async function lookupFill(s,raw){
+  const code=lkCode(raw),box=s.querySelector("#lk");if(!box)return;
+  if(!code||findByCode(code)){box.hidden=true;return;}
+  const seq=++lkSeq;box.hidden=false;box.className="lk-status";box.textContent="🔎 Buscando el producto…";
+  const r=await lookupCodigo(code);
+  if(seq!==lkSeq||!s.isConnected||lkCode(s.querySelector("#cb").value)!==code)return;
+  if(!r){box.className="lk-status miss";box.textContent="No encontramos este código en la base de datos. Escribe el nombre.";return;}
+  const n=s.querySelector("#n");if(!n.value.trim())n.value=r.nombre;
+  if(r.cat){const ca=s.querySelector("#ca"),o=[...ca.options].find(x=>x.value!=="__new"&&lkNorm(x.value)===lkNorm(r.cat));if(o)ca.value=o.value;}
+  box.className="lk-status hit";box.innerHTML=`✅ <b>${esc(r.nombre)}</b><br>Encontrado en ${esc(r.fuente)}. Pon el <b>precio</b> y el <b>stock</b> y guarda.`;
+  toast("✅ Producto encontrado");
+  const pr=s.querySelector("#pr");if(pr&&!pr.value)setTimeout(()=>{try{pr.focus();}catch(e){}},120);
+}
+// Cada producto nuevo con código alimenta el catálogo común (sin precios, costos ni stock)
+function aportarCatalogo(codigo,nombre,cat){
+  const code=lkCode(codigo);if(!code||!sb||st.mode!=="db"||!nombre)return;
+  if(lkCache[code]&&lkCache[code].fuente==="catálogo DL")return;
+  sb.from("catalogo").insert({codigo:code,nombre:String(nombre).slice(0,120),cat:cat?String(cat).slice(0,40):null}).then(r=>{if(!r.error)lkCache[code]={nombre,cat:cat||"",fuente:"catálogo DL"};},()=>{});
 }
 
 /* ---------- agregar producto ---------- */
