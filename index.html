@@ -617,7 +617,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.9.0 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.9.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1555,8 +1555,8 @@ function editProd(p,opts){
 }
 
 /* ---------- búsqueda automática por código de barras ----------
-   1) Catálogo DL (tabla catalogo: lo que otros negocios ya registraron)
-   2) Open Food Facts, Open Beauty Facts y Open Products Facts (bases públicas, gratis) */
+   1) Open Food Facts, Open Beauty Facts y Open Products Facts (bases públicas, gratis)
+   2) Catálogo DL (tabla catalogo: lo que otros negocios ya registraron) */
 const LK_SOURCES=[["https://world.openfoodfacts.org","Open Food Facts"],["https://world.openbeautyfacts.org","Open Beauty Facts"],["https://world.openproductsfacts.org","Open Products Facts"]];
 const lkCache={};let lkSeq=0;
 const lkTimeout=(pr,ms)=>Promise.race([pr,new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),ms))]);
@@ -1582,7 +1582,8 @@ async function lkOpenFacts(code){
 }
 async function lookupCodigo(code){
   if(code in lkCache)return lkCache[code];
-  const r=(await lkCatalogo(code))||(navigator.onLine===false?null:await lkOpenFacts(code));
+  // Primero Open Food Facts (y bases hermanas); si no está, el catálogo DL; si no, se escribe a mano
+  const r=(navigator.onLine===false?null:await lkOpenFacts(code))||(await lkCatalogo(code));
   lkCache[code]=r;return r;
 }
 async function lookupFill(s,raw){
