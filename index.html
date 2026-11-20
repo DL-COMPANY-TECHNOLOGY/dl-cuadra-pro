@@ -411,7 +411,11 @@ html[data-theme="light"] .planchip.p-empresarial{color:#8a6a0c}
 .plan.cur{border:1px solid var(--ok)}
 .plan h4 small{font-size:11px;color:var(--muted);font-weight:700}
 .plan h4 em{font-style:normal;font-size:10.5px;padding:2px 7px;border-radius:99px;margin-left:4px;vertical-align:2px}
-.pcur{background:var(--okSoft);color:var(--ok)}.prec{background:var(--vioSoft);color:#d0a8ff}
+.pcur{background:var(--okSoft);color:var(--ok)}
+.pantes{display:block;text-align:right;font-size:13px;font-weight:700;color:var(--muted);text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:1.5px;line-height:1.2}
+.pdesc{background:linear-gradient(135deg,#ff4d6d,#ff9f1c);color:#fff!important;font-weight:900}
+.lanza{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:11px 13px;border-radius:14px;background:linear-gradient(135deg,rgba(255,77,109,.18),rgba(255,159,28,.18));border:1px solid rgba(255,159,28,.55);font-weight:800;font-size:13.5px;line-height:1.35}
+.lanza b{font-size:20px;color:#ff9f1c}.prec{background:var(--vioSoft);color:#d0a8ff}
 html[data-theme="light"] .prec{color:#6d28d9}
 .pbuy{display:block;text-align:center;text-decoration:none;margin-top:10px}
 .ubar{padding:4px 0}
@@ -610,7 +614,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.7 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.7.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1760,7 +1764,7 @@ function renderPlanCard(){
   let venc="";if(pl.vence&&k!=="gratis"){const d=Math.round((new Date(pl.vence+"T12:00")-new Date(today()+"T12:00"))/864e5);venc=`<div class="sub" style="margin-top:2px">${d<0?"Venció":"Vence"} el ${new Date(pl.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"})}${d>=0&&d<=5?` · <b style="color:var(--warn)">quedan ${d} días</b>`:""}</div>`;}
   else if(k!=="gratis")venc=`<div class="sub" style="margin-top:2px">Sin vencimiento</div>`;
   if(pl.contratado&&pl.contratado!=="gratis"&&k==="gratis")venc=`<div class="sub" style="margin-top:2px;color:var(--bad)">Tu plan ${PLANES[pl.contratado].n} venció. Renuévalo para recuperar todo.</div>`;
-  el.innerHTML=`<div class="row"><div class="grow"><div class="t">${P.ico} ${P.n}</div>${venc}</div><span class="num" style="font-weight:800">${P.p?"$"+P.p.toLocaleString("es-CO")+"/mes":"$0"}</span></div>
+  el.innerHTML=`<div class="row"><div class="grow"><div class="t">${P.ico} ${P.n}</div>${venc}</div><span class="num" style="font-weight:800;text-align:right">${P.antes?`<span class="pantes">$${P.antes.toLocaleString("es-CO")}</span>`:""}${P.p?"$"+P.p.toLocaleString("es-CO")+"/mes":"$0"}</span></div>
     <div class="row" style="display:block">${bar("Productos","productos")}${bar("Cajeros","cajeros")}${bar("Sedes","sedes")}</div>`;
 }
 $("#admPlanes").onclick=()=>showPlanes();
@@ -1883,9 +1887,9 @@ function cajeroSheet(c){
 /* ---------- planes ---------- */
 const PLANES={
   gratis:{n:"Gratis",p:0,ico:"🆓",f:["1 sede, solo el dueño","Hasta 15 productos","Historial de 3 días","Fiado hasta 3 clientes","Sin escáner, ganancia ni ventas sin internet"]},
-  pro:{n:"Pro",p:19900,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Fiado hasta 10 clientes","Historial de 90 días"]},
-  premium:{n:"Premium",p:39900,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Fiado con clientes ilimitados","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
-  empresarial:{n:"Premium Empresarial",p:79900,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Reportes de todas las sedes juntas","Panel del dueño para todas las sedes (próximamente)"]}
+  pro:{n:"Pro",p:19900,antes:40000,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 300 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Fiado hasta 10 clientes","Historial de 90 días"]},
+  premium:{n:"Premium",p:39900,antes:80000,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Fiado con clientes ilimitados","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
+  empresarial:{n:"Premium Empresarial",p:79900,antes:160000,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Reportes de todas las sedes juntas","Panel del dueño para todas las sedes (próximamente)"]}
 };
 const ORDEN=["gratis","pro","premium","empresarial"];
 const planActual=()=>(st.mode!=="db"?"empresarial":(st.plan&&st.plan.plan)||"gratis");
@@ -1902,15 +1906,16 @@ const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?
   costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado no está disponible en tu plan.",clientes:l=>`Tu plan permite hasta ${l} clientes de fiado. Archiva uno que esté al día o mejora tu plan.`,historial:l=>`Tu plan muestra los últimos ${l} días.`};
 function showPlanes(motivo){
   const cur=planActual(),e=st.empresa||{};
-  const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ($${PLANES[k].p.toLocaleString("es-CO")}/mes). ¿Cómo hago el pago para recibir mi código de activación?${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
+  const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO con el 50% de descuento de lanzamiento ($${PLANES[k].p.toLocaleString("es-CO")}/mes en vez de $${PLANES[k].antes.toLocaleString("es-CO")}). ¿Cómo hago el pago para recibir mi código de activación?${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
   const venc=st.plan&&st.plan.vence&&cur!=="gratis"?` · vence ${new Date(st.plan.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"})}`:"";
   openSheet(`<h3>${motivo?"🔒 Mejora tu plan":"Planes DL CUADRA PRO"}</h3>
     <p class="hint">${motivo?esc(motivo)+" ":""}${st.perfil?`Tu plan actual: <b>${PLANES[cur].n}</b>${venc}.`:"Empieza gratis y mejora cuando lo necesites."}</p>
+    <div class="lanza"><b>🚀 -50%</b><span>Precio de lanzamiento por ser una app nueva. Aprovecha: paga la mitad y conserva este precio mientras renueves.</span></div>
     ${st.perfil&&st.mode==="db"?(isDueno()?`<div class="card" style="padding:12px;margin:0 0 12px;border-color:rgba(46,242,160,.45)"><div style="font-weight:800;margin:0 0 6px">🔑 ¿Ya pagaste? Activa tu código</div>
       <div style="display:flex;gap:8px"><input id="cdIn" class="mono" maxlength="30" autocomplete="off" autocapitalize="characters" placeholder="DLC-PRO-30D-XXXX-XXXX" style="flex:1;min-width:0;text-transform:uppercase;background:rgba(127,127,127,.08);border:1px solid var(--line2);border-radius:12px;padding:11px 12px;color:var(--ink);font-size:14px"><button class="btn pri" type="button" id="cdGo" style="flex:none">Activar</button></div>
       <p class="hint" style="margin:6px 0 0">El plan se activa al instante. Si renuevas el mismo plan, los días se suman a los que te quedan.</p></div>`:`<div class="cdiff warn" style="margin:0 0 12px">Para cambiar de plan, habla con el dueño del negocio.</div>`):""}
     ${ORDEN.map(k=>{const P=PLANES[k],isCur=k===cur&&!!st.perfil,up=ORDEN.indexOf(k)>ORDEN.indexOf(cur);
-      return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}</span><span class="num">${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}</span></h4>
+      return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}${P.antes?' <em class="pdesc">-50%</em>':""}</span><span class="num">${P.antes?`<span class="pantes">$${P.antes.toLocaleString("es-CO")}</span>`:""}${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}</span></h4>
         <ul>${P.f.map(x=>`<li>${x}</li>`).join("")}</ul>
         ${P.p&&(up||!st.perfil)?`<a class="btn ${k==="premium"?"pri":"dark"} wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Quiero ${P.n} por WhatsApp</a>`:isCur&&P.p?`<a class="btn wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Renovar ${P.n}</a>`:""}</div>`;}).join("")}
     <p class="hint" style="text-align:center"><b>¿Cómo pagar?</b> Escríbenos por WhatsApp con el plan que quieres, paga por Nequi o transferencia y te enviamos tu <b>código de activación</b>. Lo ingresas aquí arriba y listo.<br>Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos. Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
