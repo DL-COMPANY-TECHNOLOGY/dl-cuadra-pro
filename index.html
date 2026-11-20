@@ -614,7 +614,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.7.3 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v3.8 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1887,9 +1887,9 @@ function cajeroSheet(c){
 /* ---------- planes ---------- */
 const PLANES={
   gratis:{n:"Gratis",p:0,ico:"🆓",f:["1 sede, solo el dueño","Hasta 15 productos","Historial de 3 días","Fiado hasta 3 clientes","Sin escáner, ganancia ni ventas sin internet"]},
-  pro:{n:"Pro",p:20000,antes:40000,ico:"⭐",f:["1 sede y hasta 3 cajeros con PIN","Hasta 150 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Fiado hasta 10 clientes","Historial de 90 días"]},
-  premium:{n:"Premium",p:40000,antes:80000,ico:"💎",f:["1 sede, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Fiado con clientes ilimitados","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
-  empresarial:{n:"Premium Empresarial",p:80000,antes:160000,ico:"🏢",f:["Varias sedes","Todo lo de Premium","Inventario, ventas y cajeros por sede","Reportes de todas las sedes juntas","Panel del dueño para todas las sedes (próximamente)"]}
+  pro:{n:"Pro",p:20000,antes:40000,ico:"⭐",f:["2 sedes y hasta 3 cajeros con PIN","Hasta 150 productos","Escáner de código de barras","Ganancia del día y ventas sin internet","Reportes con descarga a Excel","Fiado hasta 10 clientes","Historial de 90 días"]},
+  premium:{n:"Premium",p:40000,antes:80000,ico:"💎",f:["3 sedes, cajeros y productos ilimitados","Todo lo de Pro","Historial completo","Fiado con clientes ilimitados","Soporte prioritario por WhatsApp","Sugerencias de mejora incluidas"]},
+  empresarial:{n:"Premium Empresarial",p:80000,antes:160000,ico:"🏢",f:["Sedes ilimitadas","Todo lo de Premium","Inventario, ventas y cajeros por sede","Reportes de todas las sedes juntas","Panel del dueño para todas las sedes (próximamente)"]}
 };
 const ORDEN=["gratis","pro","premium","empresarial"];
 const planActual=()=>(st.mode!=="db"?"empresarial":(st.plan&&st.plan.plan)||"gratis");
@@ -1902,7 +1902,7 @@ function avisoVence(){
     const k="cp_vence_"+((st.empresa&&st.empresa.id)||"")+"_"+today();if(localStorage.getItem(k))return;localStorage.setItem(k,"1");
     setTimeout(()=>toast(`⏳ Tu plan ${PLANES[pl.plan].n} ${d===0?"vence hoy":"vence en "+d+(d===1?" día":" días")}. Renuévalo en Planes para no perder funciones.`),2500);}catch(e){}
 }
-const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:()=>"Tu plan incluye una sola sede.",
+const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:l=>l===1?"Tu plan incluye una sola sede. Desde el plan Pro puedes tener 2 sedes.":`Tu plan permite hasta ${l} sedes.`,
   costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado no está disponible en tu plan.",clientes:l=>`Tu plan permite hasta ${l} clientes de fiado. Archiva uno que esté al día o mejora tu plan.`,historial:l=>`Tu plan muestra los últimos ${l} días.`};
 function showPlanes(motivo){
   const cur=planActual(),e=st.empresa||{};
@@ -2228,7 +2228,7 @@ function reportes(){
     const fd=()=>{let a=s.querySelector("#rA").value,b=s.querySelector("#rB").value;if(!a||!b)return;if(a>b)[a,b]=[b,a];REP.desde=a;REP.hasta=b;pinta(s);};
     s.querySelector("#rA").onchange=fd;s.querySelector("#rB").onchange=fd;
     const rs=s.querySelector("#rS");if(rs)rs.onclick=e=>{const b=e.target.closest("[data-rs]");if(!b)return;
-      if(b.dataset.rs==="all"&&LIM().sedes===1){upsell("sedes");return;}
+      if(b.dataset.rs==="all"&&LIM().sedes===1){upsell("sedes",1);return;}
       REP.todas=b.dataset.rs==="all";rs.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));pinta(s);};
     pinta(s);
   });
@@ -2809,6 +2809,7 @@ function planSteps(de,a){
   S.push({t:`${P.ico} ¡Ahora tienes el plan ${P.n}!`,big:"🎉",p:"Se desbloquearon nuevas funciones. Te muestro dónde están."});
   if(r0<1&&r1>=1){
     S.push({el:"#tabAdmin",t:"Crea tus cajeros",p:"En <b>Admin</b> crea a tus cajeros. La app les genera un PIN de 4 números para entrar con el nombre de la empresa y el NIT.",go:"admin"});
+    S.push({view:"admin",el:"#admSedeNew",t:"Tu segunda sede",p:"Con Pro puedes tener <b>2 sedes</b> (Premium: 3, Empresarial: ilimitadas). Cada sede tiene su propio inventario y sus cajeros.",skipIfHidden:true});
     S.push({view:"admin",el:"#admCajNew",t:"Nuevo cajero",p:"Toca aquí, escribe el nombre del cajero y comparte su PIN. Él no verá tu ganancia ni tus costos.",skipIfHidden:true});
     S.push({view:"inv",el:"#scanInv",t:"Escáner activado",p:"Ya puedes escanear códigos de barras para buscar, vender y guardar productos."});
     S.push({view:"inv",el:"#invList",t:"Precio de compra",p:"Toca cada producto → <b>Editar</b> → pon el <b>precio de compra</b>. Con eso la app calcula tu ganancia."});
