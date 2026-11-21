@@ -620,7 +620,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v4.0 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v4.1 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2433,7 +2433,7 @@ function cargarExcelJS(){if(window.ExcelJS)return Promise.resolve(window.ExcelJS
 async function excelPro(o){
   const XL=await cargarExcelJS();
   const NAVY="FF0B1426",ACC=o.acento||"FFD4AF37",ACCL="FFFBF5E1",ZEBRA="FFF6F8FC",LINE="FFDDE3EE",MONEY='"$"#,##0';
-  const FMT={money:MONEY,pct:"0.0%",int:"#,##0"};
+  const FMT={money:o.moneyFmt||MONEY,pct:"0.0%",int:"#,##0",date:"dd/mm/yyyy hh:mm",day:"dd/mm/yyyy"};
   const wb=new XL.Workbook();wb.creator=o.app||"DL COMPANY";wb.created=new Date();
   const borde={top:{style:"thin",color:{argb:LINE}},bottom:{style:"thin",color:{argb:LINE}},left:{style:"thin",color:{argb:LINE}},right:{style:"thin",color:{argb:LINE}}};
   const fill=c=>({type:"pattern",pattern:"solid",fgColor:{argb:c}});
@@ -2885,7 +2885,7 @@ async function panelDL(tab){
   let gen={plan:"pro",dias:30,cant:1,nota:"",res:null},cods=null,emps=null,q="";
   const draw=async s=>{
     const T=`<div class="grab"></div><h3>🛠️ Panel DL COMPANY</h3>
-      <div class="seg" id="dlT" style="margin:0 0 12px"><button type="button" data-t="gen" class="${tab==="gen"?"on":""}">🔑 Generar</button><button type="button" data-t="cod" class="${tab==="cod"?"on":""}">📋 Códigos</button><button type="button" data-t="emp" class="${tab==="emp"?"on":""}">🏢 Empresas</button></div>`;
+      <div class="seg" id="dlT" style="margin:0 0 12px"><button type="button" data-t="gen" class="${tab==="gen"?"on":""}">🔑 Generar</button><button type="button" data-t="cod" class="${tab==="cod"?"on":""}">📋 Códigos</button><button type="button" data-t="emp" class="${tab==="emp"?"on":""}">👥 Clientes</button></div>`;
     let B="";
     if(tab==="gen"){
       B=`<div class="ctit">Plan</div><div class="rranges" id="gP">${["pro","premium","empresarial"].map(k=>`<button type="button" data-p="${k}" class="${gen.plan===k?"on":""}">${PLANES[k].ico} ${PLANES[k].n}</button>`).join("")}</div>
@@ -2907,12 +2907,13 @@ async function panelDL(tab){
       if(!emps){const r=await sb.rpc("empresas_admin");emps=r.data||[];}
       const ql=q.toLowerCase(),L=emps.filter(e=>!ql||(e.nombre||"").toLowerCase().includes(ql)||(e.correo||"").toLowerCase().includes(ql)||(e.nit||"").includes(ql));
       const cnt=k=>emps.filter(e=>e.activo===k).length;
-      B=`<p class="hint">${emps.length} cuentas · Gratis ${cnt("gratis")} · Pro ${cnt("pro")} · Premium ${cnt("premium")} · Empresarial ${cnt("empresarial")}</p>
-        <input class="search" id="cQ" placeholder="Buscar empresa, correo o NIT…" value="${esc(q)}" autocomplete="off" style="margin:0 0 8px">
-        <div class="card">${L.map(e=>`<div class="rrow" style="flex-wrap:wrap"><div class="grow"><div class="t">${e.tipo==="empresa"?"🏢":"🏪"} ${esc(e.nombre)}</div>
-          <div class="sub">${esc(e.correo||"")}${e.nit?" · NIT "+esc(e.nit):""}</div>
-          <div class="sub">${PLANES[e.activo].ico} <b>${PLANES[e.activo].n}</b>${e.vence&&e.activo!=="gratis"?" hasta "+fechaC(e.vence):e.plan!==e.activo?` (venció ${PLANES[e.plan].n})`:""} · ${e.productos} prod · ${e.sedes} sedes · ${e.cajeros} cajeros · ${e.ventas30} ventas/30d · desde ${fechaC(e.creado)}</div></div>
-          <button class="btn sm" data-ep="${e.id}">Plan</button></div>`).join("")||'<div class="empty">Sin empresas</div>'}</div>`;
+      B=`<p class="hint">${emps.length} clientes · Gratis ${cnt("gratis")} · Pro ${cnt("pro")} · Premium ${cnt("premium")} · Empresarial ${cnt("empresarial")}</p>
+        <div style="display:flex;gap:8px;margin:0 0 8px"><input class="search" id="cQ" placeholder="Buscar empresa, correo o NIT…" value="${esc(q)}" autocomplete="off" style="margin:0;flex:1"><button class="btn sm" type="button" id="eXl">📊 Excel</button></div>
+        <div class="card">${L.map(e=>`<button type="button" class="rrow" data-ev="${e.id}" style="width:100%;text-align:left;flex-wrap:wrap;align-items:flex-start;background:none;border:0;border-bottom:1px solid var(--line2);color:inherit;font:inherit"><div class="grow">
+          <div class="t">${esc(e.correo||"(sin correo)")}</div>
+          <div class="sub">${e.tipo==="empresa"?"🏢":"🏪"} ${esc(e.nombre)}${e.nit?" · NIT "+esc(e.nit):""}</div>
+          <div class="sub">📅 Cuenta creada: <b>${fechaC(e.cuenta_creada||e.creado)}</b>${e.ultimo_ingreso?" · último ingreso "+fechaC(e.ultimo_ingreso):""}</div>
+          <div class="sub">${PLANES[e.activo].ico} <b>${PLANES[e.activo].n}</b>${e.plan!==e.activo?` <span style="color:var(--bad)">(venció ${PLANES[e.plan].n})</span>`:""}${e.plan!=="gratis"&&e.plan_desde?` · adquirido el <b>${fechaC(e.plan_desde)}</b>`:""}${e.vence&&e.activo!=="gratis"?" · vence "+fechaC(e.vence):""}</div></div><span style="align-self:center">›</span></button>`).join("")||'<div class="empty">Sin clientes</div>'}</div>`;
     }
     s.innerHTML=T+B+`<div class="acts"><button class="btn pri" data-x>Cerrar</button></div>`;
     s.querySelector("[data-x]").onclick=closeSheet;
@@ -2921,7 +2922,12 @@ async function panelDL(tab){
     s.querySelectorAll("[data-cp]").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.cp);toast("Código copiado");}catch(e){toast(b.dataset.cp);}});
     s.querySelectorAll("[data-wa]").forEach(b=>b.onclick=()=>{const pl=b.dataset.pl||gen.plan,di=+(b.dataset.di||gen.dias);window.open("https://wa.me/?text="+encodeURIComponent(msgCodigo(b.dataset.wa,pl,di)),"_blank","noopener");});
     s.querySelectorAll("[data-an]").forEach(b=>b.onclick=()=>confirmSheet("Anular código",`El código ${b.dataset.an} dejará de servir.`,"Anular",async()=>{chk(await sb.rpc("anular_codigo",{p_codigo:b.dataset.an}));cods=null;toast("Código anulado");panelDL("cod");}));
-    s.querySelectorAll("[data-ep]").forEach(b=>b.onclick=()=>planEmpresaSheet(emps.find(x=>x.id===b.dataset.ep)));
+    s.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>clienteSheet(emps.find(x=>x.id===b.dataset.ev)));
+    {const xb=s.querySelector("#eXl");if(xb)xb.onclick=async()=>{xb.disabled=true;try{const off=5*3600e3,d=x=>x?new Date(new Date(x).getTime()-off):null;
+      const n=await excelPro({app:"DL CUADRA PRO",titulo:"DL CUADRA PRO · Registro de clientes",acento:"FF22E4FF",sub:`${emps.length} clientes · ${new Date().toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"numeric",month:"long",year:"numeric"})}`,
+        tablas:[{hoja:"Clientes",cols:[{h:"Correo",w:30},{h:"Negocio",w:26},{h:"NIT",w:14},{h:"Cuenta creada",w:17,f:"date"},{h:"Último ingreso",w:17,f:"date"},{h:"Plan actual",w:13},{h:"Plan adquirido el",w:17,f:"date"},{h:"Cómo lo activó",w:30},{h:"Vence",w:12,f:"day"},{h:"Productos",w:10,f:"int"},{h:"Sedes",w:8,f:"int"},{h:"Cajeros",w:9,f:"int"},{h:"Ventas 30 días",w:12,f:"int"}],
+          filas:emps.map(e=>[e.correo||"",e.nombre,e.nit||"",d(e.cuenta_creada||e.creado),d(e.ultimo_ingreso),PLANES[e.activo].n+(e.plan!==e.activo?" (venció "+PLANES[e.plan].n+")":""),e.plan!=="gratis"?d(e.plan_desde):null,e.plan!=="gratis"?(e.plan_origen||""):"",e.vence&&e.activo!=="gratis"?new Date(e.vence+"T12:00:00"):null,e.productos,e.sedes,e.cajeros,e.ventas30])}],
+        archivo:"Clientes DL CUADRA PRO "+today()});toast("📊 Registro descargado: "+n);}catch(err){toast(err.message||"No se pudo crear el Excel");}finally{xb.disabled=false;}};}
     if(tab==="gen"){
       s.querySelector("#gP").onclick=e=>{const b=e.target.closest("[data-p]");if(b){gen.plan=b.dataset.p;gen.res=null;draw(s);}};
       s.querySelector("#gD").onclick=e=>{const b=e.target.closest("[data-d]");if(b){gen.dias=+b.dataset.d;gen.res=null;draw(s);}};
@@ -2933,6 +2939,22 @@ async function panelDL(tab){
     }
   };
   openSheet("",s=>{draw(s);});
+}
+const horaC=d=>d?new Date(d).toLocaleString("es-CO",{timeZone:"America/Bogota",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"}):"—";
+function clienteSheet(e){
+  if(!e)return;const H=e.historial||[];
+  openSheet(`<h3>${esc(e.correo||e.nombre)}</h3><p class="hint">${e.tipo==="empresa"?"🏢":"🏪"} ${esc(e.nombre)}${e.nit?" · NIT "+esc(e.nit):""}</p>
+    <div class="card"><div class="rrow"><div class="grow">Cuenta creada</div><b>${horaC(e.cuenta_creada||e.creado)}</b></div>
+      <div class="rrow"><div class="grow">Último ingreso</div><b>${horaC(e.ultimo_ingreso)}</b></div>
+      <div class="rrow"><div class="grow">Plan actual</div><b>${PLANES[e.activo].ico} ${PLANES[e.activo].n}</b></div>
+      <div class="rrow"><div class="grow">Plan adquirido el</div><b>${e.plan!=="gratis"&&e.plan_desde?horaC(e.plan_desde):"—"}</b></div>
+      ${e.plan!=="gratis"&&e.plan_origen?`<div class="rrow"><div class="grow">Cómo lo activó</div><b style="font-size:12.5px">${esc(e.plan_origen)}</b></div>`:""}
+      <div class="rrow"><div class="grow">Vence</div><b>${e.vence&&e.activo!=="gratis"?fechaC(e.vence):e.activo==="gratis"?"—":"Sin vencimiento"}</b></div>
+      <div class="rrow"><div class="grow">Uso</div><span class="sub">${e.productos} productos · ${e.sedes} sedes · ${e.cajeros} cajeros · ${e.ventas30} ventas en 30 días</span></div></div>
+    <div class="ctit" style="margin-top:14px">Historial de planes (${H.length})</div>
+    <div class="card">${H.map(h=>`<div class="rrow"><div class="grow"><div class="t">${(PLANES[h.plan]||{n:h.plan}).n}${h.vence?" · hasta "+fechaC(h.vence):""}</div><div class="sub">${horaC(h.fecha)} · ${esc(h.origen)}</div></div></div>`).join("")||'<div class="empty">Sin compras todavía</div>'}</div>
+    <div class="acts"><button class="btn" data-x>Volver</button><button class="btn pri" data-pl>Cambiar plan</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=()=>panelDL("emp");s.querySelector("[data-pl]").onclick=()=>planEmpresaSheet(e);});
 }
 function planEmpresaSheet(e){
   if(!e)return;let plan=e.activo,dias=30;
