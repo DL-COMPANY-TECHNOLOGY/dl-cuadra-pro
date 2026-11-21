@@ -409,6 +409,9 @@ html[data-theme="light"] .planchip.p-pro{color:#0369a1}
 html[data-theme="light"] .planchip.p-premium{color:#6d28d9}
 html[data-theme="light"] .planchip.p-empresarial{color:#8a6a0c}
 .plan.cur{border:1px solid var(--ok)}
+.panual{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:10px 0 2px;padding:10px 12px;border-radius:13px;background:rgba(34,228,255,.07);border:1px dashed rgba(34,228,255,.55)}
+.panual b{display:block;font-size:14px;font-weight:900;white-space:nowrap}.panual span{display:block;font-size:11.5px;color:var(--muted);font-weight:700}.panual s{font-size:12px;color:var(--muted);text-decoration-color:var(--bad);text-decoration-thickness:2px}
+.pbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.pbtns .btn{text-align:center;text-decoration:none;padding-left:6px;padding-right:6px}
 .plan h4 small{font-size:11px;color:var(--muted);font-weight:700}
 .plan h4 em{font-style:normal;font-size:10.5px;padding:2px 7px;border-radius:99px;margin-left:4px;vertical-align:2px}
 .pcur{background:var(--okSoft);color:var(--ok)}
@@ -617,7 +620,7 @@ html[data-theme="light"] .ttip .tacts button.tn{color:#fff}
     <a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a>
     <a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a>
   </div>
-  <p class="dev-copy">DL CUADRA PRO v3.9.1 · © 2026</p>
+  <p class="dev-copy">DL CUADRA PRO v4.0 · © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1964,7 +1967,7 @@ const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?
   costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado no está disponible en tu plan.",clientes:l=>`Tu plan permite hasta ${l} clientes de fiado. Archiva uno que esté al día o mejora tu plan.`,historial:l=>`Tu plan muestra los últimos ${l} días.`};
 function showPlanes(motivo){
   const cur=planActual(),e=st.empresa||{};
-  const wa=k=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO con el 50% de descuento de lanzamiento ($${PLANES[k].p.toLocaleString("es-CO")}/mes en vez de $${PLANES[k].antes.toLocaleString("es-CO")}). ¿Cómo hago el pago para recibir mi código de activación?${e.nombre?`\n• Empresa: ${e.nombre}`:""}${e.nit&&String(e.nit).replace(/\D/g,"").length>5?`\n• NIT: ${e.nit}`:""}`);
+  const wa=(k,an)=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company, quiero el plan ${PLANES[k].n} de DL CUADRA PRO ${an?`ANUAL (14 meses) por $${(PLANES[k].p*12).toLocaleString("es-CO")}`:`MENSUAL por $${PLANES[k].p.toLocaleString("es-CO")}`} con el 50% de descuento de lanzamiento.${e.nombre?"\nNegocio: "+e.nombre:""}${e.nit?"\nNIT: "+e.nit:""}\n¿Cómo hago el pago?`);
   const venc=st.plan&&st.plan.vence&&cur!=="gratis"?` · vence ${new Date(st.plan.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"})}`:"";
   openSheet(`<h3>${motivo?"🔒 Mejora tu plan":"Planes DL CUADRA PRO"}</h3>
     <p class="hint">${motivo?esc(motivo)+" ":""}${st.perfil?`Tu plan actual: <b>${PLANES[cur].n}</b>${venc}.`:"Empieza gratis y mejora cuando lo necesites."}</p>
@@ -1975,8 +1978,9 @@ function showPlanes(motivo){
     ${ORDEN.map(k=>{const P=PLANES[k],isCur=k===cur&&!!st.perfil,up=ORDEN.indexOf(k)>ORDEN.indexOf(cur);
       return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}${P.antes?' <em class="pdesc">-50%</em>':""}</span><span class="num">${P.antes?`<span class="pantes">$${P.antes.toLocaleString("es-CO")}</span>`:""}${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}</span></h4>
         <ul>${P.f.map(x=>`<li>${x}</li>`).join("")}</ul>
-        ${P.p&&(up||!st.perfil)?`<a class="btn ${k==="premium"?"pri":"dark"} wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Quiero ${P.n} por WhatsApp</a>`:isCur&&P.p?`<a class="btn wide pbuy" href="${wa(k)}" target="_blank" rel="noopener">Renovar ${P.n}</a>`:""}</div>`;}).join("")}
-    <p class="hint" style="text-align:center"><b>¿Cómo pagar?</b> Escríbenos por WhatsApp con el plan que quieres, paga por Nequi o transferencia y te enviamos tu <b>código de activación</b>. Lo ingresas aquí arriba y listo.<br>Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos. Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
+        ${P.p?`<div class="panual"><div><b>📅 Pago anual</b><span>14 meses: pagas 12 y te regalamos 2</span></div><div class="num" style="text-align:right">${P.antes?`<s>$${(P.antes*12).toLocaleString("es-CO")}</s>`:""}<b>$${(P.p*12).toLocaleString("es-CO")}</b><span>$${(Math.round(P.p*12/14/100)*100).toLocaleString("es-CO")} al mes</span></div></div>`:""}
+        ${P.p&&(up||isCur||!st.perfil)?`<div class="pbtns"><a class="btn ${k==="premium"?"pri":"dark"} pbuy" href="${wa(k,0)}" target="_blank" rel="noopener">${isCur?"Renovar":"Quiero"} mensual</a><a class="btn ${k==="premium"?"pri":"dark"} pbuy" href="${wa(k,1)}" target="_blank" rel="noopener">${isCur?"Renovar":"Quiero"} anual</a></div>`:""}</div>`;}).join("")}
+    <p class="hint" style="text-align:center"><b>Pago anual:</b> 14 meses por el precio de 12.<br><b>¿Cómo pagar?</b> Escríbenos por WhatsApp con el plan que quieres, paga por Nequi o transferencia y te enviamos tu <b>código de activación</b>. Lo ingresas aquí arriba y listo.<br>Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos. Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
     <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;
       const go=s.querySelector("#cdGo");if(go)go.onclick=async()=>{
         const inp=s.querySelector("#cdIn"),cod=inp.value.trim().toUpperCase().replace(/\s+/g,"");
@@ -2117,11 +2121,87 @@ async function nuevoCierre(ev){
     const body=sedeNom(c.sede_id)+" · Ventas "+fmt(c.total)+(c.diferencia!=null&&c.diferencia!==0?" · "+diffTxt(c.diferencia).replace(/^\S+ /,""):"");
     if(reg)reg.showNotification("Caja cerrada por "+(c.por||"cajero"),{body,icon:"icon-192.png",badge:"icon-192.png",tag:"cierre-"+c.id});}}catch(e){}
 }
+const DENOM=[100000,50000,20000,10000,5000,2000,1000],MONEDAS=[1000,500,200,100,50];
+/* contador de billetes y monedas (apertura y cierre). Claves: "100000" billetes, "m500" monedas */
+function conteoHTML(pre){
+  const fila=(k,v,ico)=>`<div class="row" style="padding:8px 12px"><div class="grow"><div class="t num" style="font-size:15px">${ico} ${fmt(v)}</div></div><div class="stepper"><button data-ck="${k}" data-s="-1">−</button><input data-cq="${k}" inputmode="numeric" placeholder="0" style="width:50px;text-align:center;padding:8px 4px;border-radius:10px;border:1px solid var(--line2);background:rgba(127,127,127,.08);color:var(--ink);font-weight:800"><button data-ck="${k}" data-s="1">+</button></div><span class="sub num" data-cs="${k}" style="min-width:82px;text-align:right"></span></div>`;
+  return `<div id="${pre}Cnt"><div class="card" style="margin-bottom:10px"><div class="row" style="background:rgba(34,228,255,.08);padding:9px 12px"><div class="grow t">💵 Billetes</div><b class="num" data-cbt>$0</b></div>${DENOM.map(d=>fila(String(d),d,"")).join("")}</div>
+    <div class="card"><div class="row" style="background:rgba(34,228,255,.08);padding:9px 12px"><div class="grow t">🪙 Monedas</div><b class="num" data-cmt>$0</b></div>${MONEDAS.map(d=>fila("m"+d,d,"")).join("")}</div></div>`;
+}
+function conteoBind(s,pre,onChange,ini){
+  const box=s.querySelector("#"+pre+"Cnt"),cnt={};
+  const val=k=>+String(k).replace("m","");
+  const tot=()=>Object.keys(cnt).reduce((a,k)=>a+cnt[k]*val(k),0);
+  const upd=()=>{box.querySelectorAll("[data-cs]").forEach(el=>{const k=el.dataset.cs;el.textContent=cnt[k]?fmt(cnt[k]*val(k)):"";});
+    box.querySelectorAll("[data-cq]").forEach(el=>{if(document.activeElement!==el)el.value=cnt[el.dataset.cq]||"";});
+    box.querySelector("[data-cbt]").textContent=fmt(DENOM.reduce((a,d)=>a+(cnt[d]||0)*d,0));
+    box.querySelector("[data-cmt]").textContent=fmt(MONEDAS.reduce((a,d)=>a+(cnt["m"+d]||0)*d,0));onChange&&onChange();};
+  const set=o=>{Object.keys(cnt).forEach(k=>delete cnt[k]);if(o)Object.keys(o).forEach(k=>{if((DENOM.includes(+k)||/^m\d+$/.test(k))&&+o[k]>0)cnt[k]=+o[k];});upd();};
+  box.onclick=ev=>{const b=ev.target.closest("[data-ck]");if(!b)return;const k=b.dataset.ck;cnt[k]=Math.max(0,(cnt[k]||0)+ +b.dataset.s);if(!cnt[k])delete cnt[k];upd();};
+  box.oninput=ev=>{const k=ev.target.dataset.cq;if(!k)return;ev.target.value=ev.target.value.replace(/\D/g,"").slice(0,4);if(+ev.target.value)cnt[k]=+ev.target.value;else delete cnt[k];upd();};
+  set(ini);
+  return {total:tot,conteo:()=>Object.keys(cnt).length?{...cnt}:null,set};
+}
+function conteoLineas(o){if(!o)return "";
+  const b=DENOM.filter(d=>o[d]).map(d=>`<div class="r s"><span>${o[d]} x ${fmt(d)}</span><span>${fmt(o[d]*d)}</span></div>`).join("");
+  const m=MONEDAS.filter(d=>o["m"+d]).map(d=>`<div class="r s"><span>${o["m"+d]} x ${fmt(d)} (mon.)</span><span>${fmt(o["m"+d]*d)}</span></div>`).join("");
+  return b+m+(o.monedas?`<div class="r s"><span>Monedas</span><span>${fmt(o.monedas)}</span></div>`:"");}
+/* ticket como imagen (igual al impreso) para enviar por WhatsApp */
+function ticketCanvas(html){
+  const box=document.createElement("div");box.innerHTML=String(html).replace(/<br\s*\/?>/gi," ").replace(/<\/div>(?=\S)/g,"</div> ");
+  const W=384,PAD=18,SC=2,FF='"Courier New",Courier,monospace';
+  const cv=document.createElement("canvas"),x=cv.getContext("2d");
+  const items=[];
+  const walk=el=>{[...el.childNodes].forEach(n=>{
+    if(n.nodeType===3){const t=n.textContent.replace(/\s+/g," ").trim();if(t)items.push({t,cls:""});return;}
+    if(n.nodeType!==1)return;const c=n.classList,tag=n.tagName;
+    if(tag==="HR"){items.push({hr:1});return;}
+    if(tag==="BR")return;
+    const st={c:c.contains("c")||tag==="H1",b:c.contains("b")||c.contains("big")||c.contains("xl")||tag==="H1"||tag==="B",
+      sz:tag==="H1"?20:c.contains("xl")?24:c.contains("big")?19:c.contains("s")?11.5:14,it:c.contains("n")};
+    if(c.contains("r")){const sp=[...n.children];items.push({...st,l:(sp[0]?sp[0].textContent:"").replace(/\s+/g," ").trim(),r:sp.length>1?sp[sp.length-1].textContent.replace(/\s+/g," ").trim():""});return;}
+    if([...n.children].some(k=>/^(DIV|H1|HR)$/.test(k.tagName))){walk(n);return;}
+    items.push({...st,t:n.textContent.replace(/\s+/g," ").trim()});});};
+  walk(box);
+  const font=it=>`${it.it?"italic ":""}${it.b?"700 ":"400 "}${it.sz||14}px ${FF}`;
+  const wrap=(t,maxW)=>{const ws=t.split(" "),out=[];let ln="";ws.forEach(w=>{const tr=ln?ln+" "+w:w;if(x.measureText(tr).width>maxW&&ln){out.push(ln);ln=w;}else ln=tr;});if(ln)out.push(ln);return out.length?out:[""];};
+  const plan=()=>{let y=PAD;const ops=[];
+    items.forEach(it=>{if(it.hr){ops.push({hr:1,y:y+6});y+=13;return;}
+      x.font=font(it);const lh=Math.round((it.sz||14)*1.38);
+      if(it.l!=null){const rw=it.r?x.measureText(it.r).width:0;const ls=wrap(it.l,W-PAD*2-rw-10);
+        ls.forEach((t,k)=>{ops.push({t,f:font(it),y:y+lh*0.78,al:"l"});if(k===0&&it.r)ops.push({t:it.r,f:font(it),y:y+lh*0.78,al:"r"});y+=lh;});return;}
+      if(!it.t)return;wrap(it.t,W-PAD*2-(it.it?16:0)).forEach(t=>{ops.push({t,f:font(it),y:y+lh*0.78,al:it.c?"c":"l",ind:it.it?16:0});y+=lh;});});
+    return {ops,h:y+PAD};};
+  const {ops,h}=plan();cv.width=W*SC;cv.height=Math.ceil(h)*SC;x.scale(SC,SC);
+  x.fillStyle="#fff";x.fillRect(0,0,W,h);x.fillStyle="#000";x.strokeStyle="#000";
+  ops.forEach(o=>{if(o.hr){x.setLineDash([4,3]);x.lineWidth=1;x.beginPath();x.moveTo(PAD,o.y+.5);x.lineTo(W-PAD,o.y+.5);x.stroke();x.setLineDash([]);return;}
+    x.font=o.f;x.textAlign=o.al==="r"?"right":o.al==="c"?"center":"left";x.fillText(o.t,o.al==="r"?W-PAD:o.al==="c"?W/2:PAD+(o.ind||0),o.y);});
+  return cv;
+}
+async function enviarTicket(html,txt,nombre){
+  try{const cv=ticketCanvas(html);const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
+    const file=new File([blob],(nombre||"ticket").replace(/[^\w-]+/g,"_")+".png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:nombre||"Ticket"});}catch(e){}return;}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+    toast("Imagen del ticket descargada: adjúntala en WhatsApp");
+  }catch(e){enviarWA(txt);}
+}
+function cierreTicketHTML(c,d){
+  const en=(st.empresa&&st.empresa.nombre)||"",cont=d.conteo,R=(k,v,cl)=>`<div class="r${cl?" "+cl:""}"><span>${k}</span><span>${v}</span></div>`;
+  return `<h1>${esc(en||"DL CUADRA PRO")}</h1><div class="c">CIERRE DE CAJA</div><div class="c s">${esc(d.sede||sedeNom(c.sede_id))} · ${nice(c.fecha)}</div><div class="c s">Cerró: ${esc(c.por)} · ${hhmm(new Date(c.ts).getTime())}</div><hr>
+    <div class="b">Lo que se vendió</div>${(d.vendidos||[]).map(v=>R(`${v.cant} x ${esc(v.n)}`,fmt(v.dinero),"s")).join("")||'<div class="s">Sin ventas</div>'}<hr>
+    ${R("Ventas ("+c.ventas+")",fmt(c.total),"b")}${R("Efectivo (en caja)",fmt(c.efectivo))}${R("QR banco (no en caja)",fmt(c.qr))}${d.fiado?R("Fiado (no en caja)",fmt(d.fiado)):""}${(d.abono_ef||0)?R("+ Abonos en efectivo",fmt(d.abono_ef)):""}${R("- Gastos",fmt(c.gastos))}
+    <hr>${R("= Debe haber en caja",fmt(c.caja),"b")}${c.contado!=null?R("Contado",fmt(c.contado),"b")+`<div class="r big"><span>${c.diferencia===0?"CUADRA":c.diferencia<0?"FALTA":"SOBRA"}</span><span>${fmt(Math.abs(c.diferencia||0))}</span></div>`:""}
+    ${cont?`<hr><div class="b">Conteo de billetes y monedas</div>${conteoLineas(cont)}`:""}
+    ${(d.gastos||[]).length?`<hr><div class="b">Gastos</div>${d.gastos.map(g=>R(esc(g.d||"Gasto"),fmt(g.v),"s")).join("")}`:""}
+    ${c.nota?`<hr><div class="s">Nota: ${esc(c.nota)}</div>`:""}<hr><div class="c s">Firma: ______________________</div><div class="c s">DL CUADRA PRO · DL COMPANY -TECHNOLOGY-</div>`;
+}
 function textoCierre(c,d){
   const en=(st.empresa&&st.empresa.nombre)||"";let t=`*🔒 Cierre de caja${en?" · "+en:""}*\n📍 ${d.sede||sedeNom(c.sede_id)} · ${nice(c.fecha)}\n👤 ${c.por} · ${hhmm(new Date(c.ts).getTime())}\n\n`;
   for(const v of d.vendidos||[])t+=`• ${v.n}: ${v.cant} → ${fmt(v.dinero)}\n`;
   t+=`\nVentas (${c.ventas}): *${fmt(c.total)}*\nEfectivo: ${fmt(c.efectivo)}\nQR banco: ${fmt(c.qr)}${d.fiado?`\nFiado: ${fmt(d.fiado)}`:""}${(d.abonos||[]).length?`\nAbonos: ${fmt((d.abono_ef||0)+(d.abono_qr||0))}`:""}\nGastos: ${fmt(c.gastos)}${(d.gastos||[]).length?" ("+d.gastos.map(g=>g.d).join(", ")+")":""}\nEfectivo en caja: ${fmt(c.caja)}`;
   if(c.contado!=null)t+=`\nEfectivo contado: ${fmt(c.contado)} · ${diffTxt(c.diferencia)}`;
+  if(d.conteo){const o=d.conteo,L=DENOM.filter(x=>o[x]).map(x=>`${o[x]} x ${fmt(x)}`).concat(MONEDAS.filter(x=>o["m"+x]).map(x=>`${o["m"+x]} x ${fmt(x)} (mon.)`));if(L.length)t+=`\n🧮 Conteo: ${L.join(", ")}`;}
   if(c.nota)t+=`\n📝 ${c.nota}`;
   const bajos=(d.inventario||[]).filter(x=>x.s<=(x.m??3));if(bajos.length)t+=`\n\n⚠️ Stock bajo/agotado: ${bajos.map(x=>x.n+" ("+x.s+")").join(", ")}`;
   return t;
@@ -2135,20 +2215,29 @@ $("#btnCierre").onclick=()=>{
   openSheet(`<h3>🔒 Cerrar caja</h3><p class="hint">📍 ${esc(sedeNom(st.sede))} · ${nice(today())}</p>
     <div class="cgrid"><div><span>Ventas (${r.ventas.length})</span><b class="num">${fmt(r.tot)}</b></div><div><span>Efectivo</span><b class="num">${fmt(r.ef)}</b></div><div><span>QR banco</span><b class="num">${fmt(r.qr)}</b></div><div><span>Gastos</span><b class="num">${fmt(r.ga)}</b></div>${r.fi||r.abonos.length?`<div><span>📒 Fiado</span><b class="num">${fmt(r.fi)}</b></div><div><span>💵 Abonos efectivo</span><b class="num">${fmt(r.abEf)}</b></div>`:""}</div>
     <div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">💵 Debe haber en caja: <span class="num">${fmt(caja)}</span></div>
-    <label class="fld"><span>¿Cuánto efectivo contaste? (opcional)</span><input id="cCont" class="num" inputmode="numeric" placeholder="Ej: ${Math.max(0,caja)}"></label>
+    <p class="hint" style="margin:4px 0 0">Cuenta solo el efectivo de la caja. Lo pagado por QR o fiado no se cuenta: la app lo separa sola.</p>
+    <div class="seg" id="cModo"><button type="button" data-cm="contar" class="on">🧮 Contar billetes y monedas</button><button type="button" data-cm="total">Escribir total</button></div>
+    <div id="cBill">${conteoHTML("cc")}</div>
+    <label class="fld" id="cTotW" hidden><span>¿Cuánto efectivo contaste? (opcional)</span><input id="cCont" class="num" inputmode="numeric" placeholder="Ej: ${Math.max(0,caja)}"></label>
+    <div class="cdiff ok" id="cContado" style="background:rgba(34,228,255,.1);color:var(--acc)">🧮 Contado: <span class="num" id="cContV">$0</span></div>
     <div id="cDiff"></div>
     <label class="fld"><span>Nota (opcional)</span><input id="cNota" maxlength="300" placeholder="Ej: se pagó el hielo con plata de la caja"></label>
     ${waOpt}
     <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar cierre</button></div>`,s=>{
-    const ci=s.querySelector("#cCont"),cd=s.querySelector("#cDiff");
-    const val=()=>{const v=ci.value.replace(/\D/g,"");return v===""?null:+v;};
-    ci.oninput=()=>{const v=val();ci.value=v==null?"":v.toLocaleString("es-CO");const d=v==null?null:v-caja;cd.innerHTML=d==null?"":`<div class="cdiff ${diffCls(d)}">${diffTxt(d)}</div>`;};
+    const ci=s.querySelector("#cCont"),cd=s.querySelector("#cDiff");let modo=localStorage.getItem("cp_cierre_modo")||"contar",C=null;
+    const val=()=>{if(modo==="contar"){const c2=C&&C.conteo();return c2?C.total():null;}const v=ci.value.replace(/\D/g,"");return v===""?null:+v;};
+    const upd=()=>{if(!C)return;const v=val();s.querySelector("#cContV").textContent=fmt(v||0);s.querySelector("#cContado").hidden=modo!=="contar";const d=v==null?null:v-caja;cd.innerHTML=d==null?"":`<div class="cdiff ${diffCls(d)}">${diffTxt(d)}</div>`;};
+    C=conteoBind(s,"cc",upd);
+    const setModo=m=>{modo=m;localStorage.setItem("cp_cierre_modo",m);s.querySelectorAll("#cModo button").forEach(x=>x.classList.toggle("on",x.dataset.cm===m));s.querySelector("#cBill").hidden=m!=="contar";s.querySelector("#cTotW").hidden=m!=="total";upd();};
+    s.querySelector("#cModo").onclick=e=>{const b=e.target.closest("[data-cm]");if(b)setModo(b.dataset.cm);};setModo(modo);
+    ci.oninput=()=>{const v=ci.value.replace(/\D/g,"");ci.value=v===""?"":(+v).toLocaleString("es-CO");upd();};
     s.querySelector("[data-x]").onclick=closeSheet;
     s.querySelector("[data-ok]").onclick=async e=>{
       const b=e.currentTarget;b.disabled=true;b.textContent="Guardando…";
       try{
         const res=await sb.rpc("cerrar_caja",{p_sede:st.sede,p_contado:val(),p_nota:s.querySelector("#cNota").value.trim()||null});
         if(res.error)throw res.error;
+        if(modo==="contar"&&C.conteo())await sb.rpc("guardar_conteo",{p_cierre:res.data,p_conteo:C.conteo()});
         const wa=s.querySelector("#cWa"),mandar=wa&&wa.checked;
         closeSheet();await loadCierres();
         toast(isDueno()?"✅ Cierre guardado":"✅ Caja cerrada. El dueño ya recibió el aviso");
@@ -2183,6 +2272,7 @@ async function cierreDetalle(id){
     <div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">💵 Debía haber en caja: <span class="num">${fmt(c.caja)}</span>${c.contado!=null?`<br>Contó: <span class="num">${fmt(c.contado)}</span>`:""}</div>
     ${c.contado!=null?`<div class="cdiff ${diffCls(c.diferencia)}">${diffTxt(c.diferencia)}</div>`:""}
     ${c.nota?`<div class="cdiff warn">📝 ${esc(c.nota)}</div>`:""}
+    ${d.conteo?`<details class="cdet"><summary>🧮 Conteo de billetes y monedas</summary><div class="card" style="padding:10px 14px;font-size:14px;font-weight:700">${DENOM.filter(x=>d.conteo[x]).map(x=>`${d.conteo[x]} × ${fmt(x)}`).concat(MONEDAS.filter(x=>d.conteo["m"+x]).map(x=>`${d.conteo["m"+x]} × ${fmt(x)} (mon.)`)).join("<br>")}</div></details>`:""}
     <div class="ctit">Lo que se vendió</div><div class="card">${rows(d.vendidos||[],v=>`<div class="row"><div class="grow"><div class="t">${esc(v.n)}</div><div class="sub">${v.cant} ${v.cant===1?"unidad":"unidades"}</div></div><b class="num">${fmt(v.dinero)}</b></div>`)}</div>
     ${(d.cajeros||[]).length>1?`<div class="ctit">Por cajero</div><div class="card">${d.cajeros.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.por)}</div><div class="sub">${x.n} ventas</div></div><b class="num">${fmt(x.t)}</b></div>`).join("")}</div>`:""}
     ${(d.fiados||[]).length?`<div class="ctit">📒 Fiado</div><div class="card">${d.fiados.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.c||"")}</div><div class="sub">${esc(x.por||"")}</div></div><b class="num">${fmt(x.v)}</b></div>`).join("")}</div>`:""}
@@ -2190,8 +2280,10 @@ async function cierreDetalle(id){
     <div class="ctit">Gastos</div><div class="card">${rows(d.gastos||[],g=>`<div class="row"><div class="grow"><div class="t">${esc(g.d||"Gasto")}</div><div class="sub">${esc(g.por||"")}</div></div><b class="num">${fmt(g.v)}</b></div>`)}</div>
     ${(d.entradas||[]).length?`<div class="ctit">Mercancía que entró</div><div class="card">${d.entradas.map(x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n||"")}</div></div><b class="num">+${x.cant}</b></div>`).join("")}</div>`:""}
     <details class="cdet"><summary>📦 Inventario al cerrar (${inv.length} productos${bajos?" · "+bajos+" bajos o agotados":""})</summary><div class="card cinv">${rows(inv,x=>`<div class="row"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">${esc(x.cat||"")}</div></div><b class="num ${x.s<=0?"z":x.s<=(x.m??3)?"l":""}">${x.s}</b></div>`)}</div></details>
-    <div class="acts"><button class="btn" data-wa>📲 WhatsApp</button>${c.sede_id===st.sede&&isDueno()?'<button class="btn" data-dia>Ver el día</button>':""}<button class="btn pri" data-x>Listo</button></div>`,s=>{
+    <div class="acts"><button class="btn" data-tk>🧾 Ticket por WhatsApp</button><button class="btn" data-wa>📲 Texto</button></div>
+    <div class="acts">${c.sede_id===st.sede&&isDueno()?'<button class="btn" data-dia>Ver el día</button>':""}<button class="btn pri" data-x>Listo</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-tk]").onclick=()=>enviarTicket(cierreTicketHTML(c,d),textoCierre(c,d),"Cierre "+c.fecha);
     s.querySelector("[data-wa]").onclick=()=>enviarWA(textoCierre(c,d));
     const dd=s.querySelector("[data-dia]");if(dd)dd.onclick=()=>{closeSheet();st.day=c.fecha;subscribeMovs();goView("dia");render();};
   });
@@ -2332,33 +2424,77 @@ async function pinta(s){
   const up=body.querySelector("[data-up]");if(up)up.onclick=()=>upsell("historial",hist);
   body.querySelector("#rXl").onclick=()=>{if(!puede("costos")){upsell("excel");return;}excelReporte(R);};
 }
-let xlsxP=null;
-function loadXLSX(){if(window.XLSX)return Promise.resolve();return xlsxP||(xlsxP=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";sc.onload=res;sc.onerror=()=>{xlsxP=null;rej(new Error("No se pudo cargar el generador de Excel. Revisa tu internet."));};document.head.appendChild(sc);}));}
+/* Excel profesional (.xlsx con diseño) — DL COMPANY -TECHNOLOGY- */
+let _xlsLib=null;
+function cargarExcelJS(){if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
+  return _xlsLib||(_xlsLib=new Promise((ok,no)=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";sc.onload=()=>ok(window.ExcelJS);sc.onerror=()=>{_xlsLib=null;no(new Error("Sin conexión para generar el Excel"));};document.head.appendChild(sc);}));}
+/* o = {app, titulo, sub, acento:"FFD4AF37", resumen:[{t:"Sección", filas:[[etiqueta, valor, "money"|"pct"|"int"|"text", destacado]]}],
+        tablas:[{hoja, titulo, cols:[{h:"Encabezado", w:14, f:"money"|"int"|"pct"|"text"|"date", sum:true}], filas:[[...]], tachar:(fila)=>bool}], archivo} */
+async function excelPro(o){
+  const XL=await cargarExcelJS();
+  const NAVY="FF0B1426",ACC=o.acento||"FFD4AF37",ACCL="FFFBF5E1",ZEBRA="FFF6F8FC",LINE="FFDDE3EE",MONEY='"$"#,##0';
+  const FMT={money:MONEY,pct:"0.0%",int:"#,##0"};
+  const wb=new XL.Workbook();wb.creator=o.app||"DL COMPANY";wb.created=new Date();
+  const borde={top:{style:"thin",color:{argb:LINE}},bottom:{style:"thin",color:{argb:LINE}},left:{style:"thin",color:{argb:LINE}},right:{style:"thin",color:{argb:LINE}}};
+  const fill=c=>({type:"pattern",pattern:"solid",fgColor:{argb:c}});
+  const cab=(ws,sub,n)=>{n=Math.max(n,2);
+    ws.mergeCells(1,1,1,n);const a=ws.getCell(1,1);a.value=(o.titulo||"").toUpperCase();a.font={bold:true,size:16,color:{argb:ACC}};a.fill=fill(NAVY);a.alignment={vertical:"middle",indent:1};ws.getRow(1).height=30;
+    ws.mergeCells(2,1,2,n);const b=ws.getCell(2,1);b.value=sub;b.font={size:10,color:{argb:"FFFFFFFF"}};b.fill=fill(NAVY);b.alignment={indent:1};ws.getRow(2).height=18;ws.getRow(3).height=8;};
+  const pie=(ws,f,n)=>{ws.mergeCells(f,1,f,Math.max(n,2));const c=ws.getCell(f,1);c.value=`Generado con ${o.app||"DL COMPANY"} · ${new Date().toLocaleString("es-CO",{timeZone:"America/Bogota"})} · DL COMPANY -TECHNOLOGY-`;c.font={size:9,italic:true,color:{argb:"FF8A94A6"}};};
+  if(o.resumen&&o.resumen.length){
+    const r=wb.addWorksheet("Resumen",{properties:{tabColor:{argb:ACC}},pageSetup:{paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0}});
+    r.columns=[{width:36},{width:20},{width:12}];cab(r,(o.sub||"")+" · Resumen",3);let f=4;
+    o.resumen.forEach(sec=>{r.mergeCells(f,1,f,3);const h=r.getCell(f,1);h.value=sec.t;h.font={bold:true,size:12,color:{argb:NAVY}};h.border={bottom:{style:"medium",color:{argb:ACC}}};r.getRow(f).height=22;f++;
+      (sec.filas||[]).forEach(([k,v,t,big,extra])=>{const a=r.getCell(f,1),b=r.getCell(f,2);a.value=k;b.value=v;a.border=b.border=borde;if(FMT[t])b.numFmt=FMT[t];b.alignment={horizontal:"right"};
+        if(extra!=null){const c=r.getCell(f,3);c.value=extra;c.numFmt=FMT.pct;c.border=borde;c.alignment={horizontal:"right"};}
+        if(big)[a,b].forEach(c=>{c.font={bold:true,size:13,color:{argb:NAVY}};c.fill=fill(ACCL);});f++;});f++;});
+    pie(r,f,3);}
+  (o.tablas||[]).forEach(T=>{
+    const n=T.cols.length,ws=wb.addWorksheet(T.hoja.slice(0,31),{pageSetup:{orientation:n>6?"landscape":"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0}});
+    ws.columns=T.cols.map(c=>({width:c.w||14}));cab(ws,(o.sub||"")+" · "+(T.titulo||T.hoja),n);
+    const F=4,hr=ws.getRow(F);T.cols.forEach((c,i)=>{const x=hr.getCell(i+1);x.value=c.h;x.font={bold:true,color:{argb:NAVY}};x.fill=fill(ACC);x.alignment={vertical:"middle",horizontal:"center",wrapText:true};x.border=borde;});hr.height=22;
+    T.filas.forEach((fila,k)=>{const row=ws.getRow(F+1+k),tach=T.tachar&&T.tachar(fila);fila.forEach((v,i)=>{const c=row.getCell(i+1),fm=T.cols[i].f;c.value=v;c.border=borde;
+      c.alignment={vertical:"middle",wrapText:typeof v==="string"&&v.length>30,horizontal:fm==="money"||fm==="int"||fm==="pct"?"right":undefined};if(FMT[fm])c.numFmt=FMT[fm];if(k%2)c.fill=fill(ZEBRA);if(tach)c.font={strike:true,color:{argb:"FFB04050"}};});});
+    const L=T.filas.length;
+    if(L){ws.autoFilter={from:{row:F,column:1},to:{row:F+L,column:n}};
+      if(T.cols.some(c=>c.sum)){const tr=ws.getRow(F+L+1);for(let i=0;i<n;i++){const c=tr.getCell(i+1),col=T.cols[i];c.font={bold:true,color:{argb:NAVY}};c.fill=fill(ACCL);c.border={...borde,top:{style:"medium",color:{argb:ACC}}};
+        if(i===0&&!col.sum)c.value="TOTAL";
+        if(col.sum){const Lt=ws.getColumn(i+1).letter;c.value={formula:`SUBTOTAL(9,${Lt}${F+1}:${Lt}${F+L})`,result:T.filas.reduce((a,r)=>a+(+r[i]||0),0)};if(FMT[col.f])c.numFmt=FMT[col.f];}}}
+      pie(ws,F+L+3,n);}
+    else{ws.mergeCells(F+1,1,F+1,n);const c=ws.getCell(F+1,1);c.value="Sin registros";c.font={italic:true,color:{argb:"FF8A94A6"}};c.alignment={horizontal:"center"};}
+    ws.views=[{state:"frozen",ySplit:F}];});
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const name=(o.archivo||"reporte").replace(/[\\/:*?"<>|]+/g,"")+".xlsx";
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+  return name;
+}
 async function excelReporte(R){
   const b=$("#rXl");if(b){b.disabled=true;b.lastChild.textContent="Preparando Excel…";}
   try{
-    await loadXLSX();const X=window.XLSX,wb=X.utils.book_new();
-    const add=(name,rows,widths)=>{const ws=X.utils.aoa_to_sheet(rows);if(widths)ws["!cols"]=widths.map(w=>({wch:w}));X.utils.book_append_sheet(wb,ws,name);};
-    const en=(st.empresa&&st.empresa.nombre)||"",sd=REP.todas?"Todas las sedes":sedeNom(st.sede);
-    const costos=puede("costos");
-    const res=[["DL CUADRA PRO · Reporte de ventas"],["Negocio",en],["Sede",sd],["Desde",R.a],["Hasta",R.b],["Generado",new Date().toLocaleString("es-CO")],[],
-      ["Ventas totales",R.tot],["Número de ventas",R.n],["Venta promedio",R.ticket],["Efectivo",R.ef],["QR banco",R.qr],["Vendido fiado",R.fi],["Abonos de fiado recibidos",R.ab],["Gastos",R.ga],["Efectivo menos gastos",R.ef-R.ga]];
-    if(costos)res.push(["Costo de lo vendido",R.costo],["Ganancia",R.gan],["Ganancia después de gastos",R.neta]);
-    add("Resumen",res,[28,22]);
-    add("Por día",[["Fecha","Día","N.º ventas","Ventas","Gastos"],...Object.entries(R.dias).sort((x,y)=>x[0]<y[0]?-1:1).map(([d,v])=>[d,pd(d).toLocaleDateString("es-CO",{weekday:"long"}),v.n,v.t,v.ga])],[12,12,11,14,12]);
-    add("Productos",[["Producto","Categoría","Unidades vendidas","Ventas $"],...Object.entries(R.prod).sort((x,y)=>y[1].cant-x[1].cant).map(([pid,p])=>[p.n,((st.prods.get(pid)||{}).cat)||"",p.cant,p.t])],[28,16,16,14]);
-    add("Categorías",[["Categoría","Unidades","Ventas $"],...ord(R.cat).map(([k,v])=>[k,v.cant,v.t])],[22,12,14]);
-    add("Cajeros",[["Cajero","N.º ventas","Ventas $"],...ord(R.caj).map(([k,v])=>[k,v.n,v.t])],[22,12,14]);
-    if(REP.todas)add("Sedes",[["Sede","N.º ventas","Ventas $"],...ord(R.sede).map(([k,v])=>[k,v.n,v.t])],[22,12,14]);
-    const det=[["Fecha","Hora","Sede","Cajero","Pago","Producto","Cantidad","Precio","Subtotal","Total venta"]];
-    for(const v of R.ventas){const h=new Date(v.ts).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});(v.items||[]).forEach((it,i)=>det.push([v.fecha,h,sedeNom(v.sede_id),v.por||"",v.metodo==="qr"?"QR":v.metodo==="fiado"?"Fiado "+(v.descr||""):"Efectivo",it.nombre,it.cant,it.precio,it.cant*it.precio,i===0?v.total:""]));}
-    add("Ventas detalle",det,[11,7,16,14,9,26,9,10,11,11]);
-    if(R.abonos.length)add("Abonos fiado",[["Fecha","Cliente","Valor","Pago","Registró","Sede"],...R.abonos.map(a=>[a.fecha,a.descr||"",a.valor,a.metodo==="qr"?"QR":"Efectivo",a.por||"",sedeNom(a.sede_id)])],[11,24,12,10,14,16]);
-    add("Gastos",[["Fecha","Descripción","Valor","Registró","Sede"],...R.gastos.map(g=>[g.fecha,g.descr||"",g.valor,g.por||"",sedeNom(g.sede_id)])],[11,28,12,14,16]);
-    if(R.entradas.length)add("Entradas",[["Fecha","Producto","Cantidad","Registró","Sede"],...R.entradas.map(m=>[m.fecha,m.nombre||((st.prods.get(m.pid)||{}).nombre)||"",m.cant,m.por||"",sedeNom(m.sede_id)])],[11,26,10,14,16]);
-    if(!REP.todas)add("Inventario actual",[["Producto","Categoría","Stock","Precio venta"],...prodsArr().map(p=>[p.nombre,p.cat||"",p.stock||0,p.precio||0])],[28,16,9,12]);
-    const fn=`DL-Cuadra-Pro_${(en||"reporte").replace(/[^\wáéíóúñÁÉÍÓÚÑ]+/g,"-").slice(0,30)}_${R.a}_a_${R.b}.xlsx`;
-    X.writeFile(wb,fn);toast("📥 Excel descargado");
+    const en=(st.empresa&&st.empresa.nombre)||"Mi negocio",sd=REP.todas?"Todas las sedes":sedeNom(st.sede),costos=puede("costos");
+    const fl=d=>pd(d).toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
+    const pago=v=>v.metodo==="qr"?"QR banco":v.metodo==="fiado"?"Fiado":"Efectivo";
+    const resumen=[{t:"Ventas",filas:[["Ventas totales",R.tot,"money",1],["Número de ventas",R.n,"int"],["Venta promedio",R.ticket,"money"]]},
+      {t:"Por medio de pago",filas:[["Efectivo",R.ef,"money",0,R.tot?R.ef/R.tot:0],["QR banco",R.qr,"money",0,R.tot?R.qr/R.tot:0],["Vendido fiado",R.fi,"money",0,R.tot?R.fi/R.tot:0],["Abonos de fiado recibidos",R.ab,"money"]]},
+      {t:"Caja",filas:[["Gastos",R.ga,"money"],["Efectivo menos gastos",R.ef-R.ga,"money",1]]}];
+    if(costos)resumen.push({t:"Ganancia",filas:[["Costo de lo vendido",R.costo,"money"],["Ganancia",R.gan,"money"],["Ganancia después de gastos",R.neta,"money",1]]});
+    const T=[
+      {hoja:"Por día",cols:[{h:"Fecha",w:13},{h:"Día",w:12},{h:"N.º ventas",w:11,f:"int",sum:1},{h:"Ventas",w:15,f:"money",sum:1},{h:"Gastos",w:13,f:"money",sum:1}],
+        filas:Object.entries(R.dias).sort((x,y)=>x[0]<y[0]?-1:1).map(([d,v])=>[d,pd(d).toLocaleDateString("es-CO",{weekday:"long"}),v.n,v.t,v.ga])},
+      {hoja:"Productos",titulo:"Ventas por producto",cols:[{h:"Producto",w:30},{h:"Categoría",w:16},{h:"Unidades",w:11,f:"int",sum:1},{h:"Ventas",w:15,f:"money",sum:1},{h:"% del total",w:11,f:"pct"}],
+        filas:Object.entries(R.prod).sort((x,y)=>y[1].t-x[1].t).map(([pid,p])=>[p.n,((st.prods.get(pid)||{}).cat)||"",p.cant,p.t,R.tot?p.t/R.tot:0])},
+      {hoja:"Categorías",cols:[{h:"Categoría",w:22},{h:"Unidades",w:11,f:"int",sum:1},{h:"Ventas",w:15,f:"money",sum:1}],filas:ord(R.cat).map(([k,v])=>[k,v.cant,v.t])},
+      {hoja:"Cajeros",cols:[{h:"Cajero",w:22},{h:"N.º ventas",w:11,f:"int",sum:1},{h:"Ventas",w:15,f:"money",sum:1}],filas:ord(R.caj).map(([k,v])=>[k,v.n,v.t])}];
+    if(REP.todas)T.push({hoja:"Sedes",cols:[{h:"Sede",w:22},{h:"N.º ventas",w:11,f:"int",sum:1},{h:"Ventas",w:15,f:"money",sum:1}],filas:ord(R.sede).map(([k,v])=>[k,v.n,v.t])});
+    const det=[];for(const v of R.ventas){const h=new Date(v.ts).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});(v.items||[]).forEach((it,i)=>det.push([v.fecha,h,sedeNom(v.sede_id),v.por||"",pago(v)+(v.metodo==="fiado"&&v.descr?" · "+v.descr:""),it.nombre,it.cant,it.precio,it.cant*it.precio]));}
+    T.push({hoja:"Ventas detalle",titulo:"Detalle de ventas",cols:[{h:"Fecha",w:11},{h:"Hora",w:9},{h:"Sede",w:15},{h:"Cajero",w:14},{h:"Pago",w:14},{h:"Producto",w:26},{h:"Cant.",w:8,f:"int",sum:1},{h:"Precio",w:11,f:"money"},{h:"Subtotal",w:12,f:"money",sum:1}],filas:det});
+    if(R.abonos.length)T.push({hoja:"Abonos fiado",cols:[{h:"Fecha",w:11},{h:"Cliente",w:24},{h:"Valor",w:13,f:"money",sum:1},{h:"Pago",w:11},{h:"Registró",w:14},{h:"Sede",w:16}],filas:R.abonos.map(a=>[a.fecha,a.descr||"",a.valor,a.metodo==="qr"?"QR banco":"Efectivo",a.por||"",sedeNom(a.sede_id)])});
+    T.push({hoja:"Gastos",cols:[{h:"Fecha",w:11},{h:"Descripción",w:30},{h:"Valor",w:13,f:"money",sum:1},{h:"Registró",w:14},{h:"Sede",w:16}],filas:R.gastos.map(g=>[g.fecha,g.descr||"",g.valor,g.por||"",sedeNom(g.sede_id)])});
+    if(R.entradas.length)T.push({hoja:"Entradas",titulo:"Mercancía que entró",cols:[{h:"Fecha",w:11},{h:"Producto",w:26},{h:"Cantidad",w:10,f:"int",sum:1},{h:"Registró",w:14},{h:"Sede",w:16}],filas:R.entradas.map(m=>[m.fecha,m.nombre||((st.prods.get(m.pid)||{}).nombre)||"",m.cant,m.por||"",sedeNom(m.sede_id)])});
+    if(!REP.todas)T.push({hoja:"Inventario actual",cols:[{h:"Producto",w:30},{h:"Categoría",w:16},{h:"Stock",w:9,f:"int",sum:1},{h:"Precio venta",w:13,f:"money"},{h:"Valor en stock",w:15,f:"money",sum:1}],filas:prodsArr().map(p=>[p.nombre,p.cat||"",p.stock||0,p.precio||0,(p.stock||0)*(p.precio||0)]),tachar:f=>f[2]<=0});
+    const fn=await excelPro({app:"DL CUADRA PRO",titulo:en,acento:"FF22E4FF",sub:`${sd} · ${R.a===R.b?fl(R.a):fl(R.a)+" al "+fl(R.b)}`,resumen,tablas:T,archivo:`Ventas ${en} ${R.a}${R.a===R.b?"":" a "+R.b}`});
+    toast("📥 Excel descargado: "+fn);
   }catch(e){toast(e.message||"No se pudo crear el Excel");}
   finally{if(b){b.disabled=false;b.lastChild.textContent="Descargar en Excel";}}
 }
@@ -2740,8 +2876,8 @@ function leer(s,i,last){
 }
 
 /* ---------- panel DL COMPANY (solo superadmin): códigos y empresas ---------- */
-const DIAS=[[30,"1 mes"],[90,"3 meses"],[180,"6 meses"],[365,"1 año"]];
-const durTxt=d=>{const x=DIAS.find(y=>y[0]===d);return x?x[1]:d+" días";};
+const DIAS=[[30,"1 mes"],[90,"3 meses"],[180,"6 meses"],[426,"Anual · 14 meses"]];
+const durTxt=d=>{const x=DIAS.find(y=>y[0]===d);return x?x[1]:d===365?"1 año":d+" días";};
 const fechaC=s=>s?new Date(String(s).length<=10?s+"T12:00":s).toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"}):"";
 function msgCodigo(c,plan,dias){const P=PLANES[plan];return `¡Hola! 👋 Gracias por tu pago.\n\nTu código de activación de *DL CUADRA PRO* es:\n\n*${c}*\n\nPlan ${P.ico} *${P.n}* por ${durTxt(dias)}.\n\nCómo activarlo:\n1. Abre la app y entra con tu cuenta de dueño.\n2. Toca tu plan (o Menú → Planes).\n3. Pega el código en "Activa tu código" y toca *Activar*.\n\nCualquier duda, aquí estamos. — DL COMPANY -TECHNOLOGY-`;}
 async function panelDL(tab){
