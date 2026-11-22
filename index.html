@@ -422,6 +422,7 @@ html[data-theme="light"] .planchip.p-empresarial{color:#8a6a0c}
 .plan h4 small{font-size:11px;color:var(--muted);font-weight:700}
 .plan h4 em{font-style:normal;font-size:10.5px;padding:2px 7px;border-radius:99px;margin-left:4px;vertical-align:2px}
 .pcur{background:var(--okSoft);color:var(--ok)}
+.pusd{display:block;text-align:right;font-size:12px;font-weight:700;color:var(--muted);margin-top:2px}.fxn{font-size:11px!important;text-align:center;margin:10px 0 0!important}
 .pantes{display:block;text-align:right;font-size:13px;font-weight:700;color:var(--muted);text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:1.5px;line-height:1.2}
 .pdesc{background:linear-gradient(135deg,#ff4d6d,#ff9f1c);color:#fff!important;font-weight:900}
 .lanza{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:11px 13px;border-radius:14px;background:linear-gradient(135deg,rgba(255,77,109,.18),rgba(255,159,28,.18));border:1px solid rgba(255,159,28,.55);font-weight:800;font-size:13.5px;line-height:1.35}
@@ -1975,20 +1976,38 @@ function avisoVence(){
 }
 const MOTIVO={productos:l=>`Tu plan permite hasta ${l} productos.`,cajeros:l=>l?`Tu plan permite hasta ${l} cajeros.`:"El plan Gratis no incluye cajeros.",sedes:()=>"Tu plan incluye una sola sede. Varias sedes están en el plan Premium Empresarial.",
   costos:()=>"El precio de compra y la ganancia están desde el plan Pro.",escaner:()=>"El escáner de código de barras está desde el plan Pro.",offline:()=>"Las ventas sin internet están desde el plan Pro.",excel:()=>"La descarga de reportes a Excel está desde el plan Pro.",fiado:()=>"El fiado no está disponible en tu plan.",clientes:l=>`Tu plan permite hasta ${l} clientes de fiado. Archiva uno que esté al día o mejora tu plan.`,historial:l=>`Tu plan muestra los últimos ${l} días.`};
+/* ---------- precio en dólares: se calcula cada día con el dólar del día (el precio en pesos no cambia) ---------- */
+const FX={rate:3350,fecha:null};
+function fxLoad(onChange){
+  let c=null;try{c=JSON.parse(localStorage.getItem("dl_fx_cop")||"null")}catch(e){}
+  if(c&&c.rate){FX.rate=c.rate;FX.fecha=c.fecha;}
+  if(c&&Date.now()-c.ts<12*3600*1000)return;
+  fetch("https://open.er-api.com/v6/latest/USD",{cache:"no-store"}).then(r=>r.json()).then(d=>{
+    const v=d&&d.result==="success"&&d.rates&&Number(d.rates.COP);
+    if(!v||v<1000||v>10000)return;
+    FX.rate=v;FX.fecha=(d.time_last_update_utc||"").slice(5,16);
+    try{localStorage.setItem("dl_fx_cop",JSON.stringify({rate:v,fecha:FX.fecha,ts:Date.now()}))}catch(e){}
+    if(onChange)onChange();
+  }).catch(()=>{});
+}
+const usdOf=cop=>cop?Math.max(1,Math.round(cop/FX.rate)):0;
+const fxNote=()=>`<p class="hint fxn">💱 En dólares: precio con el dólar del día (1 USD = $${Math.round(FX.rate).toLocaleString("es-CO")} COP${FX.fecha?" · "+FX.fecha:""}). Tasa: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a></p>`;
+fxLoad();
 function showPlanes(motivo){
+  fxLoad(()=>{const sh=document.querySelector(".sheet");if(sh&&sh.querySelector(".plan"))showPlanes(motivo);});
   const cur=planActual(),e=st.empresa||{};
   const wa=(k,an)=>"https://wa.me/573218641539?text="+encodeURIComponent(`Hola DL Company 👋 Vengo de la app DL CUADRA PRO. Quiero el plan ${PLANES[k].n} de DL CUADRA PRO ${an?`ANUAL (14 meses) por $${(PLANES[k].p*12).toLocaleString("es-CO")}`:`MENSUAL por $${PLANES[k].p.toLocaleString("es-CO")}`} con el 50% de descuento de lanzamiento.${e.nombre?"\nNegocio: "+e.nombre:""}${e.nit?"\nNIT: "+e.nit:""}\n¿Cómo hago el pago?`);
   const venc=st.plan&&st.plan.vence&&cur!=="gratis"?` · vence ${new Date(st.plan.vence+"T12:00").toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"numeric"})}`:"";
   openSheet(`<h3>${motivo?"🔒 Mejora tu plan":"Planes DL CUADRA PRO"}</h3>
     <p class="hint">${motivo?esc(motivo)+" ":""}${st.perfil?`Tu plan actual: <b>${PLANES[cur].n}</b>${venc}.`:"Empieza gratis y mejora cuando lo necesites."}</p>
-    <div class="lanza"><b>🚀 -50%</b><span>Precio de lanzamiento por ser una app nueva. Aprovecha: paga la mitad y conserva este precio mientras renueves.</span></div>
+    <div class="lanza"><b>🚀 -50%</b><span>Precio de lanzamiento por ser una app nueva. Aprovecha: paga la mitad y conserva este precio mientras renueves.</span></div>${fxNote()}
     ${st.perfil&&st.mode==="db"?(isDueno()?`<div class="card" style="padding:12px;margin:0 0 12px;border-color:rgba(46,242,160,.45)"><div style="font-weight:800;margin:0 0 6px">🔑 ¿Ya pagaste? Activa tu código</div>
       <div style="display:flex;gap:8px"><input id="cdIn" class="mono" maxlength="30" autocomplete="off" autocapitalize="characters" placeholder="DLC-PRO-30D-XXXX-XXXX" style="flex:1;min-width:0;text-transform:uppercase;background:rgba(127,127,127,.08);border:1px solid var(--line2);border-radius:12px;padding:11px 12px;color:var(--ink);font-size:14px"><button class="btn pri" type="button" id="cdGo" style="flex:none">Activar</button></div>
       <p class="hint" style="margin:6px 0 0">El plan se activa al instante. Si renuevas el mismo plan, los días se suman a los que te quedan.</p></div>`:`<div class="cdiff warn" style="margin:0 0 12px">Para cambiar de plan, habla con el dueño del negocio.</div>`):""}
     ${ORDEN.map(k=>{const P=PLANES[k],isCur=k===cur&&!!st.perfil,up=ORDEN.indexOf(k)>ORDEN.indexOf(cur);
-      return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}${P.antes?' <em class="pdesc">-50%</em>':""}</span><span class="num">${P.antes?`<span class="pantes">$${P.antes.toLocaleString("es-CO")}</span>`:""}${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}</span></h4>
+      return `<div class="plan ${isCur?"cur":""} ${k==="premium"?"hl":""}"><h4><span>${P.ico} ${P.n}${isCur?' <em class="pcur">Tu plan</em>':""}${k==="premium"&&!isCur?' <em class="prec">Recomendado</em>':""}${P.antes?' <em class="pdesc">-50%</em>':""}</span><span class="num">${P.antes?`<span class="pantes">$${P.antes.toLocaleString("es-CO")}</span>`:""}${P.p?"$"+P.p.toLocaleString("es-CO")+"<small>/mes</small>":"$0"}${P.p?`<span class="pusd">US$ ${usdOf(P.p)}/mes${P.antes?` · antes US$ ${usdOf(P.antes)}`:""}</span>`:""}</span></h4>
         <ul>${P.f.map(x=>`<li>${x}</li>`).join("")}</ul>
-        ${P.p?`<div class="panual"><div><b>📅 Pago anual</b><span>14 meses: pagas 12 y te regalamos 2</span></div><div class="num" style="text-align:right">${P.antes?`<s>$${(P.antes*12).toLocaleString("es-CO")}</s>`:""}<b>$${(P.p*12).toLocaleString("es-CO")}</b><span>$${(Math.round(P.p*12/14/100)*100).toLocaleString("es-CO")} al mes</span></div></div>`:""}
+        ${P.p?`<div class="panual"><div><b>📅 Pago anual</b><span>14 meses: pagas 12 y te regalamos 2</span></div><div class="num" style="text-align:right">${P.antes?`<s>$${(P.antes*12).toLocaleString("es-CO")}</s>`:""}<b>$${(P.p*12).toLocaleString("es-CO")}</b><span>$${(Math.round(P.p*12/14/100)*100).toLocaleString("es-CO")} al mes · anual US$ ${usdOf(P.p*12)}</span></div></div>`:""}
         ${P.p&&(up||isCur||!st.perfil)?`<div class="pbtns"><a class="btn ${k==="premium"?"pri":"dark"} pbuy" href="${wa(k,0)}" target="_blank" rel="noopener">${isCur?"Renovar":"Quiero"} mensual</a><a class="btn ${k==="premium"?"pri":"dark"} pbuy" href="${wa(k,1)}" target="_blank" rel="noopener">${isCur?"Renovar":"Quiero"} anual</a></div>`:""}</div>`;}).join("")}
     <p class="hint" style="text-align:center"><b>Pago anual:</b> 14 meses por el precio de 12.<br><b>¿Cómo pagar?</b> Escríbenos por WhatsApp con el plan que quieres, paga por Nequi o transferencia y te enviamos tu <b>código de activación</b>. Lo ingresas aquí arriba y listo.<br>Si el plan vence, tu cuenta pasa a Gratis sin perder tus datos. Consulta la <a href="legal.html#reembolsos" target="_blank" rel="noopener">política de reembolsos</a>.</p>
     <button class="btn ghost wide" data-x>Cerrar</button>`,s=>{s.querySelector("[data-x]").onclick=closeSheet;
