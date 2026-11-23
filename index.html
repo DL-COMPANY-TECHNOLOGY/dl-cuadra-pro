@@ -487,6 +487,18 @@ details.cdet summary{cursor:pointer;font-weight:800;color:var(--acc);padding:6px
 .rmeter{height:5px;border-radius:9px;background:var(--line);margin-top:5px;overflow:hidden}.rmeter i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2))}
 .rnote{font-size:12.5px;color:var(--warn);font-weight:700;margin:6px 0}
 .rxl{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:14px;border:0;background:#1d6f42;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin:12px 0 4px}
+
+/* ---------- conteo de productos ---------- */
+.apb{display:flex;align-items:center;gap:12px;margin:0 0 10px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,181,71,.55);background:linear-gradient(135deg,rgba(255,181,71,.16),rgba(255,92,122,.10))}
+.apb .ci{font-size:26px}.apb b{display:block;font-size:15px}.apb small{color:var(--muted);font-weight:600;font-size:12.5px}
+.apb .grow{flex:1;min-width:0}.apb .x{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer;padding:4px}
+.cntl .rrow{gap:8px}.cntl .rrow.ok .t::after{content:" ✓";color:var(--ok)}
+.cnti{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);font-weight:700}
+.cnti input{width:58px;padding:9px 6px;border-radius:10px;text-align:center;font-weight:800;font-size:15px;border:1px solid var(--line2);background:rgba(127,127,127,.06);color:var(--ink)}
+.cnti input:focus{border-color:var(--acc);outline:none;box-shadow:0 0 0 3px rgba(34,228,255,.18)}
+.cntcat{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px}
+.cntprog{position:sticky;top:0;z-index:2;background:var(--bg2,var(--bg));padding:8px 0;margin:0 0 6px}
+.cntprog .rmeter{height:6px}
 /* ---------- guía interactiva ---------- */
 .tour{position:fixed;inset:0;z-index:58;display:none}
 .tour.on{display:block}
@@ -571,6 +583,7 @@ footer.dlf .dlf-copy{font-size:10.5px;letter-spacing:1.2px;text-transform:upperc
   <!-- VENDER -->
   <section class="view on" id="v-vender">
     <div id="offBanner"></div>
+    <div id="apBanner"></div>
     <div class="srow"><input class="search" id="q" placeholder="Buscar producto o código…" autocomplete="off"><button class="scanbtn" id="scanSell" type="button" aria-label="Escanear código de barras para vender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg></button></div>
     <div class="chips" id="cats"></div>
     <div class="grid" id="grid"></div>
@@ -613,6 +626,7 @@ footer.dlf .dlf-copy{font-size:10.5px;letter-spacing:1.2px;text-transform:upperc
       <div><div style="font-size:12px;font-weight:800;color:var(--muted)">EFECTIVO EN CAJA <span id="dCajaL">(efectivo − gastos)</span></div><b class="num" style="font-size:22px" id="dCaja">$0</b></div>
       <button class="btn sm" id="btnCopy">📲 WhatsApp</button>
     </div>
+    <button class="cierrebtn" type="button" id="btnConteo" hidden><span class="ci">🔢</span><span><b>Conteo de productos</b><small id="ctSub">Apertura y cierre de turno</small></span></button>
     <button class="cierrebtn" type="button" id="btnFiado" hidden><span class="ci">📒</span><span><b id="fbTit">Fiado · cuentas por cobrar</b><small id="fbSub">Clientes que te deben y sus abonos</small></span></button>
     <button class="cierrebtn" type="button" id="btnCierre"><span class="ci">🔒</span><span><b id="cbTit">Cerrar caja y guardar</b><small id="cbSub">El dueño recibe el aviso al instante en su app</small></span></button>
 
@@ -654,7 +668,7 @@ footer.dlf .dlf-copy{font-size:10.5px;letter-spacing:1.2px;text-transform:upperc
   <div class="dlf-btns"><a href="https://wa.me/573218641539?text=Hola%20DL%20Company%20%F0%9F%91%8B%20Vengo%20de%20la%20app%20DL%20CUADRA%20PRO.%20Necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">💬 Soporte</a><a id="lnkPlanes">👑 Planes</a><a class="dl-only" data-install>📲 Descargar app</a><a class="dlf-site" href="https://dl-company-technology.github.io/" target="_blank" rel="noopener">🌐 Conoce DL COMPANY</a></div>
   <div class="dlf-apps"><p>Más apps de DL COMPANY</p><div><a href="https://dl-company-technology.github.io/dl-finanzas/" target="_blank" rel="noopener">DL FINANZAS</a><a href="https://dl-company-technology.github.io/dl-stock-pro/" target="_blank" rel="noopener">DL STOCK PRO</a><a href="https://dl-company-technology.github.io/dl-comanda-pro/" target="_blank" rel="noopener">DL COMANDA PRO</a></div></div>
   <div class="dlf-legal"><a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a><a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a><a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a></div>
-  <p class="dlf-copy">DL CUADRA PRO v4.2.1 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dlf-copy">DL CUADRA PRO v4.3 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -888,7 +902,7 @@ async function refresh(){
   if(!aj.error){const c=aj.data.find(x=>x.clave==="categorias");try{const v=c&&JSON.parse(c.valor);st.cats=Array.isArray(v)?v:[];}catch(e){st.cats=[];}
     const pc=aj.data.find(x=>x.clave==="pedido_cfg");try{st.pedidoCfg=pc?JSON.parse(pc.valor):null;}catch(e){st.pedidoCfg=null;}
     const av=aj.data.find(x=>x.clave==="cierre_aviso");try{const v=av&&JSON.parse(av.valor);st.aviso=v&&typeof v==="object"?v:{modo:"app",num:""};}catch(e){st.aviso={modo:"app",num:""};}}
-  loadCierres();if(puede("fiado"))loadClientes();if(st.superadmin==null&&isDueno())sb.rpc("soy_superadmin").then(r=>{st.superadmin=!r.error&&r.data===true;},()=>{});if(!pushSyncOk){pushSyncOk=true;syncPush();}
+  loadCierres();loadConteos();if(puede("fiado"))loadClientes();if(st.superadmin==null&&isDueno())sb.rpc("soy_superadmin").then(r=>{st.superadmin=!r.error&&r.data===true;},()=>{});if(!pushSyncOk){pushSyncOk=true;syncPush();}
   if(isDueno()){
     const [co,vc]=await Promise.all([sb.from("costos").select("producto_id,costo"),sb.from("venta_costos").select("movimiento_id,costo,sin_costo").eq("sede_id",sede).gte("fecha",st.from)]);
     if(!co.error)st.costos=new Map(co.data.map(r=>[r.producto_id,r.costo]));
@@ -1202,10 +1216,11 @@ function startData(){
   for(const t of ["productos","movimientos","ajustes","inventario"])channel.on("postgres_changes",{event:"*",schema:"public",table:t},refreshSoon);
   for(const t of ["sedes","empresas"])channel.on("postgres_changes",{event:"*",schema:"public",table:t},ctxSoon);
   channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"cierres"},nuevoCierre);
+  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"conteos"},nuevoConteo);
   channel.subscribe();
 }
 let ctxT=null;const ctxSoon=()=>{clearTimeout(ctxT);ctxT=setTimeout(async()=>{if(!st.user||!st.perfil)return;try{const r=await loadContext();if(!r.ok)return boot(true);if(!st.sede)return showSedePicker();render();if($("#v-admin").classList.contains("on"))loadAdmin();}catch(e){}},300);};
-function stopData(){st.superadmin=null;st.cierres=[];bellAviso=false;renderBell();if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
+function stopData(){st.superadmin=null;st.cierres=[];st.conteos=[];bellAviso=false;renderBell();if(channel&&sb){sb.removeChannel(channel);channel=null;}st.prods=new Map();st.movs=[];st.cart.clear();st.loaded=false;render();}
 
 async function init(){
   render();
@@ -1402,7 +1417,7 @@ function renderCierreBtn(){
   $("#cbSub").textContent=u?(isDueno()?"Toca para ver el cierre o cerrar de nuevo":"El dueño ya recibió el aviso · toca si necesitas cerrar de nuevo"):(isDueno()?"Queda guardado en tus cierres (🔔)":"El dueño recibe el aviso al instante en su app");
 }
 function renderDia(){
-  renderCierreBtn();
+  renderCierreBtn();renderConteoBtn();
   const day=st.day;$("#dDate").value=day;$("#dNext").disabled=day>=today();
   const r=dayStats(day);
   $("#dTot").textContent=fmt(r.tot);$("#dEf").textContent=fmt(r.ef);$("#dQr").textContent=fmt(r.qr);$("#dGa").textContent=fmt(r.ga);
@@ -2200,7 +2215,7 @@ function renderBell(){
   if(!bellAviso&&isDueno()&&st.cierres&&st.cierres.length){bellAviso=true;const n=st.cierres.filter(c=>!c.visto).length;if(n)setTimeout(()=>{if(!tourOn())toast("🔔 Tienes "+n+(n===1?" cierre de caja nuevo":" cierres de caja nuevos"));},1500);}
   const b=$("#bellBtn");if(!b)return;
   const on=st.mode==="db"&&!!st.perfil&&isDueno();b.hidden=!on;document.body.classList.toggle("hasbell",on);if(!on)return;
-  const n=(st.cierres||[]).filter(c=>!c.visto).length;const i=$("#bellN");i.hidden=!n;i.textContent=n>9?"9+":n;
+  const n=(st.cierres||[]).filter(c=>!c.visto).length+(st.conteos||[]).filter(c=>!c.visto).length;const i=$("#bellN");i.hidden=!n;i.textContent=n>9?"9+":n;
 }
 const sedeNom=id=>(st.sedes.find(s=>s.id===id)||{}).nombre||"Sede";
 const diffTxt=d=>d==null?"":d===0?"✅ Cuadró exacto":d<0?"⚠️ Faltaron "+fmt(-d):"➕ Sobraron "+fmt(d);
@@ -2335,6 +2350,7 @@ $("#btnCierre").onclick=()=>{
         const wa=s.querySelector("#cWa"),mandar=wa&&wa.checked;
         closeSheet();await loadCierres();
         toast(isDueno()?"✅ Cierre guardado":"✅ Caja cerrada. El dueño ya recibió el aviso");
+        if(!hoyConteos("cierre").length&&prodsArr().length)setTimeout(sugerirConteoCierre,mandar?2500:700);
         if(mandar){const c=(st.cierres||[]).find(x=>x.id===res.data);const d=await sb.from("cierres").select("detalle").eq("id",res.data).maybeSingle();
           if(c&&d.data)enviarWA(textoCierre(c,d.data.detalle||{}));}
       }catch(err){b.disabled=false;b.textContent="Guardar cierre";if(isNetErr(err))toast("Sin internet. Intenta de nuevo cuando vuelva la señal.");else toast("No se pudo guardar: "+(err.message||err));}
@@ -2342,15 +2358,18 @@ $("#btnCierre").onclick=()=>{
   });
 };
 function cierresSheet(){
-  const L=st.cierres||[];
-  const permis=`<div id="pushBox"></div>`;
-  openSheet(`<h3>🔔 Cierres de caja</h3><p class="hint">Aquí llegan los cierres de tus cajeros. Toca uno para ver todo lo que pasó en el día.</p>${permis}
-    <div class="card clist" style="margin:8px 0">${L.map(c=>`<div class="row ${c.visto?"":"new"}" data-cid="${esc(c.id)}">${c.visto?"":'<span class="dot"></span>'}<div class="grow"><div class="t">${c.cajero_id?"👤":"👑"} ${esc(c.por)} · ${esc(sedeNom(c.sede_id))}</div><div class="sub">${new Date(c.fecha+"T12:00").toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"})} · ${hhmm(new Date(c.ts).getTime())} · ${c.ventas} ventas${c.diferencia!=null&&c.diferencia!==0?" · "+(c.diferencia<0?"⚠️ faltó "+fmt(-c.diferencia):"➕ sobró "+fmt(c.diferencia)):""}</div></div><b class="num">${fmt(c.total)}</b></div>`).join("")||'<div class="empty">Aún no hay cierres. Cuando un cajero toque “Cerrar caja” en Cierre del día, te llegará aquí.</div>'}</div>
-    <div class="acts">${L.some(c=>!c.visto)?'<button class="btn" data-all>Marcar todo como visto</button>':""}<button class="btn pri" data-x>Cerrar</button></div>`,s=>{
+  const L=[...(st.cierres||[]).map(c=>({k:"c",x:c})),...(st.conteos||[]).map(c=>({k:"k",x:c}))].sort((a,b)=>a.x.ts<b.x.ts?1:-1).slice(0,100);
+  const fch=x=>new Date(x.fecha+"T12:00").toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"})+" · "+hhmm(new Date(x.ts).getTime());
+  const fila=({k,x})=>k==="c"
+    ?`<div class="row ${x.visto?"":"new"}" data-cid="${esc(x.id)}">${x.visto?"":'<span class="dot"></span>'}<div class="grow"><div class="t">🔒 ${x.cajero_id?"":"👑 "}${esc(x.por)} cerró caja · ${esc(sedeNom(x.sede_id))}</div><div class="sub">${fch(x)} · ${x.ventas} ventas${x.diferencia!=null&&x.diferencia!==0?" · "+(x.diferencia<0?"⚠️ faltó "+fmt(-x.diferencia):"➕ sobró "+fmt(x.diferencia)):""}</div></div><b class="num">${fmt(x.total)}</b></div>`
+    :`<div class="row ${x.visto?"":"new"}" data-kid="${esc(x.id)}">${x.visto?"":'<span class="dot"></span>'}<div class="grow"><div class="t">🔢 Conteo de ${x.tipo} · ${esc(x.por)} · ${esc(sedeNom(x.sede_id))}</div><div class="sub">${fch(x)} · ${x.contados} productos · ${x.con_dif?`<span style="color:var(--bad)">⚠️ ${x.con_dif} no ${x.con_dif===1?"cuadra":"cuadran"}</span>`:'<span style="color:var(--ok)">✅ Todo cuadra</span>'}</div></div><b class="num" style="color:${x.faltan?"var(--bad)":"var(--ok)"}">${x.faltan?"−"+fmt(x.valor_falta):"✓"}</b></div>`;
+  openSheet(`<h3>🔔 Cierres y conteos</h3><p class="hint">Aquí llegan los cierres de caja y los conteos de productos de tus cajeros. Toca uno para ver el detalle.</p><div id="pushBox"></div>
+    <div class="card clist" style="margin:8px 0">${L.map(fila).join("")||'<div class="empty">Aún no hay cierres ni conteos. Cuando un cajero cierre la caja o cuente los productos, te llegará aquí.</div>'}</div>
+    <div class="acts">${L.some(o=>!o.x.visto)?'<button class="btn" data-all>Marcar todo como visto</button>':""}<button class="btn pri" data-x>Cerrar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     pintarPush(s.querySelector("#pushBox"));
-    const al=s.querySelector("[data-all]");if(al)al.onclick=async()=>{await sb.rpc("marcar_cierres_vistos",{p_id:null});(st.cierres||[]).forEach(c=>c.visto=true);renderBell();cierresSheet();};
-    s.querySelector(".clist").onclick=e=>{const r=e.target.closest("[data-cid]");if(r)cierreDetalle(r.dataset.cid);};
+    const al=s.querySelector("[data-all]");if(al)al.onclick=async()=>{await Promise.all([sb.rpc("marcar_cierres_vistos",{p_id:null}),sb.rpc("marcar_conteos_productos_vistos",{p_id:null})]);(st.cierres||[]).forEach(c=>c.visto=true);(st.conteos||[]).forEach(c=>c.visto=true);renderBell();cierresSheet();};
+    s.querySelector(".clist").onclick=e=>{const r=e.target.closest("[data-cid]");if(r)return cierreDetalle(r.dataset.cid);const k=e.target.closest("[data-kid]");if(k)conteoDetalle(k.dataset.kid);};
   });
 }
 async function cierreDetalle(id){
@@ -2941,8 +2960,8 @@ async function pintarPush(box){
   const pt=box.querySelector("[data-pt]");if(pt)pt.onclick=async()=>{try{const r=await sb.functions.invoke("push-cierre",{body:{test:true}});toast(r.data&&r.data.sent?"Aviso de prueba enviado":"No se pudo enviar la prueba");}catch(err){toast("No se pudo enviar la prueba");}};
 }
 // abrir el cierre al tocar la notificación
-let cierreAbrir=new URLSearchParams(location.search).get("cierre");
-if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",ev=>{const d=ev.data||{};if(d.tipo==="abrir"){try{const c=new URL(d.url).searchParams.get("cierre");if(c){cierreAbrir=c;loadCierres();}}catch(e){}}});
+let cierreAbrir=new URLSearchParams(location.search).get("cierre"),conteoAbrir=new URLSearchParams(location.search).get("conteo");
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",ev=>{const d=ev.data||{};if(d.tipo==="abrir"){try{const u=new URL(d.url).searchParams,c=u.get("cierre"),k=u.get("conteo");if(c){cierreAbrir=c;loadCierres();}if(k){conteoAbrir=k;loadConteos();}}catch(e){}}});
 
 /* ---------- voz de la guía: lee cada paso y avanza sola al terminar ---------- */
 const VOZ={ok:"speechSynthesis" in window&&"SpeechSynthesisUtterance" in window,on:true,voz:null,tok:0,t:null,bar:null};
@@ -3066,6 +3085,138 @@ function planEmpresaSheet(e){
   });
 }
 
+/* ---------- conteo de productos: apertura y cierre de turno ---------- */
+const KSEL="id,sede_id,tipo,fecha,ts,cajero_id,por,contados,con_dif,faltan,sobran,valor_falta,nota,visto,aplicado";
+let contBusy=false;
+async function loadConteos(){
+  if(!sb||st.mode!=="db"||!st.perfil||contBusy)return;contBusy=true;
+  try{let q=sb.from("conteos").select(KSEL).order("ts",{ascending:false}).limit(80);if(!isDueno())q=q.eq("fecha",today());
+    const r=await q;if(!r.error){st.conteos=r.data||[];renderBell();renderConteoBtn();renderApBanner();
+      if(conteoAbrir&&isDueno()){const id=conteoAbrir;conteoAbrir=null;try{history.replaceState(history.state,"",location.pathname);}catch(e){}if(st.conteos.some(c=>c.id===id))setTimeout(()=>conteoDetalle(id),300);}}}
+  finally{contBusy=false;}
+}
+const hoyConteos=t=>(st.conteos||[]).filter(c=>c.fecha===today()&&c.sede_id===st.sede&&c.tipo===t&&(isDueno()||(st.perfil&&c.cajero_id===st.perfil.cajero_id)));
+const TIPOC={apertura:["🌅","Conteo de apertura","Al empezar el turno: confirma que lo que quedó ayer sí está en el negocio."],cierre:["🌙","Conteo de cierre","Al cerrar la caja: confirma que los productos cuadran con lo vendido."]};
+function renderConteoBtn(){
+  const b=$("#btnConteo");if(!b)return;const on=st.mode==="db"&&!!sb&&!!st.perfil&&st.day===today()&&prodsArr().length>0;b.hidden=!on;if(!on)return;
+  const a=hoyConteos("apertura")[0],c=hoyConteos("cierre")[0];
+  const est=x=>x?(x.con_dif?`⚠️ ${x.con_dif} no ${x.con_dif===1?"cuadra":"cuadran"}`:"✅ "+hhmm(new Date(x.ts).getTime())):"pendiente";
+  $("#ctSub").textContent=`Apertura: ${est(a)} · Cierre: ${est(c)}`;b.classList.toggle("done",!!(a&&c));
+}
+function renderApBanner(){
+  const el=$("#apBanner");if(!el)return;
+  const k="cp_apb_"+(st.sede||"")+"_"+today();let off=false;try{off=!!localStorage.getItem(k);}catch(e){}
+  const show=st.mode==="db"&&!!st.perfil&&prodsArr().length>0&&!hoyConteos("apertura").length&&!off&&(st.cierres||[]).every(c=>!(c.fecha===today()&&c.sede_id===st.sede));
+  el.innerHTML=show?`<div class="apb"><span class="ci">🌅</span><div class="grow"><b>Empieza tu turno contando</b><small>Confirma que los productos que quedaron ayer están completos. ${isDueno()?"":"El dueño recibe el resultado."}</small></div><button class="btn sm pri" type="button" data-apgo>Contar</button><button class="x" type="button" data-apx aria-label="Ahora no">✕</button></div>`:"";
+  if(!show)return;
+  el.querySelector("[data-apgo]").onclick=()=>conteoSheet("apertura");
+  el.querySelector("[data-apx]").onclick=()=>{try{localStorage.setItem(k,"1");}catch(e){}renderApBanner();toast("Puedes hacerlo luego en Cierre del día → Conteo de productos");};
+}
+function conteoMenu(){
+  const L=(st.conteos||[]).filter(c=>c.fecha===today()&&c.sede_id===st.sede);
+  openSheet(`<h3>🔢 Conteo de productos</h3><p class="hint">📍 ${esc(sedeNom(st.sede))} · ${nice(today())}. Contar al empezar y al terminar el turno permite saber a tiempo si falta algo, por ejemplo un producto entregado sin cobrar.</p>
+    ${["apertura","cierre"].map(t=>{const T=TIPOC[t],x=hoyConteos(t)[0];return `<button class="opt" data-ct="${t}"><span class="ic c1">${T[0]}</span><span><b>${T[1]}${x?" · ✅ hecho "+hhmm(new Date(x.ts).getTime()):""}</b><small>${T[2]}</small></span></button>`;}).join("")}
+    ${L.length?`<div class="ctit">Conteos de hoy</div><div class="card clist">${L.map(x=>`<div class="row" data-kid="${esc(x.id)}"><div class="grow"><div class="t">${TIPOC[x.tipo][0]} ${TIPOC[x.tipo][1]} · ${esc(x.por)}</div><div class="sub">${hhmm(new Date(x.ts).getTime())} · ${x.contados} productos · ${x.con_dif?`⚠️ ${x.con_dif} no ${x.con_dif===1?"cuadra":"cuadran"}`:"✅ Todo cuadra"}</div></div><b class="num" style="color:${x.faltan?"var(--bad)":"var(--ok)"}">${x.faltan?"−"+fmt(x.valor_falta):"✓"}</b></div>`).join("")}</div>`:""}
+    <div class="acts"><button class="btn pri" data-x>Cerrar</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelectorAll("[data-ct]").forEach(b=>b.onclick=()=>conteoSheet(b.dataset.ct));
+    const cl=s.querySelector(".clist");if(cl)cl.onclick=e=>{const r=e.target.closest("[data-kid]");if(r)conteoDetalle(r.dataset.kid);};
+  });
+}
+function sugerirConteoCierre(){
+  if($("#scrim").classList.contains("on"))return;
+  openSheet(`<div style="text-align:center"><div style="font-size:44px">🌙</div><h3>Ahora cuenta los productos</h3>
+    <p class="hint">Así sabes si lo que hay en el negocio cuadra con lo que se vendió hoy. Si falta algo (por ejemplo, un producto que se entregó y no se cobró), ${isDueno()?"lo verás":"el dueño lo sabrá"} de una vez.</p></div>
+    <div class="acts"><button class="btn" data-x>Después</button><button class="btn pri" data-ok>🔢 Contar ahora</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;s.querySelector("[data-ok]").onclick=()=>conteoSheet("cierre");});
+}
+const CKEY=t=>"cp_conteo_"+((st.empresa&&st.empresa.id)||"")+"_"+(st.sede||"")+"_"+t+"_"+today();
+function conteoSheet(tipo){
+  if(!sb||st.mode!=="db")return;
+  if(navigator.onLine===false){toast("El conteo necesita internet para guardarse. Intenta cuando vuelva la señal.");return;}
+  const T=TIPOC[tipo],dueno=isDueno();
+  let D={};try{D=JSON.parse(localStorage.getItem(CKEY(tipo))||"{}")||{};}catch(e){}
+  const P=prodsArr().slice().sort((a,b)=>(a.cat||"").localeCompare(b.cat||"")||a.nombre.localeCompare(b.nombre));
+  const pack=p=>p.pedido_contenido>1&&p.pedido_unidad?{n:p.pedido_contenido,U:uInfo(p.pedido_unidad)}:null;
+  const total=pid=>{const d=D[pid];if(!d)return null;const p=st.prods.get(pid),k=pack(p);const a=d.p===""||d.p==null?null:+d.p,u=d.u===""||d.u==null?null:+d.u;if(a==null&&u==null)return null;return (a||0)*(k?k.n:0)+(u||0);};
+  const guardaD=()=>{try{localStorage.setItem(CKEY(tipo),JSON.stringify(D));}catch(e){}};
+  let q="",nota=D.__nota||"",fase="contar";
+  const contados=()=>P.filter(p=>total(p.id)!=null).length;
+  const draw=s=>{
+    if(fase==="revisar")return revisar(s);
+    s.innerHTML=`<div class="grab"></div><h3>${T[0]} ${T[1]}</h3><p class="hint">${T[2]} ${dueno?"":"Cuenta lo que ves en el negocio, sin adivinar."}</p>
+      <div class="cntprog"><div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span id="cPg">${contados()} de ${P.length} contados</span><span style="color:var(--muted)">💾 Se guarda solo</span></div><div class="rmeter"><i id="cPb" style="width:${Math.round(contados()*100/Math.max(1,P.length))}%"></i></div></div>
+      <input class="search" id="cQ" placeholder="Buscar producto…" value="${esc(q)}" autocomplete="off" style="margin:0 0 8px">
+      <div class="card cntl" id="cL"></div>
+      <label class="fld" style="margin-top:10px"><span>Nota (opcional)</span><input id="cN" maxlength="300" value="${esc(nota)}" placeholder="Ej: 2 cervezas rotas en la bodega"></label>
+      <div class="acts"><button class="btn" data-x>Salir</button><button class="btn pri" data-rev>Revisar conteo ›</button></div>`;
+    const lista=()=>{const ql=q.trim().toLowerCase();let cat=null,out="";
+      for(const p of P){if(ql&&!matchQ(p,ql))continue;if(p.cat!==cat){cat=p.cat;out+=`<div class="cntcat">${esc(cat||"Sin categoría")}</div>`;}
+        const k=pack(p),d=D[p.id]||{},t=total(p.id);
+        out+=`<div class="rrow ${t!=null?"ok":""}" data-pid="${esc(p.id)}"><div class="grow"><div class="t">${esc(p.nombre)}</div>${dueno?`<div class="sub">Sistema: ${p.stock||0}${k?` · 1 ${k.U[2]} = ${k.n}`:""}</div>`:k?`<div class="sub">1 ${k.U[2]} = ${k.n} und</div>`:""}</div>
+          ${k?`<label class="cnti"><input data-f="p" inputmode="numeric" maxlength="5" value="${d.p??""}" placeholder="0">${esc(k.U[3])}</label><span class="cnti">+</span>`:""}<label class="cnti"><input data-f="u" inputmode="numeric" maxlength="6" value="${d.u??""}" placeholder="0">und</label></div>`;}
+      s.querySelector("#cL").innerHTML=out||'<div class="empty">Sin productos</div>';};
+    lista();
+    const L=s.querySelector("#cL");
+    L.oninput=e=>{const inp=e.target;if(!inp.dataset.f)return;inp.value=inp.value.replace(/\D/g,"");const row=inp.closest("[data-pid]"),pid=row.dataset.pid;
+      D[pid]=D[pid]||{};D[pid][inp.dataset.f]=inp.value;if(total(pid)==null)delete D[pid];row.classList.toggle("ok",total(pid)!=null);guardaD();
+      const n=contados();s.querySelector("#cPg").textContent=n+" de "+P.length+" contados";s.querySelector("#cPb").style.width=Math.round(n*100/Math.max(1,P.length))+"%";};
+    L.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.dataset.f){e.preventDefault();const all=[...L.querySelectorAll("input")],i=all.indexOf(e.target);if(all[i+1])all[i+1].focus();}});
+    s.querySelector("#cQ").oninput=e=>{q=e.target.value;lista();};
+    s.querySelector("#cN").oninput=e=>{nota=e.target.value;D.__nota=nota;guardaD();};
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-rev]").onclick=()=>{if(!contados()){toast("Cuenta al menos un producto");return;}fase="revisar";draw(s);s.scrollTop=0;};
+  };
+  const revisar=s=>{
+    const C=P.filter(p=>total(p.id)!=null),faltan=P.length-C.length;
+    const dif=C.map(p=>({p,t:total(p.id),d:total(p.id)-(p.stock||0)})).filter(x=>x.d!==0);
+    const vf=dif.filter(x=>x.d<0).reduce((a,x)=>a+(-x.d)*(x.p.precio||0),0);
+    s.innerHTML=`<div class="grab"></div><h3>${T[0]} Revisa antes de enviar</h3>
+      ${faltan?`<div class="cdiff warn">📦 Faltan ${faltan} ${faltan===1?"producto":"productos"} por contar. Puedes enviar así (se guarda solo lo contado) o volver a contar.</div>`:`<div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">✔ Contaste los ${C.length} productos.</div>`}
+      ${dif.length?`<div class="cdiff bad">⚠️ ${dif.length} ${dif.length===1?"producto no cuadra":"productos no cuadran"} con el sistema${vf?` · faltan ${fmt(vf)} en mercancía`:""}. Vuelve a contarlos para estar seguro.</div>
+        <div class="card">${dif.map(x=>`<div class="rrow"><div class="grow"><div class="t">${esc(x.p.nombre)}</div><div class="sub">Contaste ${x.t}${dueno?" · sistema "+(x.p.stock||0):""}</div></div><b class="num" style="color:${x.d<0?"var(--bad)":"var(--warn)"}">${x.d<0?"Faltan "+(-x.d):"Sobran "+x.d}</b></div>`).join("")}</div>`
+        :`<div class="cdiff ok">✅ Todo lo que contaste cuadra con el sistema.</div>`}
+      <div class="acts"><button class="btn" data-back>‹ Volver a contar</button><button class="btn pri" data-go>Enviar conteo</button></div>`;
+    s.querySelector("[data-back]").onclick=()=>{fase="contar";draw(s);};
+    s.querySelector("[data-go]").onclick=async e=>{const b=e.currentTarget;b.disabled=true;b.textContent="Enviando…";
+      try{const items=C.map(p=>({pid:p.id,contado:total(p.id)}));
+        const r=await sb.rpc("guardar_conteo_productos",{p_sede:st.sede,p_tipo:tipo,p_items:items,p_nota:nota.trim()||null});if(r.error)throw r.error;
+        try{localStorage.removeItem(CKEY(tipo));}catch(_){}
+        await loadConteos();conteoDetalle(r.data,true);}
+      catch(err){b.disabled=false;b.textContent="Enviar conteo";toast(isNetErr(err)?"Sin internet. Tu conteo sigue guardado; envíalo cuando vuelva la señal.":"No se pudo enviar: "+(err.message||err));}};
+  };
+  openSheet("",draw);
+}
+async function conteoDetalle(id,recien){
+  const r=await sb.from("conteos").select(KSEL+",items").eq("id",id).maybeSingle();
+  if(r.error||!r.data){toast("No se pudo abrir el conteo");return;}
+  const c=r.data,T=TIPOC[c.tipo],dueno=isDueno(),it=c.items||[],dif=it.filter(x=>x.dif!==0).sort((a,b)=>a.dif-b.dif);
+  if(dueno&&!c.visto){sb.rpc("marcar_conteos_productos_vistos",{p_id:id});const l=(st.conteos||[]).find(x=>x.id===id);if(l)l.visto=true;renderBell();}
+  const txt=()=>{const en=(st.empresa&&st.empresa.nombre)||"";let t=`*${T[0]} ${T[1]}${en?" · "+en:""}*\n📍 ${sedeNom(c.sede_id)} · ${nice(c.fecha)} · ${hhmm(new Date(c.ts).getTime())}\n👤 ${c.por} · ${c.contados} productos contados\n\n`;
+    t+=dif.length?dif.map(x=>`• ${x.n}: ${x.dif<0?"faltan "+(-x.dif):"sobran "+x.dif} (sistema ${x.sis}, contado ${x.cont})`).join("\n")+(c.faltan?`\n\n⚠️ Faltan ${c.faltan} und · ${fmt(c.valor_falta)}`:""):"✅ Todo cuadra";
+    if(c.nota)t+=`\n📝 ${c.nota}`;return t;};
+  openSheet(`<h3>${T[0]} ${T[1]}</h3><p class="hint">📍 ${esc(sedeNom(c.sede_id))} · ${nice(c.fecha)} · ${hhmm(new Date(c.ts).getTime())} · ${c.cajero_id?"👤":"👑"} ${esc(c.por)}</p>
+    ${recien?`<div class="cdiff ok" style="background:rgba(34,228,255,.1);color:var(--acc)">✔ Conteo enviado${dueno?"":". El dueño ya recibió el aviso"}.</div>`:""}
+    ${dif.length?`<div class="cdiff bad">⚠️ ${dif.length} de ${c.contados} ${dif.length===1?"producto no cuadra":"productos no cuadran"}${c.faltan?` · faltan ${c.faltan} und (${fmt(c.valor_falta)} a precio de venta)`:""}${c.sobran?` · sobran ${c.sobran} und`:""}</div>`:`<div class="cdiff ok">✅ Todo cuadra: ${c.contados} productos contados</div>`}
+    ${c.nota?`<div class="cdiff warn">📝 ${esc(c.nota)}</div>`:""}
+    ${dif.length?`<div class="ctit">No cuadran</div><div class="card">${dif.map(x=>`<div class="rrow"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">Sistema ${x.sis} · contado ${x.cont}${x.dif<0?" · "+fmt(-x.dif*(x.precio||0)):""}</div></div><b class="num" style="color:${x.dif<0?"var(--bad)":"var(--warn)"}">${x.dif<0?"Faltan "+(-x.dif):"Sobran "+x.dif}</b></div>`).join("")}</div>`:""}
+    <details class="cdet"><summary>📦 Ver todo lo contado (${it.length})</summary><div class="card">${it.map(x=>`<div class="rrow"><div class="grow"><div class="t">${esc(x.n)}</div><div class="sub">Sistema ${x.sis}</div></div><b class="num">${x.cont}</b></div>`).join("")}</div></details>
+    ${dueno&&dif.length?(c.aplicado?`<div class="cdiff ok">✅ Inventario ajustado a lo contado el ${new Date(c.aplicado).toLocaleString("es-CO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>`:`<button class="btn wide" type="button" data-apl style="margin:8px 0">🔧 Ajustar el inventario a lo contado</button><p class="hint" style="margin:0 0 8px">Úsalo cuando confirmes que el conteo está bien. Las diferencias quedan registradas como ajuste.</p>`):""}
+    <div class="acts"><button class="btn" data-wa>📲 WhatsApp</button><button class="btn pri" data-x>Listo</button></div>`,s=>{
+    s.querySelector("[data-x]").onclick=closeSheet;
+    s.querySelector("[data-wa]").onclick=()=>enviarWA(txt());
+    const ap=s.querySelector("[data-apl]");if(ap)ap.onclick=()=>confirmSheet("Ajustar inventario",`Se corregirá el stock de ${dif.length} ${dif.length===1?"producto":"productos"} según el conteo de ${c.por}. Las ventas hechas después del conteo se respetan.`,"Ajustar",async()=>{
+      const rr=await sb.rpc("aplicar_conteo_productos",{p_id:id});if(rr.error){toast(rr.error.message);return;}await refresh();await loadConteos();toast("✅ Inventario ajustado ("+rr.data+")");conteoDetalle(id);});
+  });
+}
+async function nuevoConteo(ev){
+  const c=ev&&ev.new;await loadConteos();
+  if(!isDueno()||!c||c.visto)return;
+  toast(`🔢 ${c.por} hizo el conteo de ${c.tipo} · `+(c.con_dif?`⚠️ ${c.con_dif} no ${c.con_dif===1?"cuadra":"cuadran"}`:"✅ todo cuadra"));
+  const b=$("#bellBtn");b.classList.remove("ring");void b.offsetWidth;b.classList.add("ring");
+}
+$("#btnConteo").onclick=conteoMenu;
+
 /* ---------- guía interactiva (primer ingreso, cajero, nuevo plan) ---------- */
 let tourT=null,TOUR=null;
 const PRANK={gratis:0,pro:1,premium:2,empresarial:3};
@@ -3092,6 +3243,7 @@ function dueñoSteps(){
     {view:"vender",el:"#grid",t:"2. Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b>, elige efectivo o QR, y el stock se descuenta solo."},
     {view:"vender",el:"#q",t:"Busca rápido",p:"Escribe el nombre o el código para encontrar el producto. Con el botón de al lado puedes escanearlo."},
     {view:"dia",el:"#btnRep",t:"📊 Reportes",p:"Mira cómo te fue en la semana o el mes: productos más vendidos, ventas por día, por cajero y por categoría. Descárgalo en Excel."+lockTxt("costos","Pro").replace("Disponible","Excel disponible")},
+    {view:"dia",el:"#btnConteo",t:"🔢 Conteo de productos",p:"Al <b>empezar el turno</b> se cuenta lo que hay (apertura) y al <b>cerrar la caja</b> se vuelve a contar (cierre). Si falta algo, por ejemplo un producto entregado sin cobrar, lo sabes de una vez.",skipIfHidden:true},
     {view:"dia",el:"#dTot",t:"3. Cierre del día",p:"Aquí ves cuánto vendiste hoy: efectivo, QR, gastos y lo que debe haber en caja. Cuadra tu caja todos los días."},
     {view:"dia",el:"#dGanW",t:"💰 Tu ganancia",p:"La app calcula cuánto ganaste con el precio de compra de tus productos. Tus cajeros nunca la ven."+lockTxt("costos","Pro"),skipIfHidden:true},
     {view:"dia",el:"#btnFiado",t:"📒 Fiado",p:"Anota lo que se llevan fiado tus clientes: al cobrar elige <b>📒 Fiado</b> y el cliente. Aquí ves quién te debe, registras abonos y le cobras por WhatsApp."+(LIM().clientes!=null?` Tu plan permite <b>${LIM().clientes} clientes</b>.`:"")},
@@ -3111,6 +3263,8 @@ function cajeroSteps(){
     {view:"vender",el:"#grid",t:"Vende tocando productos",p:"Cada toque suma 1 unidad al carrito. Abajo aparece el total: toca <b>Cobrar</b> y elige efectivo o QR."},
     {view:"vender",el:"#q",t:"Busca o escanea",p:"Escribe el nombre o el código del producto, o usa el botón del escáner para leer el código de barras."},
     {view:"inv",el:".kpis",t:"Revisa el stock",p:"Mira qué productos están bajos o agotados para avisarle al dueño."},
+    {view:"vender",el:"#apBanner .apb",t:"🌅 Conteo de apertura",p:"Al empezar tu turno toca <b>Contar</b> y escribe cuántas unidades hay de cada producto. El dueño recibe el resultado.",skipIfHidden:true},
+    {view:"dia",el:"#btnConteo",t:"🔢 Conteo de productos",p:"Aquí haces el conteo de <b>apertura</b> y el de <b>cierre</b>. Después de cerrar la caja, la app te pide contar otra vez para ver si todo cuadra con las ventas.",skipIfHidden:true},
     {view:"dia",el:"#dTot",t:"Tu cierre del día",p:"Aquí ves lo que has vendido en tu turno: efectivo, QR y gastos."},
     {view:"dia",el:"#btnCierre",t:"🔒 Cierra la caja",p:"Al terminar tu turno toca <b>Cerrar caja</b>, escribe cuánto efectivo contaste y guarda. El dueño recibe el aviso al instante. Si quieres, también se lo envías por WhatsApp."},
     {el:"#menuBtn",t:"Terminar turno",p:"Al final del día toca los <b>3 puntos</b> y elige <b>Terminar turno y salir</b>. Para volver a entrar necesitas tu PIN."},
