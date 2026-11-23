@@ -654,7 +654,7 @@ footer.dlf .dlf-copy{font-size:10.5px;letter-spacing:1.2px;text-transform:upperc
   <div class="dlf-btns"><a href="https://wa.me/573218641539?text=Hola%20DL%20Company%20%F0%9F%91%8B%20Vengo%20de%20la%20app%20DL%20CUADRA%20PRO.%20Necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">💬 Soporte</a><a id="lnkPlanes">👑 Planes</a><a class="dl-only" data-install>📲 Descargar app</a><a class="dlf-site" href="https://dl-company-technology.github.io/" target="_blank" rel="noopener">🌐 Conoce DL COMPANY</a></div>
   <div class="dlf-apps"><p>Más apps de DL COMPANY</p><div><a href="https://dl-company-technology.github.io/dl-finanzas/" target="_blank" rel="noopener">DL FINANZAS</a><a href="https://dl-company-technology.github.io/dl-stock-pro/" target="_blank" rel="noopener">DL STOCK PRO</a><a href="https://dl-company-technology.github.io/dl-comanda-pro/" target="_blank" rel="noopener">DL COMANDA PRO</a></div></div>
   <div class="dlf-legal"><a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a><a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a><a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a></div>
-  <p class="dlf-copy">DL CUADRA PRO v4.2 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dlf-copy">DL CUADRA PRO v4.2.1 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2756,7 +2756,7 @@ function textoPedido(P){
   const en=(st.empresa&&st.empresa.nombre)||st.negocio||"";
   const sd=st.mode==="db"&&sedeActual()?sedeActual().nombre:"";
   let t=`${saludo()}${P.prov?" "+P.prov:""}, para realizar el siguiente pedido para${en?" *"+en+"*":""}${sd?" · "+sd:""}${P.dir?" ("+P.dir+")":""}${P.nombre?" a nombre de "+P.nombre:""}.\n`;
-  t+=`📅 Para el ${nice(P.fecha)}\n\n`;
+  t+=P.fecha===today()?`📅 Para *hoy*, ${nice(P.fecha)}\n\n`:`📅 Para el ${nice(P.fecha)}\n\n`;
   for(const it of P.items)t+=linea(it)+"\n";
   t+=`\nTotal: ${P.items.length} ${P.items.length===1?"producto":"productos"}`;
   if(P.nota)t+=`\n📝 ${P.nota}`;
