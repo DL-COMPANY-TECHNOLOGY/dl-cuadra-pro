@@ -654,7 +654,7 @@ footer.dlf .dlf-copy{font-size:10.5px;letter-spacing:1.2px;text-transform:upperc
   <div class="dlf-btns"><a href="https://wa.me/573218641539?text=Hola%20DL%20Company%20%F0%9F%91%8B%20Vengo%20de%20la%20app%20DL%20CUADRA%20PRO.%20Necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">💬 Soporte</a><a id="lnkPlanes">👑 Planes</a><a class="dl-only" data-install>📲 Descargar app</a><a class="dlf-site" href="https://dl-company-technology.github.io/" target="_blank" rel="noopener">🌐 Conoce DL COMPANY</a></div>
   <div class="dlf-apps"><p>Más apps de DL COMPANY</p><div><a href="https://dl-company-technology.github.io/dl-finanzas/" target="_blank" rel="noopener">DL FINANZAS</a><a href="https://dl-company-technology.github.io/dl-stock-pro/" target="_blank" rel="noopener">DL STOCK PRO</a><a href="https://dl-company-technology.github.io/dl-comanda-pro/" target="_blank" rel="noopener">DL COMANDA PRO</a></div></div>
   <div class="dlf-legal"><a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a><a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a><a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a></div>
-  <p class="dlf-copy">DL CUADRA PRO v4.1 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dlf-copy">DL CUADRA PRO v4.2 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -1541,11 +1541,18 @@ function invMenu(p){
   });
 }
 function entrada(p){
+  const U=p.pedido_unidad&&p.pedido_contenido>1?uInfo(p.pedido_unidad):null,K=U?p.pedido_contenido:1;let porPack=!!U;
   openSheet(`<h3>Entrada · ${esc(p.nombre)}</h3><p class="hint">Suma unidades al inventario (llegó mercancía).</p>
-    <label class="fld"><span>Cantidad que entra</span><input id="c" inputmode="numeric" class="num" placeholder="0" autofocus></label>
+    ${U?`<div class="seg" id="eM" style="margin:0 0 10px"><button type="button" data-m="p" class="on">Por ${esc(U[2])} (x${K})</button><button type="button" data-m="u">Por unidad</button></div>`:""}
+    <label class="fld"><span id="eL">${U?"¿Cuántas "+esc(U[3])+" llegaron?":"Cantidad que entra"}</span><input id="c" inputmode="numeric" class="num" placeholder="0" autofocus></label>
+    <p class="hint" id="eT" style="margin:-4px 0 12px"></p>
     <div class="acts"><button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Agregar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;const inp=s.querySelector("#c");setTimeout(()=>inp.focus(),50);
-    s.querySelector("[data-ok]").onclick=async()=>{const c=parseInt(inp.value,10);if(!(c>0)){toast("Escribe una cantidad");return;}
+    const tot=()=>{const n=parseInt(inp.value,10)||0;return porPack?n*K:n;};
+    const pin=()=>{const n=parseInt(inp.value,10)||0;s.querySelector("#eT").innerHTML=porPack&&n?`${n} ${n===1?U[2]:U[3]} = <b>${n*K} unidades</b> · quedarán ${(p.stock||0)+n*K}`:n?`Quedarán <b>${(p.stock||0)+n}</b> unidades`:"";};
+    inp.oninput=pin;
+    const em=s.querySelector("#eM");if(em)em.onclick=e=>{const b=e.target.closest("[data-m]");if(!b)return;porPack=b.dataset.m==="p";em.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));s.querySelector("#eL").textContent=porPack?"¿Cuántas "+U[3]+" llegaron?":"Cantidad que entra (unidades)";pin();inp.focus();};
+    s.querySelector("[data-ok]").onclick=async()=>{const c=tot();if(!(c>0)){toast("Escribe una cantidad");return;}
       try{await store.entrada(p,c);closeSheet();toast(`+${c} ${p.nombre}`);}catch(e){fail(e);}};
   });
 }
@@ -1574,6 +1581,9 @@ function editProd(p,opts){
     <div class="two">${isNew?`<label class="fld"><span>Stock inicial</span><input id="sk" inputmode="numeric" class="num" placeholder="0"></label>`:""}
     <label class="fld"><span>Avisar stock bajo con</span><input id="sm" inputmode="numeric" class="num" value="${p.stock_min!=null?p.stock_min:""}" placeholder="3 unidades"></label></div>
     <p class="hint" style="margin:-4px 0 12px">Stock mínimo: cuando queden esas unidades o menos, sale en <b>Stock bajo</b>. Vacío = 3.</p>
+    <div class="two"><label class="fld"><span>¿Cómo lo compras? (opcional)</span><select id="pu"><option value="">Por unidad / sin definir</option>${todasUnidades().filter(u=>u[0]!=="und").map(u=>`<option value="${esc(u[0])}" ${u[0]===p.pedido_unidad?"selected":""}>${esc(u[1])}</option>`).join("")}${p.pedido_unidad&&p.pedido_unidad!=="und"&&!todasUnidades().some(u=>u[0]===p.pedido_unidad)?`<option value="${esc(p.pedido_unidad)}" selected>${esc(uInfo(p.pedido_unidad)[1])}</option>`:""}<option value="__nueva">➕ Otra presentación…</option></select></label>
+    <label class="fld" id="pcW"><span>¿Cuántas unidades trae?</span><input id="pc" inputmode="numeric" class="num" value="${p.pedido_contenido||""}" placeholder="Ej: 30"></label></div>
+    <p class="hint" id="puH" style="margin:-4px 0 12px"></p>
     <div class="acts">${isNew?"":`<button class="btn ghost" data-del style="color:var(--bad);flex:0 0 auto">Eliminar</button>`}<button class="btn" data-x>Cancelar</button><button class="btn pri" data-ok>Guardar</button></div>`,s=>{
     s.querySelector("[data-x]").onclick=closeSheet;
     if(opts.priceFocus)setTimeout(()=>s.querySelector("#pr").focus(),50);
@@ -1583,6 +1593,13 @@ function editProd(p,opts){
     const mg=()=>{const pv=parseInt(s.querySelector("#pr").value.replace(/\D/g,""),10)||0,cv=parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0;
       s.querySelector("#mgn").innerHTML=pv&&cv?`Ganas <b style="color:${pv-cv<0?"var(--bad)":"var(--ok)"}">${fmt(pv-cv)}</b> por unidad (${Math.round((pv-cv)*100/pv)}%)`:"El precio de compra solo lo ves tú, para calcular tu ganancia.";};
     s.querySelector("#pr").oninput=mg;s.querySelector("#co").oninput=mg;mg();
+    const pu=s.querySelector("#pu"),pc=s.querySelector("#pc"),pcW=s.querySelector("#pcW"),puH=s.querySelector("#puH");
+    const sinCont=u=>!u||["und","botella","garrafa"].includes(u);
+    const pinta=()=>{pcW.style.visibility=sinCont(pu.value)?"hidden":"visible";const U=pu.value?uInfo(pu.value):null,n=parseInt(pc.value,10)||0;
+      puH.innerHTML=!U?"Ej: cerveza por <b>canasta x30</b>, agua por <b>paca x12</b>, gaseosa por <b>sixpack x6</b>, licor por <b>botella</b>. Se usa en los pedidos y al registrar mercancía.":sinCont(pu.value)?`Se pide por <b>${U[2]}</b>.`:n>1?`1 ${U[2]} = <b>${n} unidades</b>. En los pedidos y entradas puedes contar por ${U[3]}.`:`Escribe cuántas unidades trae cada ${U[2]}.`;};
+    pu.onchange=()=>{if(pu.value==="__nueva"){const k=nuevaPresentacion();if(k){if(![...pu.options].some(o=>o.value===k))pu.insertBefore(new Option(uInfo(k)[1],k),pu.lastElementChild);pu.value=k;}else pu.value=p.pedido_unidad||"";}
+      const d={canasta:30,sixpack:6,paca:12,docena:12,caja:24,paquete:50}[pu.value];if(d&&!pc.value)pc.value=d;if(sinCont(pu.value))pc.value="";pinta();};
+    pc.oninput=()=>{pc.value=pc.value.replace(/\D/g,"").slice(0,5);pinta();};pinta();
     if(!puede("costos")){s.querySelector("#co").onclick=()=>upsell("costos");s.querySelector("#mgn").innerHTML='🔒 Precio de compra y ganancia: <a style="color:var(--acc);cursor:pointer" data-up>disponible desde el plan Pro</a>';s.querySelector("[data-up]").onclick=()=>upsell("costos");}
     s.querySelector("#cbScan").onclick=()=>!puede("escaner")?upsell("escaner"):openScanner({title:"Código del producto",onCode:code=>{s.querySelector("#cb").value=code;const o=findByCode(code);if(o&&o.id!==p.id)toast("Ojo: ese código ya es de "+o.nombre);else if(isNew)lookupFill(s,code);}});
     if(isNew){s.querySelector("#cb").onchange=e=>lookupFill(s,e.target.value);if(opts.codigo)lookupFill(s,opts.codigo);}
@@ -1593,6 +1610,8 @@ function editProd(p,opts){
       const costo=puede("costos")?(parseInt(s.querySelector("#co").value.replace(/\D/g,""),10)||0):(st.costos.get(p.id)||p.costo||0);
       if(!nombre){toast("Escribe el nombre");return;}
       const smV=s.querySelector("#sm").value.replace(/\D/g,""),stock_min=smV===""?null:Math.min(100000,+smV);
+      const pedido_unidad=pu.value&&pu.value!=="__nueva"?pu.value:null,pcv=parseInt(pc.value,10),pedido_contenido=pedido_unidad&&!sinCont(pedido_unidad)&&pcv>1?Math.min(pcv,10000):null;
+      if(pedido_unidad&&!sinCont(pedido_unidad)&&!pedido_contenido){toast("Escribe cuántas unidades trae cada "+uInfo(pedido_unidad)[2]);pc.focus();return;}
       if(cat==="__new"){cat=s.querySelector("#caNew").value.trim().replace(/\s+/g," ");if(!cat){toast("Escribe el nombre de la categoría");return;}
         const ex=catList().find(c=>c.toLowerCase()===cat.toLowerCase());if(ex)cat=ex;}
       const other=codigo&&findByCode(codigo);if(other&&other.id!==p.id){toast("Ese código ya es de "+other.nombre);return;}
@@ -1600,11 +1619,13 @@ function editProd(p,opts){
         if(!catList().includes(cat))await store.setCats([...catList(),cat]);
         if(isNew){let id=slug(nombre);while(st.prods.has(id))id+="-"+Math.random().toString(36).slice(2,4);
           const sk=parseInt(s.querySelector("#sk").value,10)||0;
-          const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;if(stock_min!=null)data.stock_min=stock_min;
+          const data={nombre,precio,cat,orden:999,activo:true};if(codigo)data.codigo=codigo;if(stock_min!=null)data.stock_min=stock_min;if(pedido_unidad){data.pedido_unidad=pedido_unidad;data.pedido_contenido=pedido_contenido;}
           await store.newProd(id,data,sk);
           if(codigo)aportarCatalogo(codigo,nombre,cat);
           if(costo&&puede("costos"))await store.setCosto(id,costo);
-        }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;if((p.stock_min??null)!==stock_min)data.stock_min=stock_min;await store.updProd(p.id,data);
+        }else{const data={nombre,precio,cat};if((p.codigo||"")!==codigo)data.codigo=codigo||null;if((p.stock_min??null)!==stock_min)data.stock_min=stock_min;
+          if((p.pedido_unidad||null)!==pedido_unidad||(p.pedido_contenido||null)!==pedido_contenido){data.pedido_unidad=pedido_unidad;data.pedido_contenido=pedido_contenido;}
+          await store.updProd(p.id,data);
           if(puede("costos")&&costo!==(st.costos.get(p.id)||p.costo||0))await store.setCosto(p.id,costo);}
         closeSheet();toast("Guardado");
       }catch(e){fail(e);}
@@ -2703,6 +2724,9 @@ const plural=w=>/[aeiouáéíóú]$/i.test(w)?w+"s":/z$/i.test(w)?w.slice(0,-1)+
 const misUnidades=()=>(pedCfg().unidades||[]).filter(u=>u&&u.k&&u.s);
 function uInfo(k){if(UMAP[k])return UMAP[k];const c=misUnidades().find(u=>u.k===k);if(c)return [c.k,c.s.charAt(0).toUpperCase()+c.s.slice(1),c.s.toLowerCase(),(c.p||plural(c.s)).toLowerCase()];
   if(k&&k.startsWith("x:")){const n=k.slice(2);return [k,n.charAt(0).toUpperCase()+n.slice(1),n,plural(n)];}return UMAP.und;}
+function nuevaPresentacion(){const nm=(prompt("Nombre de la presentación (en singular). Ej: Bidón, Rollo, Cubeta","")||"").trim().replace(/\s+/g," ").slice(0,16);
+  if(!nm)return null;const low=nm.toLowerCase();if(UMAP[low])return low;const k="x:"+low,c=pedCfg();c.unidades=c.unidades||[];
+  if(!c.unidades.some(u=>u.k===k)){c.unidades.push({k,s:nm,p:plural(nm)});guardarPedCfg(c);toast("Presentación “"+nm+"” guardada");}return k;}
 const todasUnidades=()=>[...UNIDADES,...misUnidades().map(u=>uInfo(u.k))];
 function presOf(p){
   if(p.pedido_unidad&&(UMAP[p.pedido_unidad]||p.pedido_unidad.startsWith("x:")))return {u:p.pedido_unidad,c:p.pedido_contenido||null};
