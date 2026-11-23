@@ -468,6 +468,13 @@ html[data-theme="light"] .cierrebtn:not(#btnCierre){background:#fff;border-color
 #btnCierre small{color:rgba(255,255,255,.88)}
 #btnCierre.done{background:linear-gradient(135deg,#12b886,#0ca678);box-shadow:0 8px 24px rgba(18,184,134,.28)}
 #btnConteo{margin-top:12px}
+.cierrebtn.alerta{background:rgba(255,92,122,.10)!important;border-color:rgba(255,92,122,.55)!important}
+.cierrebtn.alerta small{color:#d6455f}
+html[data-theme="light"] .cierrebtn.alerta{background:#fdecef!important;border-color:#f3a6b3!important}
+.cierrebtn.pend{background:rgba(255,196,0,.10)!important;border-color:rgba(255,196,0,.55)!important}
+html[data-theme="light"] .cierrebtn.pend{background:#fff8dc!important;border-color:#f0d27a!important}
+.cierrebtn.done:not(#btnCierre){background:rgba(46,242,160,.08)!important}
+html[data-theme="light"] .cierrebtn.done:not(#btnCierre){background:#eafaf2!important;border-color:#9fdfbf!important}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .cgrid div{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:9px 11px}
 .cgrid span{display:block;font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -676,7 +683,7 @@ footer.dlf .dlf-copy{font-size:10.5px;letter-spacing:1.2px;text-transform:upperc
   <div class="dlf-btns"><a href="https://wa.me/573218641539?text=Hola%20DL%20Company%20%F0%9F%91%8B%20Vengo%20de%20la%20app%20DL%20CUADRA%20PRO.%20Necesito%20ayuda%20con%20DL%20CUADRA%20PRO" target="_blank" rel="noopener">💬 Soporte</a><a id="lnkPlanes">👑 Planes</a><a class="dl-only" data-install>📲 Descargar app</a><a class="dlf-site" href="https://dl-company-technology.github.io/" target="_blank" rel="noopener">🌐 Conoce DL COMPANY</a></div>
   <div class="dlf-apps"><p>Más apps de DL COMPANY</p><div><a href="https://dl-company-technology.github.io/dl-finanzas/" target="_blank" rel="noopener">DL FINANZAS</a><a href="https://dl-company-technology.github.io/dl-stock-pro/" target="_blank" rel="noopener">DL STOCK PRO</a><a href="https://dl-company-technology.github.io/dl-comanda-pro/" target="_blank" rel="noopener">DL COMANDA PRO</a></div></div>
   <div class="dlf-legal"><a href="legal.html#terminos" target="_blank" rel="noopener">Términos</a><a href="legal.html#privacidad" target="_blank" rel="noopener">Privacidad</a><a href="legal.html#reembolsos" target="_blank" rel="noopener">Reembolsos</a></div>
-  <p class="dlf-copy">DL CUADRA PRO v4.3.2 · Plataforma oficial de ventas e inventario © 2026</p>
+  <p class="dlf-copy">DL CUADRA PRO v4.3.3 · Plataforma oficial de ventas e inventario © 2026</p>
 </footer>
 
 <div class="cartbar" id="cartbar">
@@ -2633,7 +2640,7 @@ function loadClientes(){
 function renderFiadoBtn(){
   const b=$("#btnFiado");if(!b)return;const on=st.mode==="db"&&!!st.perfil&&st.day===today();b.hidden=!on;if(!on)return;
   if(!puede("fiado")){$("#fbTit").textContent="📒 Fiado 🔒";$("#fbSub").textContent="Anota lo que te deben tus clientes · desde el plan Pro";return;}
-  const L=(st.clientes||[]).filter(c=>c.saldo>0),tot=L.reduce((s,c)=>s+c.saldo,0);
+  const L=(st.clientes||[]).filter(c=>c.saldo>0),tot=L.reduce((s,c)=>s+c.saldo,0);b.classList.toggle("pend",tot>0);
   $("#fbTit").textContent=L.length?"Fiado · "+fmt(tot)+" por cobrar":"Fiado · cuentas por cobrar";
   const lc=LIM().clientes,nc=(st.clientes||[]).filter(c=>c.activo).length;
   $("#fbSub").textContent=(L.length?L.length+(L.length===1?" cliente te debe":" clientes te deben")+" · toca para ver y registrar abonos":"Anota lo que te deben tus clientes y sus abonos")+(lc!=null?` · ${nc} de ${lc} clientes`:"");
@@ -3109,7 +3116,8 @@ function renderConteoBtn(){
   const b=$("#btnConteo");if(!b)return;const on=st.mode==="db"&&!!sb&&!!st.perfil&&st.day===today()&&prodsArr().length>0;b.hidden=!on;if(!on)return;
   const a=hoyConteos("apertura")[0],c=hoyConteos("cierre")[0];
   const est=x=>x?(x.con_dif?`⚠️ ${x.con_dif} no ${x.con_dif===1?"cuadra":"cuadran"}`:"✅ "+hhmm(new Date(x.ts).getTime())):"pendiente";
-  $("#ctSub").textContent=`Apertura: ${est(a)} · Cierre: ${est(c)}`;b.classList.toggle("done",!!(a&&c));
+  $("#ctSub").textContent=`Apertura: ${est(a)} · Cierre: ${est(c)}`;
+  const alerta=[a,c].some(x=>x&&x.con_dif);b.classList.toggle("alerta",alerta);b.classList.toggle("done",!alerta&&!!(a&&c));
 }
 function renderApBanner(){
   const el=$("#apBanner");if(!el)return;
